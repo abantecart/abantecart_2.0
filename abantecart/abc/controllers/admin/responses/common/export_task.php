@@ -224,7 +224,7 @@ class ControllerResponsesCommonExportTask extends AController
             $tm->deleteTask($task_id);
             rename($this->getExportFile($task_id), $this->getPublicExportFile($task_id));
             @unlink($this->getExportFile($task_id));
-            $downloadLink = $this->html->getHomeURL().'export/'.$this->zipFile;
+            $downloadLink = ABC::env('AUTO_SERVER').'export/'.$this->zipFile;
             $result_text = '<a href="'.$downloadLink.'">'
                 .$this->language->get('text_export_task_download')
                 .'</a>';
