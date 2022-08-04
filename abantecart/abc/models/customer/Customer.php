@@ -434,6 +434,36 @@ class Customer extends BaseModel
         'limit',
     ];
 
+    protected $formFields = [
+        'firstname' => [
+            'cast' => 'string',
+            'rule' => 'required|max:255',
+            'js_rule' => 'required|max:255',
+            'type' => 'input',
+            'access' => 'read',
+            'sort_order' => 20,
+            'hidable' => false,
+        ],
+        'lastname' => [
+            'cast' => 'string',
+            'rule' => 'required|max:255',
+            'js_rule' => 'required|max:255',
+            'type' => 'input',
+            'access' => 'read',
+            'sort_order' => 20,
+            'hidable' => false,
+        ],
+        'loginname' => [
+            'cast' => 'string',
+            'rule' => 'required|max:255',
+            'js_rule' => 'required|max:255',
+            'type' => 'input',
+            'access' => 'read',
+            'sort_order' => 20,
+            'hidable' => false,
+        ],
+    ];
+
     /** Wrap basic method to implement conditional rules
      *
      * @param array $data

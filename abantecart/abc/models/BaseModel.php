@@ -819,9 +819,9 @@ abstract class BaseModel extends OrmModel
         return $this->primaryKeySet ?? [];
     }
 
-    public function getFields()
+    public function getFormFields()
     {
-        return $this->fields;
+        return $this->formFields;
     }
 
     /**

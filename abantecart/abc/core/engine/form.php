@@ -22,17 +22,12 @@ namespace abc\core\engine;
 
 use abc\core\ABC;
 use abc\core\cache\ACache;
-use abc\core\lib\AConfig;
-use abc\core\lib\ADB;
 use abc\core\lib\AException;
 use abc\core\lib\ALanguageManager;
-use abc\core\lib\ARequest;
-use abc\core\lib\ASession;
 use abc\core\view\AView;
 use abc\core\lib\ADataset;
 use abc\core\lib\AError;
 use abc\core\lib\AFile;
-use abc\models\admin\ModelLocalisationCountry;
 use Exception;
 use H;
 use ReCaptcha\ReCaptcha;
@@ -43,15 +38,15 @@ use ReflectionException;
  *
  * Class AForm
  *
- * @property ALayout $layout
- * @property AHtml $html
- * @property \abc\core\lib\ALanguageManager $language
- * @property \abc\core\lib\AbcCache $cache
- * @property \abc\core\lib\ADB $db
- * @property \abc\core\lib\AConfig $config
- * @property \abc\core\lib\ASession $session
- * @property \abc\core\lib\ARequest $request
- * @property \abc\core\engine\ALoader $load
+ * @property ALayout                                    $layout
+ * @property AHtml                                      $html
+ * @property \abc\core\lib\ALanguageManager             $language
+ * @property \abc\core\lib\AbcCache                     $cache
+ * @property \abc\core\lib\ADB                          $db
+ * @property \abc\core\lib\AConfig                      $config
+ * @property \abc\core\lib\ASession                     $session
+ * @property \abc\core\lib\ARequest                     $request
+ * @property \abc\core\engine\ALoader                   $load
  * @property \abc\models\admin\ModelLocalisationCountry $model_localisation_country
  *
  */
@@ -119,6 +114,7 @@ class AForm
         $this->form_edit_action = $form_edit_action;
     }
 
+
     public function __get($key)
     {
         return $this->registry->get($key);
@@ -175,8 +171,8 @@ class AForm
      */
     protected function loadForm($name)
     {
-        $language_id = (int) $this->config->get('storefront_language_id');
-        $store_id = (int) $this->config->get('config_store_id');
+        $language_id = (int)$this->config->get('storefront_language_id');
+        $store_id = (int)$this->config->get('config_store_id');
         $cache_key = 'forms.'.$name;
         $cache_key = preg_replace('/[^a-zA-Z0-9\.]/', '', $cache_key).'.store_'.$store_id.'_lang_'.$language_id;
         $form = $this->cache->get($cache_key);
@@ -213,8 +209,8 @@ class AForm
      */
     protected function loadFields()
     {
-        $language_id = (int) $this->config->get('storefront_language_id');
-        $store_id = (int) $this->config->get('config_store_id');
+        $language_id = (int)$this->config->get('storefront_language_id');
+        $store_id = (int)$this->config->get('config_store_id');
         $cache_key = 'forms.'.$this->form['form_name'].'.fields';
         $cache_key = preg_replace('/[^a-zA-Z0-9\.]/', '', $cache_key).'.store_'.$store_id.'_lang_'.$language_id;
         $fields = $this->cache->get($cache_key);
@@ -257,6 +253,14 @@ class AForm
     }
 
     /**
+     * @param array $fields
+     */
+    public function setFields(array $fields): void
+    {
+        $this->fields = $fields;
+    }
+
+    /**
      * @param array $a
      * @param array $b
      *
@@ -279,8 +283,8 @@ class AForm
      */
     protected function loadGroups()
     {
-        $language_id = (int) $this->config->get('storefront_language_id');
-        $store_id = (int) $this->config->get('config_store_id');
+        $language_id = (int)$this->config->get('storefront_language_id');
+        $store_id = (int)$this->config->get('config_store_id');
         $cache_key = 'forms.'.$this->form['form_name'].'.groups';
         $cache_key = preg_replace('/[^a-zA-Z0-9\.]/', '', $cache_key).'.store_'.$store_id.'_lang_'.$language_id;
         $groups = $this->cache->get($cache_key);
@@ -416,7 +420,7 @@ class AForm
      * load values to select, multiselect, checkbox group etc
      *
      * @param string $fname
-     * @param array $values
+     * @param array  $values
      *
      * @return void
      */
@@ -581,7 +585,7 @@ class AForm
                             'type'        => $data['type'],
                             'title'       => $field['name'],
                             'description' => (!empty($field['description']) ? $field['description'] : ''),
-                            'error'       => ($this->errors[$field['field_name']] ? : ''),
+                            'error'       => ($this->errors[$field['field_name']] ?: ''),
                             'item_html'   => $item->getHtml(),
                         ]
                     );

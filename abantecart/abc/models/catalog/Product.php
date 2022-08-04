@@ -3125,4 +3125,37 @@ class Product extends BaseModel
         );
     }
 
+    public function getTotalProductsByCategoryId($category_id = 0)
+    {
+        $store_id = (int)$this->config->get('config_store_id');
+
+        $filters = $this->getProductFilters();
+        $cache_key = 'product.listing.products_by_category.'
+            .(int)$category_id
+            .'.store_'.$store_id
+            .'_'.md5($filters);
+        $cache = $this->cache->get($cache_key);
+        if ($cache === null) {
+            //get all children category ids
+            $subCategories = (new Category())->getChildrenIDs((int)$category_id);
+            $categList = implode(',', array_merge($subCategories, [(int)$category_id]));
+            $sql = "SELECT COUNT(*) AS total
+                    FROM ".$this->db->table_name("products_to_categories")." p2c
+                    LEFT JOIN ".$this->db->table_name("products")." p 
+                        ON (p2c.product_id = p.product_id)
+                    LEFT JOIN ".$this->db->table_name("products_to_stores")." p2s 
+                        ON (p.product_id = p2s.product_id)
+                    WHERE 
+                        p2c.category_id in (".$categList.")
+                        AND ".$filters."
+                        AND p2s.store_id = '".$store_id."'";
+            $query = $this->db->query($sql);
+
+            $cache = $query->row['total'];
+            $this->cache->put($cache_key, $cache);
+        }
+
+        return $cache;
+    }
+
 }

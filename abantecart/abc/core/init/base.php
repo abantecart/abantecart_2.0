@@ -39,6 +39,8 @@ $class_list = [
         'html',
         'layout',
         'form',
+        'models_form',
+        'form_facade',
         'extensions',
         'hook',
         'attribute',

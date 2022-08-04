@@ -899,6 +899,21 @@ class HtmlElementFactory
     }
 
     /**
+     * @param string $type
+     *
+     * @return string|null
+     */
+    public static function getCodeByElementType(string $type): ?string
+    {
+        foreach (self::$available_elements as $code => $element) {
+            if ($element['type'] === $type) {
+                return $code;
+            }
+        }
+        return null;
+    }
+
+    /**
      * return array of elements indexes for elements which has options
      *
      * @static
