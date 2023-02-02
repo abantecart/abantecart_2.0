@@ -594,7 +594,7 @@ class ModelToolImportProcess extends Model
             //check is update needed
             $sql = "SELECT po.product_option_id  
                     FROM ".$this->db->table_name('product_option_descriptions')." pod
-                    LEFT JOIN ".$this->db->table_name('product_options')." po
+                    RIGHT JOIN ".$this->db->table_name('product_options')." po
                         ON po.product_id = '".(int) $product_id."'
                     WHERE pod.name = '".$this->db->escape($dataRow['name'])."'";
 
@@ -652,7 +652,7 @@ class ModelToolImportProcess extends Model
             }
 
             $ids = [];
-            if (max($counts) == 1) {
+            if (max($counts) < 1) {
                 //single option value case
                 $ids[] = $this->saveOptionValue($product_id, $weight_class_id, $p_option_id, $option_vals);
             } else {
