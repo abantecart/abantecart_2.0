@@ -56,8 +56,7 @@ class ABC extends ABCBase
         $stage_name = '';
         if (!$file || !is_file($file)) {
             $stage_name = @include(
-                dirname(getcwd())
-                .DS.'abc'
+                dirname(__DIR__)
                 .DS.'config'
                 .DS.'enabled.config.php'
             );
@@ -152,8 +151,7 @@ class ABC extends ABCBase
         foreach ($config_sections as $config_section) {
             $KEY = strtoupper($config_section);
             $file_name = $config_section.'.php';
-            $file = dirname(getcwd())
-                    .DS.'abc'.DS
+            $file = dirname(__DIR__).DS
                     .'config'.DS
                     .$stage_name.DS
                     .$file_name;
@@ -175,8 +173,7 @@ class ABC extends ABCBase
             }
 
             $ext_dirs = glob(
-                dirname(getcwd())
-                .DS.'abc'.DS
+                dirname(__DIR__).DS
                 .'extensions'.DS
                 .'*'.DS
                 .'config'.DS
@@ -216,8 +213,7 @@ class ABC extends ABCBase
      */
     public static function loadClassMap($stage_name = 'default')
     {
-        $classmap_file = dirname(getcwd())
-        .DS.'abc'.DS
+        $classmap_file = dirname(__DIR__).DS
             .'config'.DS
             .$stage_name.DS
             .'classmap.php';
@@ -230,8 +226,7 @@ class ABC extends ABCBase
         }
 
         $ext_dirs = glob(
-            dirname(getcwd())
-                .DS.'abc'.DS
+            dirname(__DIR__).DS
             .'extensions'.DS
             .'*'.DS
             .'config'.DS
@@ -242,7 +237,7 @@ class ABC extends ABCBase
             if (is_file($classmap_file)) {
                 $ext_classmap = @include($classmap_file);
                 if (is_array($ext_classmap)) {
-                    static::$class_map = array_merge(static::$class_map,$ext_classmap);
+                    static::$class_map = array_merge((array)static::$class_map,$ext_classmap);
                 }
             }
         }
@@ -525,8 +520,7 @@ class ABC extends ABCBase
 
     public function init()
     {
-        require dirname(getcwd())
-        .DS.'abc'.DS.'core'.DS.'init'.DS.'app.php';
+        require __DIR__.DS.'init'.DS.'app.php';
     }
 
     protected function validateApp()
