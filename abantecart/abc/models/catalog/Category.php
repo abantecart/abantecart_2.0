@@ -352,7 +352,6 @@ class Category extends BaseModel
     public static function getCategories($parentId = 0, $storeId = null, $limit = 0, $languageId = null)
     {
         $languageId = $languageId !== null ? $languageId : static::$current_language_id;
-        Registry::log()->write($languageId);
 
         $cacheKey = 'category.list.'.$parentId
             .'.store_'.$storeId
@@ -402,7 +401,6 @@ class Category extends BaseModel
 
             //allow to extend this method from extensions
             Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, func_get_args());
-            Registry::log()->write($query->toSql());
             $categories = $query->get();
 
             foreach ($categories as $category) {

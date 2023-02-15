@@ -33,8 +33,8 @@ class FixCategoriesCounters extends ABaseWorker
             1000,
             static function ($categories) {
                 foreach ($categories as $category) {
-                        $category = Category::find($category->category_id);
-                        $category->touch();
+                    $category = Category::find($category->category_id);
+                    $category->touch();
                 }
             }
         );

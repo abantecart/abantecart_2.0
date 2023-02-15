@@ -91,6 +91,8 @@ class BaseModel extends OrmModel
     const UPDATED_AT = 'date_modified';
     const DELETED_AT = 'date_deleted';
 
+    public static $defaultDatetimeStringFormat = 'Y-m-d H:i:s';
+
     const CLI = 0;
     const USER = 1;
     const CUSTOMER = 2;
