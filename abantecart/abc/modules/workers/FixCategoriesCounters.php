@@ -3,13 +3,11 @@
 namespace abc\modules\workers;
 
 use abc\core\ABC;
-use abc\extensions\tims_catalog\modules\traits\ProductExportTrait;
 use abc\models\catalog\Category;
-use abc\models\catalog\Product;
 
 class FixCategoriesCounters extends ABaseWorker
 {
-    use ProductExportTrait;
+
     private $lockFile = 'FixCategoriesCountersWorker.lock';
 
     public function __construct()
@@ -27,29 +25,16 @@ class FixCategoriesCounters extends ABaseWorker
         @unlink($this->lockFile);
     }
 
-    // php abcexec job:run --worker=FixCategoriesCounters [ optional] --touch-products
-    public function main($params = [])
+    // php abcexec job:run --worker=FixCategoriesCounters
+    public function main()
     {
-        if ($params['touch-products']) {
-            $chunkStep = 5;
-        } else {
-            $chunkStep = 100;
-        }
-
         $this->init();
         Category::chunk(
-            $chunkStep,
+            1000,
             static function ($categories) {
                 foreach ($categories as $category) {
-                    $category = Category::with('products')->find($category->category_id);
+                    $category = Category::find($category->category_id);
                     $category->touch();
-
-                    $ids = $category->products->pluck('product_id')->toArray();
-                    $this->processBatch($ids);
-//                    foreach ($category->products as $p) {
-//                        $product = Product::find($p->product_id);
-//                        $product->touch();
-//                    }
                 }
             }
         );
