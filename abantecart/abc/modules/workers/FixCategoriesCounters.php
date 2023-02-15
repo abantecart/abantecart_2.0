@@ -3,12 +3,13 @@
 namespace abc\modules\workers;
 
 use abc\core\ABC;
+use abc\extensions\tims_catalog\modules\traits\ProductExportTrait;
 use abc\models\catalog\Category;
 use abc\models\catalog\Product;
 
 class FixCategoriesCounters extends ABaseWorker
 {
-
+    use ProductExportTrait;
     private $lockFile = 'FixCategoriesCountersWorker.lock';
 
     public function __construct()
@@ -42,10 +43,13 @@ class FixCategoriesCounters extends ABaseWorker
                 foreach ($categories as $category) {
                     $category = Category::with('products')->find($category->category_id);
                     $category->touch();
-                    foreach ($category->products as $p) {
-                        $product = Product::find($p->product_id);
-                        $product->touch();
-                    }
+
+                    $ids = $category->products->pluck('product_id')->toArray();
+                    $this->processBatch($ids);
+//                    foreach ($category->products as $p) {
+//                        $product = Product::find($p->product_id);
+//                        $product->touch();
+//                    }
                 }
             }
         );
