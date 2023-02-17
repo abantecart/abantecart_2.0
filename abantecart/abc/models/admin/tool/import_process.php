@@ -650,9 +650,9 @@ class ModelToolImportProcess extends Model
             foreach($option_vals as $optValue){
                 $counts[] = is_array($optValue) ? count($optValue) : 0;
             }
-
+            $counts = array_unique($counts);
             $ids = [];
-            if (max($counts) < 1) {
+            if (max($counts) < 2) {
                 //single option value case
                 $ids[] = $this->saveOptionValue($product_id, $weight_class_id, $p_option_id, $option_vals);
             } else {
