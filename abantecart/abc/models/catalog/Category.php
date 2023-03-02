@@ -14,6 +14,7 @@ use abc\models\system\Setting;
 use abc\models\system\Store;
 use Carbon\Carbon;
 use Dyrynda\Database\Support\GeneratesUuid;
+use Error;
 use Exception;
 use H;
 use Dyrynda\Database\Support\CascadeSoftDeletes;
@@ -878,8 +879,8 @@ class Category extends BaseModel
             }
             if ($data['keywords']) {
                 UrlAlias::replaceKeywords($data['keywords'], $category->getKeyName(), $category->getKey());
-            } elseif ($data['keyword']) {
-                UrlAlias::setCategoryKeyword(($data['keyword'] ? : $categoryName), (int) $categoryId);
+            } elseif (isset($data['keyword'])) {
+                UrlAlias::setCategoryKeyword((string)$data['keyword'], (int)$categoryId);
             }
 
             //allow to extend this method from extensions
@@ -891,9 +892,9 @@ class Category extends BaseModel
             //call event listener on saved
             $category->touch();
             return true;
-        } catch (Exception $e) {
+        } catch (Exception|Error $e) {
             $db->rollback();
-            Registry::log()->write(__CLASS__." ".$e->getMessage()."\n".$e->getTraceAsString());
+            Registry::log()->write(__CLASS__ . " " . $e->getMessage() . "\n" . $e->getTraceAsString());
             return false;
         }
     }
