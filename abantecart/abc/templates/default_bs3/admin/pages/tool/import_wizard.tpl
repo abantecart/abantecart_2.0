@@ -41,15 +41,15 @@
 			</a>
 
 			<a href="#" class="btn btn-default export_map tooltips" data-toggle="modal" data-target="#load_map_modal" title="<?php echo $text_load_map; ?>">
-				<i class="fa fa-code fa-fw"></i>
-			</a>
-		</div>
+                <i class="fa fa-code fa-fw"></i>
+            </a>
+        </div>
 
-		<?php include($tpl_common_dir . 'content_buttons.tpl'); ?>
-	</div>
+        <?php include($tpl_common_dir . 'content_buttons.tpl'); ?>
+    </div>
 
-	<?php echo $form_open; ?>
-	<div class="panel-body panel-body-nopadding tab-content col-xs-12">
+    <?php echo $form_open; ?>
+    <div class="panel-body panel-body-nopadding tab-content col-xs-12">
 
         <label class="h4 heading"><?php echo $import_wizard_title; ?></label>
 
@@ -96,60 +96,65 @@
                     <td class="col-md-3" style="word-break: break-all;"><?php echo $data[$i]; ?></td>
                     <td class="col-md-4 table-field">
                         <?php foreach ($tables as $table_name => $tbl_data) { ?>
-					<div class="field_selector <?php echo $table_name; ?>_field hidden">
-						<div class="form-group">
-							<div class="input-group">
-								<select class="form-control" name="<?php echo $table_name; ?>_fields[<?php echo $i ?>]"  disabled="disabled">
-									<option value=""> - - </option>
-									<?php
-									foreach($tbl_data["columns"] as $cname => $det) {
-										$selected = '';
-										if($cname == $map[$table_name."_fields"][$i]) {
-											$selected = 'selected';
-										}
-                                        //see if we can match columns based on the name
-										$col_name = trim(preg_replace('/[0-9]+/', '', $col));
-                                        if (strtolower($col_name) == $cname
-                                            || strtolower(preg_replace('/\s+/', '.', $col_name)) == $cname
-                                            || strtolower($col_name) == $det['alias']
-                                        ) {
-                                            $selected = 'selected';
-                                        }
-                                        $sel_title = $det["title"];
-                                        if ($det["required"]) {
-                                            $sel_title = "{$sel_title} *required";
-                                        }
-                                        echo '<option value="' . $cname . '" data-mvalue="' . $det["multivalue"]
-                                            . '" data-split="' . $det["split"] . '" data-default-splitter="' . $det["splitter"]
-                                            . '" data-update="' . $det["update"] . '" ' . $selected . '>' . $sel_title . '</option>';
-                                    }
-                                    ?>
-                                </select>
+                            <div class="field_selector <?php echo $table_name; ?>_field hidden">
+                                <div class="form-group">
+                                    <div class="input-group">
+                                        <select class="form-control"
+                                                name="<?php echo $table_name; ?>_fields[<?php echo $i ?>]"
+                                                disabled="disabled">
+                                            <option value=""> - -</option>
+                                            <?php
+                                            foreach ($tbl_data["columns"] as $cname => $det) {
+                                                $selected = '';
+                                                if ($cname == $map[$table_name . "_fields"][$i]) {
+                                                    $selected = 'selected';
+                                                }
+                                                //see if we can match columns based on the name
+                                                $col_name = trim(preg_replace('/[0-9]+/', '', $col));
+                                                if (strtolower($col_name) == $cname
+                                                    || strtolower(preg_replace('/\s+/', '.', $col_name)) == $cname
+                                                    || strtolower($col_name) == $det['alias']
+                                                ) {
+                                                    $selected = 'selected';
+                                                }
+                                                $sel_title = $det["title"];
+                                                if ($det["required"]) {
+                                                    $sel_title = "{$sel_title} *required";
+                                                }
+                                                echo '<option value="' . $cname . '" data-mvalue="' . $det["multivalue"]
+                                                    . '" data-split="' . $det["split"] . '" data-splitter="' . $det["splitter"] . '" data-update="' . $det["update"] . '" ' . $selected . '>' . $sel_title . '</option>';
+                                            }
+                                            ?>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group field_splitter hidden">
+                                    <div class="input-group">
+                                        <label class="control-label"><?php echo $text_import_split; ?></label>
+                                        <input type="text" size="5" name="split_col[<?php echo $i ?>]"
+                                               value="<?php echo $map['split_col'][$i] ?: ','; ?>" disabled="disabled">
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                        <div class="form-group field_splitter hidden">
-                            <div class="input-group">
-                                <label class="control-label"><?php echo $text_import_split; ?></label>
-                                <input type="text" size="5" name="split_col[<?php echo $i ?>]"
-                                       value="<?php echo $map['split_col'][$i] ?: ','; ?>" disabled="disabled">
-                            </div>
-                        </div>
-                    </div>
                         <?php } ?>
-				</td>
-				<td class="col-md-2 update-field">
-                    <div class="form-group field_updater hidden">
-                        <div class="input-group">
-                            <input type="checkbox" name="update_col[<?php echo $i ?>]" <?php if ($map['update_col'][$i]
-                                || in_array($col, (array)$prechecked)) {
-                                echo 'checked="checked"';
-                            } ?>>
+                    </td>
+                    <td class="col-md-2 update-field">
+                        <div class="form-group field_updater hidden">
+                            <div class="input-group">
+                                <input type="checkbox"
+                                       name="update_col[<?php echo $i ?>]" <?php if ($map['update_col'][$i]
+                                    || in_array($col, (array)$prechecked)) {
+                                    echo 'checked="checked"';
+                                } ?>>
+                            </div>
                         </div>
-                    </div>
-                </td>
+                    </td>
                 </tr>
-            <?php } ?>
+                <?php
+            }
+            ?>
         </table>
+
     </div>
 
     <div class="panel-footer col-xs-12">
@@ -165,87 +170,88 @@
                 <a href="<?php echo $form['schedule_url']; ?>" class="btn btn-primary">
                     <i class="fa fa-clock fa-fw"></i> <?php echo $button_schedule_import; ?>
                 </a>
-			<a href="#" class="btn btn-default export_map" data-toggle="modal" data-target="#export_map_modal">
-				<i class="fa fa-code fa-fw"></i> <?php echo $text_export_map; ?>
-			</a>
-			<a href="<?php echo $back_url; ?>" class="btn btn-default" title="<?php echo $button_back; ?>">
-				<i class="fa fa-arrow-left fa-fw"></i>
-				<?php echo $button_back ?>
-			</a>
-			<?php } else { ?>
+                <a href="#" class="btn btn-default export_map" data-toggle="modal" data-target="#export_map_modal">
+                    <i class="fa fa-code fa-fw"></i> <?php echo $text_export_map; ?>
+                </a>
+                <a href="<?php echo $back_url; ?>" class="btn btn-default" title="<?php echo $button_back; ?>">
+                    <i class="fa fa-arrow-left fa-fw"></i>
+                    <?php echo $button_back ?>
+                </a>
+            <?php } else { ?>
                 <button class="btn btn-primary lock-on-click">
                     <i class="fa fa-paper-plane fa-fw"></i> <?php echo $form['submit']->text; ?>
-			</button>
-			<a href="#" class="btn btn-default export_map" data-toggle="modal" data-target="#load_map_modal">
-				<i class="fa fa-code fa-fw"></i> <?php echo $text_load_map; ?>
-			</a>
-			<a href="<?php echo $reset_url; ?>" class="btn btn-default">
-                <i class="fa fa-sync fa-fw"></i> <?php echo $button_reset; ?>
-			</a>
-			<?php } ?>
-		</div>
-	</div>
+                </button>
+                <a href="#" class="btn btn-default export_map" data-toggle="modal" data-target="#load_map_modal">
+                    <i class="fa fa-code fa-fw"></i> <?php echo $text_load_map; ?>
+                </a>
+                <a href="<?php echo $reset_url; ?>" class="btn btn-default">
+                    <i class="fa fa-sync fa-fw"></i> <?php echo $button_reset; ?>
+                </a>
+            <?php } ?>
+        </div>
+    </div>
 
-	<?php
-	if ($import_ready) {
+    <?php
+    if ($import_ready) {
         echo $this->html->buildElement(
-            [
+            array(
                 'type'       => 'modal',
                 'id'         => 'export_map_modal',
                 'modal_type' => 'lg',
                 'title'      => $title_export_map,
                 'content'    => $serialized_map,
-            ]
-        );
+            ));
     } else {
         echo $this->html->buildElement(
-            [
+            array(
                 'type'       => 'modal',
                 'id'         => 'load_map_modal',
                 'modal_type' => 'lg',
                 'title'      => $title_load_map,
                 'content'    => $form['serialized_map'] . '
-            <br /><center>
-                <button class="btn btn-primary lock-on-click"
-                <i class="fa fa-paper-plane fa-fw"></i>' . $form['submit']->text . '
-                </button>
-            </center>',
-            ]
-        );
-    } ?>
+		<br /><center>
+			<button class="btn btn-primary lock-on-click"
+			<i class="fa fa-paper-plane fa-fw"></i>' . $form['submit']->text . '
+			</button>
+		</center>
+		',
+            ));
+    }
+    ?>
+
     </form>
+
 </div>
 
 <script type="text/javascript">
-    $(document).ready(
-        function () {
-            $('.aform').show();
-            load_table_fields($('select[name^="table"]').val());
-        }
-    );
+    $(document).ready(function () {
+        $('.aform').show();
+
+        load_table_fields($('select[name^=\'table\']').val());
+    });
 
     //process selected table
-    $('select[name^="table"]').change(function () {
+    $('select[name^=\'table\']').change(function () {
         var table_name = $(this).val();
         load_table_fields(table_name);
     });
 
     //check update
     <?php foreach ($tables as $table_name => $tbl_data) { ?>
-    $('select[name^="<?php echo $table_name; ?>_fields"]').change(function () {
+    $('select[name^=\'<?php echo $table_name; ?>_fields\']').change(function () {
         var $elm = $(this);
         updateFields($elm, '<?php echo $table_name; ?>');
     });
     <?php } ?>
 
     //allow only one update by field
-    $(".field_updater input:checkbox").on('click', function() {
+    $(".field_updater input:checkbox").on('click', function () {
         $(".field_updater input:checkbox").not(this).prop('checked', false);
     });
 
-	$('#show_results').click(function () {
-		$('#test_results').slideToggle();
-	});
+    $('#show_results').click(function () {
+        $('#test_results').slideToggle();
+    });
 
 	$('#show_errors').click(function () {
 		$('#error_results').slideToggle();
@@ -269,38 +275,40 @@
 			<?php } ?>
 			updateFields($elm, table_name);
 		});
-	};
+    };
 
-	var updateFields = function ($elm, table_name) {
-		$selected = $elm.find("option:selected");
-		var $update = $elm.closest('tr').find('.update-field');
-		if($selected.data('update')){
-			$update.find('.field_updater').removeClass('hidden');
-			<?php if($import_ready) { ?>
-				$update.find('.field_updater input').attr("disabled", true);
-			<?php } ?>
+    var updateFields = function ($elm, table_name) {
+        $selected = $elm.find("option:selected");
+        var $update = $elm.closest('tr').find('.update-field');
+        if ($selected.data('update')) {
+            $update.find('.field_updater').removeClass('hidden');
+            <?php if($import_ready) { ?>
+            $update.find('.field_updater input').attr("disabled", true);
+            <?php } ?>
+
         } else {
             $update.find('.field_updater').addClass('hidden');
             $update.find('.field_updater input').removeAttr('checked');
         }
         var $split = $elm.parents('.field_selector').find('.field_splitter');
-        if ($selected.data('split') === '1') {
+        if ($selected.data('split') == '1') {
             <?php if(!$import_ready) { ?>
+            $split.find('input').removeAttr('disabled');
             let inputSplit = $split.find('input');
             inputSplit.removeAttr('disabled');
             if ($selected.data('splitter').length > 0 && inputSplit.val().length == 0) {
                 inputSplit.val($selected.data('splitter'));
             }
             <?php } ?>
-			$split.removeClass('hidden');
-		} else {
-			<?php if(!$import_ready) { ?>
-				$split.find('input').attr("disabled", true);
-			<?php } ?>
+            $split.removeClass('hidden');
+        } else {
+            <?php if(!$import_ready) { ?>
+            $split.find('input').attr("disabled", true);
+            <?php } ?>
             $split.addClass('hidden');
         }
         //hide from other select for single value fields
-        if ($selected.data('multivalue') !== '1') {
+        if ($selected.data('multivalue') != '1') {
             checkSelected(table_name, $elm);
         }
 
@@ -315,12 +323,15 @@
                 //skip same element
                 return;
             }
-            if ($selected.val() && $selected.data('mvalue') !== '1') {
+            if ($selected.val() && $selected.data('mvalue') != '1') {
                 if ($selected.val() == $orig_sel.val()) {
                     $elm.closest('.form-group').addClass("has-error");
                 }
             }
         });
     };
-    <?php echo $this->getHookVar('js_hook'); ?>
+
+    <?php
+    echo $this->getHookVar('js_hook');
+    ?>
 </script>
