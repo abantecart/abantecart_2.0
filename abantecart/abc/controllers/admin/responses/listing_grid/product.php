@@ -156,14 +156,13 @@ class ControllerResponsesListingGridProduct extends AController
 
         if (!$this->user->canModify('listing_grid/product')) {
             $error = new AError('');
-
             $error->toJSONResponse('NO_PERMISSIONS_402',
                 [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/product'),
                     'reset_value' => true,
                 ]
             );
-            return null;
+            return;
         }
 
         $this->loadModel('catalog/product');
@@ -178,7 +177,8 @@ class ControllerResponsesListingGridProduct extends AController
                         $err = $this->validateDelete($id);
                         if (!empty($err)) {
                             $error = new AError('');
-                            return $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
+                            $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
+                            return;
                         }
                         $this->extensions->hk_ProcessData($this, 'deleting', ['product_id' => $id]);
 
@@ -215,8 +215,8 @@ class ControllerResponsesListingGridProduct extends AController
                                 $err = $this->validateField($f, $this->request->post[$f][$id]);
                                 if (!empty($err)) {
                                     $error = new AError('');
-
-                                    return $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
+                                    $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
+                                    return;
                                 }
                                 $upd[$f] = $this->request->post[$f][$id];
                             }
@@ -239,7 +239,6 @@ class ControllerResponsesListingGridProduct extends AController
 
         //update controller data
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
-        return null;
     }
 
     /**

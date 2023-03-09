@@ -327,6 +327,7 @@ class ModelToolImportProcess extends Model
             $product_data['manufacturer_id'] = $this->processManufacturer($manufacturers['manufacturer'], 0, $store_id);
         }
 
+        $product_desc['name'] = str_replace('  ', ' ', trim($product_desc['name']));
         //check if row is complete and uniform
         if (!$product_desc['name'] && !$product['sku'] && !$product['model']) {
             $this->toLog('Error: Record is not complete or missing required data. Skipping!');
