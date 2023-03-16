@@ -362,8 +362,8 @@ class ModelAuditListener
               'name' => $item['field_name'],
               'groupId' => $item['auditable_id'],
               'groupName' => $item['auditable_model_name'],
-              'oldValue' => $item['old_value'],
-              'newValue' => $item['new_value'],
+              'oldValue' => is_string($item['old_value']) ? $item['old_value'] : var_export($item['old_value'], true),
+              'newValue' => is_string($item['new_value']) ? $item['new_value'] : var_export($item['new_value'], true),
             ];
         }
 
