@@ -369,14 +369,21 @@ class AbcCache
 
     public function flush($tags = '', string $store = '')
     {
-        $tags = is_array($tags) ? $tags : func_get_args();
-        $storage = $this->getStorage($store);
-        if (method_exists($storage->getStore(), 'tags') && $tags) {
-            /** @var TaggedCache $storage */
-            return $storage->tags($tags)->flush();
+        $result = false;
+        try {
+            $tags = is_array($tags) ? $tags : func_get_args();
+            $storage = $this->getStorage($store);
+            if (method_exists($storage->getStore(), 'tags') && $tags) {
+                /** @var TaggedCache $storage */
+                $result = $storage->tags($tags)->flush();
+            }else {
+                /** @var FileStore $storage */
+                $result = $storage->flush();
+            }
+        }catch(Exception|\Error $e){
+            Registry::log()->error($e->getMessage()."\n".$e->getTraceAsString());
         }
-        /** @var FileStore $storage */
-        return $storage->flush();
+        return $result;
     }
 
     /**
