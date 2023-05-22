@@ -1,15 +1,35 @@
 <?php
+/**
+ * AbanteCart, Ideal Open Source Ecommerce Solution
+ * http://www.abantecart.com
+ *
+ * Copyright 2011-2022 Belavier Commerce LLC
+ *
+ * This source file is subject to Open Software License (OSL 3.0)
+ * License details is bundled with this package in the file LICENSE.txt.
+ * It is also available at this URL:
+ * <http://www.opensource.org/licenses/OSL-3.0>
+ *
+ * UPGRADE NOTE:
+ * Do not edit or add to this file if you wish to upgrade AbanteCart to newer
+ * versions in the future. If you wish to customize AbanteCart for your
+ * needs please refer to http://www.abantecart.com for more information.
+ */
 
 namespace abc\models\customer;
 
 use abc\core\engine\Registry;
-use abc\core\lib\ADataEncryption;
+use abc\core\lib\AException;
 use abc\models\BaseModel;
 use abc\models\locale\Country;
 use abc\models\locale\Zone;
 use abc\models\QueryBuilder;
+use Carbon\Carbon;
+use Exception;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\JoinClause;
+use Illuminate\Support\Collection;
 
 /**
  * Class Address
@@ -25,6 +45,8 @@ use Illuminate\Database\Query\JoinClause;
  * @property string $city
  * @property int $country_id
  * @property int $zone_id
+ * @property Carbon $date_added
+ * @property Carbon $date_modified
  *
  * @property Customer $customer
  * @property Country $country
@@ -38,25 +60,22 @@ use Illuminate\Database\Query\JoinClause;
 class Address extends BaseModel
 {
     use SoftDeletes;
+
     protected $mainClassName = Customer::class;
     protected $mainClassKey = 'customer_id';
-
     protected $primaryKey = 'address_id';
 
-    protected $dates = [
-        'date_added',
-        'date_modified',
+    protected $casts = [
+        'customer_id'   => 'int',
+        'country_id'    => 'int',
+        'zone_id'       => 'int',
+        'date_added'    => 'datetime',
+        'date_modified' => 'datetime'
     ];
 
     protected $guarded = [
         'date_added',
         'date_modified',
-    ];
-
-    protected $casts = [
-        'customer_id' => 'int',
-        'country_id'  => 'int',
-        'zone_id'     => 'int',
     ];
 
     protected $fillable = [
@@ -72,6 +91,8 @@ class Address extends BaseModel
         'country_id',
         'zone_id',
     ];
+
+    protected $touches = ['customer'];
 
     protected $rules = [
         'address_id'  => [
@@ -110,13 +131,13 @@ class Address extends BaseModel
         'company'     => [
             'checks'   => [
                 'string',
-                'max:32',
+                'max:64',
             ],
             'messages' => [
                 '*' => [
                     'language_key'   => 'error_company',
                     'language_block' => 'account/address',
-                    'default_text'   => 'Company Name must be less than 32 character!',
+                    'default_text'   => 'Company Name must be less than 64 character!',
                     'section'        => 'storefront',
                 ],
             ],
@@ -144,7 +165,7 @@ class Address extends BaseModel
                 'string',
                 //required only when new customer creating
                 'required_without:customer_id',
-                'between:1,32',
+                'between:1,40',
             ],
             'messages' => [
                 '*' => [
@@ -193,7 +214,7 @@ class Address extends BaseModel
                 'string',
                 //required only when new customer creating
                 'required_without:customer_id',
-                'between:2,10',
+                'between:2,15',
             ],
             'messages' => [
                 '*' => [
@@ -253,17 +274,18 @@ class Address extends BaseModel
         ],
     ];
 
-//temporary disable softDeleting
-public function __construct(array $attributes = [])
-{
-    $this->forceDeleting = true;
-    parent::__construct($attributes);
-}
+    //temporary disable softDeleting
+    public function __construct(array $attributes = [])
+    {
+        $this->forceDeleting = true;
+        parent::__construct($attributes);
+    }
 
     /**
      * @param $value
      */
-    public function SetZoneIdAttribute($value){
+    public function SetZoneIdAttribute($value)
+    {
         $value = (int)$value > 0 ? (int)$value : null;
         $this->attributes['zone_id'] = $value;
     }
@@ -272,15 +294,12 @@ public function __construct(array $attributes = [])
      * @param array $options
      *
      * @return bool
-     * @throws \abc\core\lib\AException
+     * @throws AException
      */
     public function save(array $options = [])
     {
 
         $data = $this->attributes;
-        /**
-         * @var ADataEncryption $dcrypt
-         */
         $dcrypt = Registry::dcrypt();
         if ($dcrypt->active) {
             $data = $dcrypt->encrypt_data($data, 'addresses');
@@ -310,8 +329,8 @@ public function __construct(array $attributes = [])
      * @param int $customer_id
      *
      * @return array
-     * @throws \abc\core\lib\AException
-     * @throws \Exception
+     * @throws AException
+     * @throws Exception
      */
     public static function getAddressesByCustomerId(int $customer_id)
     {
@@ -324,22 +343,20 @@ public function __construct(array $attributes = [])
         if (!$rows) {
             return [];
         }
-        /**
-         * @var ADataEncryption $dcrypt
-         */
+
         $dcrypt = Registry::dcrypt();
 
         foreach ($rows as $row) {
             $row = $dcrypt->decrypt_data($row, 'addresses');
             $country = null;
-            /**
-             * @var Country $country
-             */
-            if( (int)$row['country_id'] ) {
-                $country = Country::find($row['country_id']);
+            /** @var Country $country */
+            if ($row['country_id']) {
+                $country = Country::with('description')
+                    ->useCache('localization')
+                    ->find($row['country_id']);
             }
             if ($country) {
-                $country_name = $country->name;
+                $country_name = $country->description->name;
                 $iso_code_2 = $country->iso_code_2;
                 $iso_code_3 = $country->iso_code_3;
                 $address_format = $country->address_format;
@@ -351,14 +368,14 @@ public function __construct(array $attributes = [])
             }
 
             $zone = null;
-            /**
-             * @var Zone $zone
-             */
-            if( (int)$row['zone_id'] ) {
-                $zone = Zone::find($row['zone_id']);
+            /** @var Zone $zone */
+            if ($row['zone_id']) {
+                $zone = Zone::with('description')
+                    ->useCache('localization')
+                    ->find($row['zone_id']);
             }
             if ($zone) {
-                $zone_name = $zone->name;
+                $zone_name = $zone->description->name;
                 $zone_code = $zone->code;
             } else {
                 $zone_name = '';
@@ -390,10 +407,9 @@ public function __construct(array $attributes = [])
     /**
      * @param int $customer_id
      * @param int $language_id
+     * @param int|null $address_id
      *
-     * @param int $address_id
-     *
-     * @return \Illuminate\Support\Collection|Address
+     * @return Collection|Model
      */
     public static function getAddresses(int $customer_id, int $language_id, int $address_id = null)
     {
@@ -401,60 +417,52 @@ public function __construct(array $attributes = [])
          * @var QueryBuilder $query
          */
         $query = Address::select(
-                            [
-                                'addresses.*',
-                                'countries.*',
-                                'zones.*',
-                                'country_descriptions.name as country',
-                                'zone_descriptions.name as zone'
-                            ]
-
-                        )
-                        ->where('customer_id', '=', $customer_id);
-        //if needs to get only one address
-        if($address_id){
+            [
+                'addresses.*',
+                'countries.*',
+                'zones.*',
+                'country_descriptions.name as country',
+                'zone_descriptions.name as zone'
+            ]
+        )->where('customer_id', '=', $customer_id);
+        if ($address_id) {
             $query->where('address_id', '=', $address_id);
         }
         $query->leftJoin(
             'countries',
-            function($join){
-                /**
-                 * @var JoinClause $join
-                 */
-                 $join->on('addresses.country_id', '=', 'countries.country_id');
+            function ($join) {
+                /** @var JoinClause $join */
+                $join->on('addresses.country_id', '=', 'countries.country_id');
             }
         );
         $query->leftJoin(
             'country_descriptions',
-            function($join) use ($language_id){
-                /**
-                 * @var JoinClause $join
-                 */
-                 $join->on('country_descriptions.country_id', '=', 'countries.country_id')
-                     ->where('country_descriptions.language_id', '=', $language_id);
+            function ($join) use ($language_id) {
+                /** @var JoinClause $join */
+                $join->on('country_descriptions.country_id', '=', 'countries.country_id')
+                    ->where('country_descriptions.language_id', '=', $language_id);
             }
         );
         $query->leftJoin(
             'zones',
-            function($join){
-                /**
-                 * @var JoinClause $join
-                 */
-                 $join->on('addresses.zone_id', '=', 'zones.zone_id');
+            function ($join) {
+                /** @var JoinClause $join */
+                $join->on('addresses.zone_id', '=', 'zones.zone_id');
             }
         );
         $query->leftJoin(
             'zone_descriptions',
-            function($join) use ($language_id){
-                /**
-                 * @var JoinClause $join
-                 */
-                 $join->on('zone_descriptions.zone_id', '=', 'zones.zone_id')
-                      ->where('zone_descriptions.language_id', '=', $language_id);
+            function ($join) use ($language_id) {
+                /** @var JoinClause $join */
+                $join->on('zone_descriptions.zone_id', '=', 'zones.zone_id')
+                    ->where('zone_descriptions.language_id', '=', $language_id);
             }
         );
 
-        return $address_id ? $query->first() : $query->get();
+        //allow to extend this method from extensions
+        Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, func_get_args());
+        return $address_id
+            ? $query->first()
+            : $query->useCache('customer')->get();
     }
-
 }

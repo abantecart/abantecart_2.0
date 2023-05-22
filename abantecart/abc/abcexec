@@ -4,7 +4,7 @@
  * AbanteCart, Ideal Open Source Ecommerce Solution
  * http://www.abantecart.com
  *
- * Copyright 2011-2018 Belavier Commerce LLC
+ * Copyright 2011-2022 Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
@@ -21,12 +21,19 @@ namespace abc\commands;
 
 use abc\core\ABC;
 use Exception;
-
-if (version_compare(phpversion(), '7.0.0', '<') == true) {
-    exit("\n\t\t\tphp v7.0.0+  Required for AbanteCart to work properly!\n");
+define('PHP_MIN_VERSION', '8.1.0');
+if (version_compare(phpversion(), PHP_MIN_VERSION, '<')) {
+    exit("\n\t\t\tphp v".PHP_MIN_VERSION."+  Required for AbanteCart to work properly!\n");
 }
 set_include_path(__DIR__);
 define('DS', DIRECTORY_SEPARATOR);
+define('ABCEXEC', TRUE);
+//Detect if included or run directly
+if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
+    define('DIRECT', TRUE);
+} else {
+    define('DIRECT', FALSE);
+}
 
 //process command
 $args = $argv;
@@ -53,7 +60,7 @@ if (!preg_match('/^--(.*)$/', $command)) {
 }
 
 try {
-    require __DIR__.DS.'core'.DS.'abc.php';
+    require __DIR__ . DS . 'core' . DS . 'ABC.php';
     //run constructor of ABC class to load environment
 
     $ABC = new ABC();
@@ -61,10 +68,14 @@ try {
         $ABC->loadDefaultStage();
         echo "Default stage environment loaded.\n\n";
     }
-    require __DIR__.DS.'core'.DS.'init'.DS.'cli.php';
-} catch (\Exception $e) {
-    showException($e);
-    exit(1);
+    require __DIR__ . DS . 'core' . DS . 'init' . DS . 'cli.php';
+} catch (Exception $e) {
+    if (DIRECT) {
+        showException($e);
+        exit(1);
+    } else {
+        throw $e;
+    }
 }
 //set sign
 ABC::env('abcexec', true);
@@ -75,7 +86,7 @@ if (!$class || $class == 'help' || $action == 'help') {
 
 //try to get instance of executor or die
 /**
- * @var \abc\commands\Install | array $executor
+ * @var Install | array $executor
  */
 $executor = getExecutor($class);
 
@@ -87,22 +98,29 @@ if (!$options && !$action) {
 }
 
 //validate command and options
-$errors = (array)$executor->validate($action, $options);
-
+$errors = $executor->validate($action, $options);
 if ($errors) {
-    showError("Validation errors occurred");
-    foreach ($errors as $error) {
-        showError("\t".$error);
+    if (DIRECT){
+        showError("Validation errors occurred");
+        foreach ($errors as $error) {
+            showError("\t".$error);
+        }
+        exit(1);
+    } else {
+        throw $errors;
     }
-    exit(1);
 }
 
 //run command
 try {
     showResult($executor->run($action, $options));
 } catch (Exception $e) {
-    showException($e);
-    exit(1);
+    if (DIRECT){
+        showException($e);
+        exit(1);
+    } else {
+        throw $e;
+    }
 }
 
 //if all fine - run post-trigger
@@ -111,8 +129,12 @@ try {
     $executor->finish($action, $options);
     showResult($executor->getOutput());
 } catch (Exception $e) {
-    showException($e);
-    exit(1);
+    if (DIRECT){
+        showException($e);
+        exit(1);
+    } else {
+        throw $e;
+    }
 }
 
 exit(0);

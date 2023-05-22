@@ -20,30 +20,53 @@
 
 namespace abc\controllers\storefront;
 
-use abc\core\engine\AControllerAPI;
+use abc\core\engine\ASecureControllerAPI;
 use abc\models\order\Order;
 use abc\models\order\OrderProduct;
 use H;
 
-class ControllerApiAccountHistory extends AControllerAPI
+class ControllerApiAccountHistory extends ASecureControllerAPI
 {
     public $data;
 
+    /**
+     * @OA\POST(
+     *     path="/index.php/?rt=a/account/history",
+     *     summary="Get orders history",
+     *     description="Get orders history paginated data",
+     *     tags={"Account"},
+     *     security={{"tokenAuth":{}, "apiKey":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(ref="#/components/schemas/AccountHistoryRequestModel"),
+     *     ),
+     *     @OA\Response(
+     *         response="200",
+     *         description="Success response",
+     *         @OA\JsonContent(ref="#/components/schemas/HistorySuccessModel"),
+     *     ),
+     *     @OA\Response(
+     *         response="403",
+     *         description="Access denied",
+     *         @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"),
+     *     ),
+     *      @OA\Response(
+     *         response="500",
+     *         description="Server Error",
+     *         @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"),
+     *     )
+     * )
+     *
+     */
     public function post()
     {
         $this->extensions->hk_InitData($this, __FUNCTION__);
         $request_data = $this->rest->getRequestParams();
 
-        if (!$this->customer->isLoggedWithToken($request_data['token'])) {
-            $this->rest->setResponseData(['error' => 'Not logged in or Login attempt failed!']);
-            $this->rest->sendResponse(401);
-            return null;
-        }
-
         $this->loadLanguage('account/history');
 
         $order_total = Order::where('customer_id', '=', $this->customer->getId())
-                            ->where('order_status_id', '>', 0)->count();
+            ->where('order_status_id', '>', 0)->count();
 
         if ($order_total) {
             if (isset($request_data['page']) && is_integer($request_data['page'])) {
@@ -53,31 +76,31 @@ class ControllerApiAccountHistory extends AControllerAPI
             }
 
             if (isset($request_data['limit']) && is_integer($request_data['limit'])) {
-                $this->data['limit'] = (int)$request_data['limit'];
+                $this->data['limit'] = (int) $request_data['limit'];
             } else {
-                $this->data['limit'] = $this->config->get('config_catalog_limit');
+                $this->data['limit'] = (int) $this->config->get('config_catalog_limit');
             }
 
             $orders = [];
             $results = (new Order())
-                        ->getCustomerOrdersArray(
-                            $this->customer->getId(),
-                            ($page - 1) * $this->data['limit'],
-                            $this->data['limit']
-                        );
+                ->getCustomerOrdersArray(
+                    $this->customer->getId(),
+                    ($page - 1) * $this->data['limit'],
+                    $this->data['limit']
+                );
 
             foreach ($results as $result) {
                 $product_total = OrderProduct::where('order_id', '=', $result['order_id'])->count();
                 $orders[] = [
-                    'order_id'   => $result['order_id'],
-                    'name'       => $result['firstname'].' '.$result['lastname'],
-                    'status'     => $result['status'],
-                    'date_added' => H::dateISO2Display(
-                        $result['date_added'],
-                        $this->language->get('date_format_short')
-                    ),
-                    'products'   => $product_total,
-                    'total'      => $this->currency->format($result['total'], $result['currency'], $result['value']),
+                    'order_id' => $result['order_id'],
+                    'firstname' => $result['firstname'],
+                    'lastname' =>  $result['lastname'],
+                    'status' => $result['order_status_name'],
+                    'date_added' => $result['date_added'],
+                    'product_count' => $product_total,
+                    'total' => $result['total'],
+                    'currency' => $result['currency'],
+                    'value' => $result['value'],
                 ];
             }
 

@@ -12,7 +12,6 @@ use abc\core\lib\AEncryption;
 use abc\core\lib\AMail;
 use abc\core\lib\AMessage;
 use abc\core\view\AView;
-use abc\models\customer\CustomerTransaction;
 use abc\models\order\Order;
 use abc\models\order\OrderOption;
 use abc\models\order\OrderProduct;
@@ -20,7 +19,6 @@ use abc\models\order\OrderTotal;
 use abc\models\system\Setting;
 use abc\modules\events\ABaseEvent;
 use H;
-use Illuminate\Validation\ValidationException;
 
 class AdminOrderUpdateProductStatusesChange
 {
@@ -37,7 +35,9 @@ class AdminOrderUpdateProductStatusesChange
      * @param ABaseEvent $event
      *
      * @return bool
-     * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
      */
     public function handle(ABaseEvent $event)
     {
@@ -162,6 +162,7 @@ class AdminOrderUpdateProductStatusesChange
             }
 
             $this->data['logo'] = $config_mail_logo;
+            //TODO: see belong! why override ?
             $this->data['store_name'] = $order_info['store_name'];
             $this->data['address'] = nl2br($config->get('config_address'));
             $this->data['telephone'] = $config->get('config_telephone');
@@ -320,9 +321,9 @@ class AdminOrderUpdateProductStatusesChange
             $mail->setTo($order_info['email']);
             $mail->setFrom($config->get('store_main_email'));
             $mail->setSender($order_info['store_name']);
-            if($mail->setTemplate('admin_order_update_product_statuses', $this->data, $order_info['language_id'])) {
-                $mail->send();
-            }
+            $mail->setSubject(Registry::language()->get('text_order_status').Registry::order_status()->getStatusById($order_info['order_status_id']));
+            $mail->setTemplate('admin_order_update_product_statuses', $this->data, $order_info['language_id']);
+            $mail->send();
 
             //send alert email for merchant
             if ($config->get('config_alert_mail')) {
@@ -341,9 +342,9 @@ class AdminOrderUpdateProductStatusesChange
                 $this->data['order_total'] = $order_total;
 
                 $mail->setTo($config->get('store_main_email'));
-                if($mail->setTemplate('admin_order_update_product_statuses_alert', $this->data)) {
-                    $mail->send();
-                }
+                $mail->setTemplate('admin_order_update_product_statuses_alert', $this->data);
+                $mail->setSubject(Registry::language()->get('text_order_status').Registry::order_status()->getStatusById($order_info['order_status_id']));
+                $mail->send();
 
                 // Send to additional alert emails
                 $emails = explode(',', $config->get('config_alert_emails'));

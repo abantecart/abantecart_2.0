@@ -15,17 +15,30 @@
  * versions in the future. If you wish to customize AbanteCart for your
  * needs please refer to http://www.abantecart.com for more information.
  */
-
 namespace abc\commands;
 
 use abc\core\ABC;
-use abc\core\engine\{ ALoader, ExtensionsApi, Registry };
+use abc\core\lib\AbcCache;
+use abc\core\lib\AConfig;
+use abc\core\lib\ADataEncryption;
+use abc\core\lib\ADocument;
+use abc\core\lib\ADownload;
+use abc\core\lib\AException;
+use abc\core\lib\AIMManager;
+use abc\core\lib\ALanguageManager;
+use abc\core\lib\AOrderStatus;
+use abc\core\lib\ASession;
+use abc\core\engine\{AHtml, ALoader, ExtensionsApi, Registry};
 use abc\core\lib\Abac;
 use abc\core\lib\ADB;
 use abc\core\lib\OSUser;
 use Exception;
 use H;
 use Illuminate\Events\Dispatcher;
+use JetBrains\PhpStorm\NoReturn;
+
+// Error Reporting
+error_reporting(E_ERROR & ~E_NOTICE);
 
 // do check for vendor autoload file first
 if (!is_file(dirname(__DIR__, 2).DS.'vendor'.DS.'autoload.php')) {
@@ -77,22 +90,29 @@ $dir_public = !ABC::env('DIR_PUBLIC') ? $dir_root.'public'.DS : ABC::env('DIR_PU
 $dir_vendor = !ABC::env('DIR_VENDOR') ? $dir_app.'vendor'.DS : ABC::env('DIR_VENDOR');
 
 $defaults = [
-    'DIR_ROOT'            => $dir_root,
-    'DIR_TESTS'           => $dir_app.'tests'.DS,
-    'DIR_APP'             => $dir_app,
-    'DIR_TEMPLATES'       => $dir_app.'templates'.DS,
-    'DIR_APP_EXTENSIONS'  => $dir_app.'extensions'.DS,
-    'DIR_SYSTEM'          => $dir_app.'system'.DS,
-    'CACHE'               => ['DIR_CACHE' => $dir_app.'system'.DS.'cache'.DS],
-    'DIR_BACKUP'          => $dir_app.'system'.DS.'backup'.DS,
-    'DIR_CORE'            => $dir_app.'core'.DS,
-    'DIR_LIB'             => $dir_app.'core'.DS.'lib'.DS,
-    'DIR_MODULES'         => $dir_app.'modules'.DS,
-    'DIR_WORKERS'         => $dir_app.'modules'.DS.'workers'.DS,
-    'DIR_IMAGES'          => $dir_public.'images'.DS,
-    'DIR_DOWNLOADS'       => $dir_app.'downloads'.DS,
-    'DIR_MIGRATIONS'      => $dir_app.'migrations'.DS,
-    'DIR_CONFIG'          => $dir_app.'config'.DS,
+    'DIR_ROOT'           => $dir_root,
+    'DIR_TESTS'          => $dir_app.'tests'.DS,
+    'DIR_APP'            => $dir_app,
+    'DIR_TEMPLATES'      => $dir_app.'templates'.DS,
+    'DIR_APP_EXTENSIONS' => $dir_app.'extensions'.DS,
+    'DIR_SYSTEM'         => $dir_app.'system'.DS,
+    'CACHE'              => [
+        'stores' =>
+            [
+                'file' => [
+                    'path' => $dir_app.'system'.DS.'cache'.DS,
+                ],
+            ],
+    ],
+    'DIR_BACKUP'         => $dir_app.'system'.DS.'backup'.DS,
+    'DIR_CORE'           => $dir_app.'core'.DS,
+    'DIR_LIB'            => $dir_app.'core'.DS.'lib'.DS,
+    'DIR_MODULES'        => $dir_app.'modules'.DS,
+    'DIR_WORKERS'        => $dir_app.'modules'.DS.'workers'.DS,
+    'DIR_IMAGES'         => $dir_public.'images'.DS,
+    'DIR_DOWNLOADS'      => $dir_app.'downloads'.DS,
+    'DIR_MIGRATIONS'     => $dir_app.'migrations'.DS,
+    'DIR_CONFIG'         => $dir_app.'config'.DS,
     'DIR_LOGS'            => $dir_app.'system'.DS.'logs'.DS,
     'DIR_PUBLIC'          => $dir_public,
     'DIR_RESOURCES'       => $dir_public.DS.'resources'.DS,
@@ -137,11 +157,11 @@ require_once('admin.php');
 $registry->set('os_user', new OSUser());
 
 // Loader
-registerClass($registry, 'load', 'ALoader', [$registry], '\abc\core\engine\ALoader', [$registry]);
+registerClass($registry, 'load', 'ALoader', [$registry], ALoader::class, [$registry]);
 $registry->set('load', new ALoader($registry));
 
 // URL Class
-registerClass($registry, 'html', 'AHtml', [$registry], '\abc\core\engine\AHtml', [$registry]);
+registerClass($registry, 'html', 'AHtml', [$registry], AHtml::class, [$registry]);
 
 // Database
 if (ABC::env('DB_CURRENT_DRIVER')) {
@@ -153,20 +173,29 @@ if (ABC::env('DB_CURRENT_DRIVER')) {
 
 //session
 $session_id = 'CLI';
-registerClass($registry, 'session', 'ASession', [$session_id], '\abc\core\lib\ASession', [$session_id]);
+registerClass($registry, 'session', 'ASession', [$session_id], ASession::class, [$session_id]);
 
 
-// Config
 if (ABC::env('DB_CURRENT_DRIVER')) {
+    // Config
+    registerClass($registry, 'config', 'AConfig', [$registry], AConfig::class, [$registry]);
+
     // Cache
-    registerClass($registry, 'cache', 'ACache', [], '\abc\core\cache\ACache', []);
-    registerClass($registry, 'config', 'AConfig', [$registry], '\abc\core\lib\AConfig', [$registry]);
+    registerClass(
+        $registry,
+        'cache',
+        'AbcCache',
+        [ABC::env('CACHE')['driver']],
+        AbcCache::class,
+        ['file']
+    );
+
     registerClass(
         $registry,
         'language',
         'ALanguageManager',
         [$registry],
-        '\abc\core\lib\ALanguageManager',
+        ALanguageManager::class,
         [$registry]);
 
     //override urls
@@ -196,20 +225,20 @@ if (ABC::env('DB_CURRENT_DRIVER')) {
     }
 }
 
-registerClass($registry, 'im', 'AIMManager', [], "\abc\core\lib\AIMManager", []);
+registerClass($registry, 'im', 'AIMManager', [], AIMManager::class, []);
 if($registry->has('db')){
-   registerClass($registry, 'order_status', 'AOrderStatus', [$registry], "\abc\core\lib\AOrderStatus", [$registry]);
+   registerClass($registry, 'order_status', 'AOrderStatus', [$registry], AOrderStatus::class, [$registry]);
 }
-registerClass($registry, 'download', 'ADownload', [], "\abc\core\lib\ADownload", []);
+registerClass($registry, 'download', 'ADownload', [], ADownload::class, []);
 
 // Log
-$registry->set('log', ABC::getObjectByAlias('ALog', [['app' => 'cli.log']]));
+$registry->set('log', ABC::getObjectByAlias('ALog'));
 
 // Document
-registerClass($registry, 'document', 'ADocument', [], '\abc\core\lib\ADocument', []);
+registerClass($registry, 'document', 'ADocument', [], ADocument::class, []);
 
 //main instance of data encryption
-registerClass($registry, 'dcrypt', 'ADataEncryption', [], '\abc\core\lib\ADataEncryption', []);
+registerClass($registry, 'dcrypt', 'ADataEncryption', [], ADataEncryption::class, []);
 
 // Extensions api
 $extensions = new ExtensionsApi();
@@ -217,9 +246,7 @@ $extensions->loadAvailableExtensions();
 $registry->set('extensions', $extensions);
 
 //register event listeners
-/**
- * @var Dispatcher $evd
- */
+/** @var Dispatcher $evd */
 $evd = ABC::getObjectByAlias('EventDispatcher');
 if(is_object($evd)) {
     foreach (ABC::env('EVENTS') as $event_alias => $listeners) {
@@ -232,9 +259,7 @@ if(is_object($evd)) {
 
 
 //register ABAC
-/**
- * @var Abac $abac
- */
+/** @var Abac $abac */
 $abac = ABC::getObjectByAlias('ABAC', [ $registry ]);
 if(is_object($abac)) {
     $registry->set('abac', $abac);
@@ -254,6 +279,7 @@ function showResult($result)
         foreach ($result as $error) {
             showError($error);
         }
+        throw new \Exception(implode("\n", $result));
     }
 }
 
@@ -304,11 +330,11 @@ function showException($e)
  * @param string $script_name - name of executor
  * @param array  $options
  */
-function showHelpPage($script_name = '', $options = [])
+#[NoReturn] function showHelpPage($script_name = '', $options = [])
 {
     global $registry;
     $script_name = $script_name == 'help' ? '' : strtolower($script_name);
-    //first of all get list of scripts
+    //get list of scripts
     $executors = glob(ABC::env('DIR_APP').'commands'.DS.'*.php');
     $help = [];
 
@@ -385,7 +411,7 @@ function showHelpPage($script_name = '', $options = [])
  * @param string $name
  * @param bool   $silent_mode - silent mode
  *
- * @return array | \abc\commands\Install
+ * @return array | Install
  */
 function getExecutor($name, $silent_mode = false)
 {
@@ -405,16 +431,14 @@ function getExecutor($name, $silent_mode = false)
     }
     try {
         require_once $run_file;
-        /**
-         * @var \abc\commands\Install $executor
-         */
+        /** @var Install $executor */
         $class_name = "\abc\commands\\".$name;
         if (class_exists($class_name)) {
-            return $executor = new $class_name();
+            return new $class_name();
         } else {
-            throw new \Exception('Class '.$class_name.' not found in '.$run_file);
+            throw new Exception('Class '.$class_name.' not found in '.$run_file);
         }
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
         $error_text = 'Error: '.$e->getMessage();
         if (!$silent_mode) {
             showError($error_text);
@@ -436,7 +460,7 @@ function getExecutor($name, $silent_mode = false)
  * @param string   $default_class
  * @param array    $default_arguments
  *
- * @throws \abc\core\lib\AException
+ * @throws AException
  */
 function registerClass($registry, $item_name, $alias, $arguments, $default_class, $default_arguments)
 {

@@ -464,10 +464,12 @@
                 }
 
                 if ((String(value) != String(orgvalue) || $changed > 0)) {
-                    //mark filed chaneged
+                    //mark filed changed
                     $field.addClass(o.changedClass);
                     //build quick save button set
-                    showQuickSave($field);
+                    if (!$field.hasClass('no-quicksave')) {
+                        showQuickSave($field);
+                    }
                 } else {
                     //clean up
                     $field.removeClass(o.changedClass);
@@ -565,7 +567,7 @@
             var $field = $(elem);
             var $wrapper = $(elem).closest('.afield');
             //locate btn container if it is present
-            var $btncontainer = $wrapper.find(o.btnContainer);
+            var $btncontainer = $wrapper.find(o.btnContainer).last();
 
             //show quicksave button set only if not yet shown or configured
             if (!o.showButtons || $btncontainer.find(o.btnGrpSelector).length != 0) {
@@ -575,7 +577,7 @@
             //can not find input-group-addon span button container create new one
             if ($btncontainer.length == 0) {
                 $wrapper.append(o.btnContainerHTML);
-                $btncontainer = $wrapper.find(o.btnContainer);
+                $btncontainer = $wrapper.find(o.btnContainer).last();
             }
 
             //add quick save button classes and tooltips
@@ -602,16 +604,22 @@
                      //clean up
                      $btncontainer.parent('.afield').removeClass(o.changedClass);
                      $field.removeClass(o.hoverClass + " " + o.focusClass + " " + o.activeClass + " " + o.changedClass);
-                     $(o.btnGrpSelector, $btncontainer).remove();
-                     $('.field_err', $btncontainer).remove();
+                     $(o.btnGrpSelector, $btncontainer).last().remove();
+                     $('.field_err', $btncontainer).last().remove();
                      $btncontainer.removeClass('quicksave');
                      //remove button container if it is empty
-                     if( ($btncontainer.text()).length == 0 ){
-                        //do not remove for now. Isues in country/zones
-                        //$btncontainer.remove();
+                     if (($btncontainer.text()).length == 0) {
+                         //do not remove for now. Isues in country/zones
+                         //$btncontainer.remove();
                      }
                  }
              });
+
+            //check if element placed inside jqgrid and mark row as selected for batch update
+            let prnt = elem.parents('tr.jqgrow');
+            if (prnt && !prnt.hasClass('ui-state-highlight')) {
+                prnt.click();
+            }
 
             return false;
         }
@@ -674,7 +682,7 @@
             //if empty and we have select, need to pass blank value
             if (!$data) {
                 $wrapper.find('select').each(function () {
-                    $data += $(this).attr('name')+'=\'\'&';
+                    $data += $(this).attr('name') + '=&';
                 });
             }
 
@@ -791,14 +799,14 @@
             } else if (elem.is(":radio")) {
                 if (elem.hasClass('star')) {
                     doRating(elem);
-                }else{
+                } else {
                     doRadio(elem);
                 }
-            } else if (elem.is(":text, :password, input[type='email'], input[type='tel']")) {
+            } else if (elem.is(":text, :password, input[type='email'], input[type='tel'], input[type='number']")) {
                 if (elem.is(":password") && $(elem).is('[name$="_confirmation"]')) {
                     ;
                 } else if (elem.is(":password") && elem.hasClass('passwordset_element')) {
-                    doPasswordset(elem);                    
+                    doPasswordset(elem);
                 } else {
                     doInput(elem);
                 }
@@ -901,13 +909,18 @@ var formOnExit = function(){
         }
         $btn.attr('data-loading-text',spinner);
         $btn.on('click', function (event) {
+            let frm = $(this).parents('form');
+            //prevent spinner for forms with invalid fields (see native browser field validation + form attribute "novalidate")
+            if (frm.find(':invalid')) {
+                return;
+            }
             //chrome submit fix
             //If we detect child was clicked, and not the actual button, stop the propagation and trigger the "click" event on the button.
-            var $target = $( event.target );
-            if ( !$target.is("button") ) {
-               event.stopPropagation();
-               $target.closest("button").click();
-               return;
+            var $target = $(event.target);
+            if (!$target.is("button")) {
+                event.stopPropagation();
+                $target.closest("button").click();
+                return;
             }
             $(this).button('loading');
         });

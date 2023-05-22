@@ -3,7 +3,7 @@
  * AbanteCart, Ideal Open Source Ecommerce Solution
  * http://www.abantecart.com
  *
- * Copyright 2011-2018 Belavier Commerce LLC
+ * Copyright 2011-2022 Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
@@ -36,11 +36,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Carbon\Carbon $date_added
  * @property \Carbon\Carbon $date_modified
  *
+ * @method static CustomerCommunication find(int $communication_id) CustomerCommunication
+ *
  * @package abc\models\customer
  */
 class CustomerCommunication extends BaseModel
 {
     use SoftDeletes;
+
     protected $table = 'customer_communications';
 
     protected $primaryKey = 'communication_id';
@@ -48,9 +51,9 @@ class CustomerCommunication extends BaseModel
     protected $mainClassName = Customer::class;
     protected $mainClassKey = 'customer_id';
 
-    protected $dates = [
-        'date_added',
-        'date_modified',
+    protected $casts = [
+        'date_added'    => 'datetime',
+        'date_modified' => 'datetime',
     ];
 
     protected $fillable = [
@@ -107,7 +110,7 @@ class CustomerCommunication extends BaseModel
          */
         $communication = new CustomerCommunication();
         $communication->subject = $mail->getSubject();
-        $communication->body = $mail->getHtml() ? $mail->getHtml() : nl2br($mail->getText());
+        $communication->body = $mail->getHtml() ? : nl2br($mail->getText());
         $customer_id = null;
         if (Registry::customer()) {
             $customer_id = Registry::customer()->getId();

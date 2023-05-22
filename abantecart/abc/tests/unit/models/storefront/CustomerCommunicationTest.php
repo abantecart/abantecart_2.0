@@ -1,10 +1,10 @@
 <?php
 
-namespace abc\tests\unit\models\storefront;
+namespace Tests\unit\models\models\storefront;
 
 use abc\core\lib\ADB;
 use abc\models\customer\CustomerCommunication;
-use abc\tests\unit\ATestCase;
+use Tests\unit\ATestCase;
 
 /**
  * Class CustomerCommunicationTest
@@ -16,7 +16,7 @@ use abc\tests\unit\ATestCase;
 class CustomerCommunicationTest extends ATestCase
 {
 
-    protected function tearDown()
+    protected function tearDown():void
     {
         //init
     }

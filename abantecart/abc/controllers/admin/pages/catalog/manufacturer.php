@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2018 Belavier Commerce LLC
+  Copyright © 2011-2021 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -20,6 +20,7 @@
 
 namespace abc\controllers\admin;
 
+use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\models\admin\ModelCatalogManufacturer;
@@ -37,7 +38,6 @@ use H;
 class ControllerPagesCatalogManufacturer extends AController
 {
     public $error = [];
-    public $data = [];
     public $fields = [
         'name',
         'manufacturer_store',
@@ -47,7 +47,6 @@ class ControllerPagesCatalogManufacturer extends AController
 
     public function main()
     {
-
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
@@ -83,24 +82,43 @@ class ControllerPagesCatalogManufacturer extends AController
                 'edit'   => [
                     'text'     => $this->language->get('text_edit'),
                     'href'     => $this->html->getSecureURL('catalog/manufacturer/update', '&manufacturer_id=%ID%'),
-                    'children' => array_merge([
-                        'quickview' => [
-                            'text'  => $this->language->get('text_quick_view'),
-                            'href'  => $this->html->getSecureURL('catalog/manufacturer/update',
-                                '&manufacturer_id=%ID%'),
-                            //quick view port URL
-                            'vhref' => $this->html->getSecureURL('r/common/viewport/modal',
-                                '&viewport_rt=catalog/manufacturer/update&manufacturer_id=%ID%'),
+                    'children' => array_merge(
+                        [
+                            'quickview' => [
+                                'text'  => $this->language->get(
+                                    'text_quick_view'
+                                ),
+                                'href'  => $this->html->getSecureURL(
+                                    'catalog/manufacturer/update',
+                                    '&manufacturer_id=%ID%'
+                                ),
+                                //quick view port URL
+                                'vhref' => $this->html->getSecureURL(
+                                    'r/common/viewport/modal',
+                                    '&viewport_rt=catalog/manufacturer/update&manufacturer_id=%ID%'
+                                ),
+                            ],
+                            'general'   => [
+                                'text' => $this->language->get(
+                                    'entry_edit'
+                                ),
+                                'href' => $this->html->getSecureURL(
+                                    'catalog/manufacturer/update',
+                                    '&manufacturer_id=%ID%'
+                                ),
+                            ],
+                            'layout'    => [
+                                'text' => $this->language->get(
+                                    'entry_layout'
+                                ),
+                                'href' => $this->html->getSecureURL(
+                                    'catalog/manufacturer_layout',
+                                    '&manufacturer_id=%ID%'
+                                ),
+                            ],
                         ],
-                        'general'   => [
-                            'text' => $this->language->get('entry_edit'),
-                            'href' => $this->html->getSecureURL('catalog/manufacturer/update', '&manufacturer_id=%ID%'),
-                        ],
-                        'layout'    => [
-                            'text' => $this->language->get('entry_layout'),
-                            'href' => $this->html->getSecureURL('catalog/manufacturer_layout', '&manufacturer_id=%ID%'),
-                        ],
-                    ], (array)$this->data['grid_edit_expand']),
+                        (array) $this->data['grid_edit_expand']
+                    ),
                 ],
                 'save'   => [
                     'text' => $this->language->get('button_save'),
@@ -157,12 +175,10 @@ class ControllerPagesCatalogManufacturer extends AController
 
         //update controller data
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
-
     }
 
     public function insert()
     {
-
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
@@ -172,9 +188,11 @@ class ControllerPagesCatalogManufacturer extends AController
             $manufacturer_id = Manufacturer::addManufacturer($this->request->post);
             $this->session->data['success'] = $this->language->get('text_success');
             $this->extensions->hk_ProcessData($this, __FUNCTION__, ['manufacturer_id' => $manufacturer_id]);
-            abc_redirect($this->html->getSecureURL(
-                'catalog/manufacturer/update',
-                '&manufacturer_id='.$manufacturer_id)
+            abc_redirect(
+                $this->html->getSecureURL(
+                    'catalog/manufacturer/update',
+                    '&manufacturer_id='.$manufacturer_id
+                )
             );
         }
         $this->getForm();
@@ -183,11 +201,8 @@ class ControllerPagesCatalogManufacturer extends AController
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
     }
 
-    public function update()
+    public function update(...$args)
     {
-
-        $args = func_get_args();
-
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
@@ -200,33 +215,46 @@ class ControllerPagesCatalogManufacturer extends AController
             unset($this->session->data['success']);
         }
 
-        $manufacturer_id = (int)$this->request->get['manufacturer_id'];
+        $manufacturer_id = (int) $this->request->get['manufacturer_id'];
 
         if (($this->request->is_POST()) && $this->validateForm()) {
             (new Manufacturer())->editManufacturer($manufacturer_id, $this->request->post);
             $this->session->data['success'] = $this->language->get('text_success');
             $this->extensions->hk_ProcessData($this, __FUNCTION__);
-            abc_redirect($this->html->getSecureURL(
-                'catalog/manufacturer/update',
-                '&manufacturer_id='.$manufacturer_id
-            )
+            abc_redirect(
+                $this->html->getSecureURL(
+                    'catalog/manufacturer/update',
+                    '&manufacturer_id='.$manufacturer_id
+                )
             );
         }
 
         if ($this->config->get('config_embed_status')) {
-            $this->view->assign('embed_url',
-                $this->html->getSecureURL('common/do_embed/manufacturers', '&manufacturer_id='.$manufacturer_id));
+            $this->view->assign(
+                'embed_url',
+                $this->html->getSecureURL('common/do_embed/manufacturers', '&manufacturer_id=' . $manufacturer_id)
+            );
         }
 
-        $this->data['auditLog'] = $this->html->buildElement([
-            'type'   => 'button',
-            'text'  => $this->language->get('text_audit_log'),
-            'href'  => $this->html->getSecureURL('tool/audit_log', '&modal_mode=1&auditable_type=Manufacturer&auditable_id='.$manufacturer_id),
-            //quick view port URL
-            'vhref' => $this->html->getSecureURL(
-                'r/common/viewport/modal',
-                '&viewport_rt=tool/audit_log&modal_mode=1&auditable_type=Manufacturer&auditable_id='.$manufacturer_id),
-        ]);
+        if ($this->registry->get('AuditLogStorage') || ABC::getObjectByAlias('AuditLogStorage')) {
+            $this->data['auditLog'] = $this->html->buildElement(
+                [
+                    'type'  => 'button',
+                    'text'  => $this->language->get('text_audit_log'),
+                    'href'  => $this->html->getSecureURL(
+                        'tool/audit_log',
+                        '&modal_mode=1&auditable_type=Manufacturer&auditable_id='
+                        . $manufacturer_id
+                    ),
+                    //quick view port URL
+                    'vhref' => $this->html->getSecureURL(
+                        'r/common/viewport/modal',
+                        '&viewport_rt=tool/audit_log&modal_mode=1&auditable_type=Manufacturer&auditable_id='
+                        . $manufacturer_id
+                    ),
+                ]
+            );
+        }
         $this->getForm($args);
 
         //update controller data
@@ -235,8 +263,7 @@ class ControllerPagesCatalogManufacturer extends AController
 
     protected function getForm($args = [])
     {
-
-        $viewport_mode = isset($args[0]['viewport_mode']) ? $args[0]['viewport_mode'] : '';
+        $viewport_mode = $args[0]['viewport_mode'] ?? '';
 
         $this->view->assign('token', $this->session->data['token']);
         $this->view->assign('error_warning', $this->error['warning']);
@@ -255,7 +282,7 @@ class ControllerPagesCatalogManufacturer extends AController
 
         $this->view->assign('cancel', $this->html->getSecureURL('catalog/manufacturer'));
 
-        $manufacturer_id = (int)$this->request->get['manufacturer_id'];
+        $manufacturer_id = (int) $this->request->get['manufacturer_id'];
         $this->data['manufacturer_id'] = $manufacturer_id;
 
         if ($manufacturer_id && $this->request->is_GET()) {
@@ -313,7 +340,7 @@ class ControllerPagesCatalogManufacturer extends AController
                 '&manufacturer_id='.$manufacturer_id
             );
 
-            if($manufacturer_id) {
+            if ($manufacturer_id) {
                 $this->data['active'] = 'general';
                 //load tabs controller
                 $tabs_obj = $this->dispatch('pages/catalog/manufacturer_tabs', [$this->data]);
@@ -376,15 +403,22 @@ class ControllerPagesCatalogManufacturer extends AController
             'attr'  => 'type="button"',
             'style' => 'btn btn-info',
         ]);
-        $this->data['generate_seo_url'] = $this->html->getSecureURL('common/common/getseokeyword',
-            '&object_key_name=manufacturer_id&id='.$manufacturer_id);
+        $this->data['generate_seo_url'] = $this->html->getSecureURL(
+            'common/common/getseokeyword',
+            '&object_key_name=manufacturer_id&id='.$manufacturer_id
+        );
 
         $this->data['form']['fields']['general']['keyword'] = $form->getFieldHtml([
             'type'     => 'input',
             'name'     => 'keyword',
             'value'    => $this->data['keyword'],
-            'attr'     => ' gen-value="'.H::SEOEncode($this->data['category_description']['name']).'" ',
-            'help_url' => $this->gen_help_url('seo_keyword'),
+            'attr'     => ' gen-value="'
+                .H::SEOEncode(
+                    $this->data['category_description']['name']
+                ).'" ',
+            'help_url' => $this->gen_help_url(
+                'seo_keyword'
+            ),
         ]);
 
         $this->data['form']['fields']['general']['sort_order'] = $form->getFieldHtml([
@@ -405,13 +439,15 @@ class ControllerPagesCatalogManufacturer extends AController
         }
 
         if ($viewport_mode != 'modal') {
-            $this->addChild('responses/common/resource_library/get_resources_html', 'resources_html',
-                'responses/common/resource_library_scripts.tpl');
+            $this->addChild(
+                'responses/common/resource_library/get_resources_html', 'resources_html',
+                'responses/common/resource_library_scripts.tpl'
+            );
             $resources_scripts = $this->dispatch(
                 'responses/common/resource_library/get_resources_scripts',
                 [
                     'object_name' => 'manufacturers',
-                    'object_id'   => $manufacturer_id,
+                    'object_id'   => (int)$manufacturer_id,
                     'types'       => ['image', 'audio', 'video', 'pdf'],
                 ]
             );
@@ -434,8 +470,10 @@ class ControllerPagesCatalogManufacturer extends AController
         if (mb_strlen($this->request->post['name']) < 2 || mb_strlen($this->request->post['name']) > 64) {
             $this->error['warning'][] = $this->language->get('error_name');
         }
-        if (($error_text = $this->html->isSEOkeywordExists('manufacturer_id='.$this->request->get['manufacturer_id'],
-            $this->request->post['keyword']))) {
+        if (($error_text = $this->html->isSEOkeywordExists(
+            'manufacturer_id='.$this->request->get['manufacturer_id'],
+            $this->request->post['keyword']
+        ))) {
             $this->error['warning'][] = $error_text;
         }
 

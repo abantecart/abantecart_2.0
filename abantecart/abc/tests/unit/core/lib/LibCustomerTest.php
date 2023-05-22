@@ -1,10 +1,12 @@
 <?php
-namespace abc\tests\unit;
+namespace Tests\unit\core\lib;
 
 use abc\core\engine\Registry;
 use abc\core\lib\ACustomer;
 use abc\models\customer\Customer;
+use Exception;
 use Illuminate\Validation\ValidationException;
+use Tests\unit\ATestCase;
 
 /**
  * Class LibCustomerTest
@@ -33,7 +35,7 @@ class LibCustomerTest extends ATestCase{
         ];
         $errors = ACustomer::validateRegistrationData( $data );
 
-        $this->assertEquals(12, count($errors));
+        $this->assertCount(12, $errors);
 
         $errors = ACustomer::validateSubscribeData(
             [
@@ -47,7 +49,7 @@ class LibCustomerTest extends ATestCase{
             ]
         );
 
-        $this->assertEquals(6, count($errors));
+        $this->assertCount(6, $errors);
 
         $errors = ACustomer::validateSubscribeData(
             [
@@ -61,15 +63,18 @@ class LibCustomerTest extends ATestCase{
             ]
         );
 
-        $this->assertEquals(0, count($errors));
+        $this->assertCount(0, $errors);
     }
 
     public function testCreateCustomer()
     {
         $loginname = 'test_loginname';
-        $password = 'ytytytest';
+        $password = 'super-secret-password';
+        $email = 'test_tmp@abantecart.com';
 
-        Customer::whereIn('loginname', ['test_subscriber', $loginname])->forceDelete();
+        Customer::whereIn('loginname', ['test_subscriber', $loginname])
+                ->orWhere('email',$email)
+                ->forceDelete();
 
         //create subscriber account with the same email to check if it will be deleted
         $data = [
@@ -77,7 +82,7 @@ class LibCustomerTest extends ATestCase{
             'loginname' => 'test_subscriber',
             'firstname' => 'test firstname',
             'lastname' => 'test lastname',
-            'email'    => 'test_tmp@abantecart.com',
+            'email'    => $email,
             'telephone' => '1234567890',
             'fax' => '0987654321',
             'password' => 'tesdsdst',
@@ -101,7 +106,7 @@ class LibCustomerTest extends ATestCase{
         }catch(ValidationException $e){
             var_dump($e->errors());
             exit;
-        }catch(\Exception $e){
+        }catch(Exception $e){
             var_dump($e->getMessage());
             exit;
         }
@@ -111,7 +116,7 @@ class LibCustomerTest extends ATestCase{
             'loginname' => $loginname,
             'firstname' => 'test firstname',
             'lastname' => 'test lastname',
-            'email'    => 'test_tmp@abantecart.com',
+            'email'    => $email,
             'telephone' => '1234567890',
             'fax' => '0987654321',
             'password' => $password,
@@ -137,12 +142,12 @@ class LibCustomerTest extends ATestCase{
         }catch(ValidationException $e){
             var_dump($e->errors());
             exit;
-        }catch(\Exception $e){
+        }catch(Exception $e){
             var_dump($e->getMessage());
             exit;
         }
 
-        $result = Customer::where('email', '=', 'test_tmp@abantecart.com')->get();
+        $result = Customer::where('email', '=', $email)->get();
         $this::assertEquals(1, $result->count());
 
         //check login
@@ -154,7 +159,7 @@ class LibCustomerTest extends ATestCase{
         $result = $customer->login($loginname, 'test-non-exists-password');
         $this::assertEquals(false, $result);
 
-        //this destroy must remove both newly created customers
+        //destroy must remove newly created customer
         Customer::destroy($customer_id);
     }
 }

@@ -1,10 +1,24 @@
 <?php
-
+/**
+ * AbanteCart, Ideal Open Source Ecommerce Solution
+ * http://www.abantecart.com
+ *
+ * Copyright 2011-2023 Belavier Commerce LLC
+ *
+ * This source file is subject to Open Software License (OSL 3.0)
+ * License details is bundled with this package in the file LICENSE.txt.
+ * It is also available at this URL:
+ * <http://www.opensource.org/licenses/OSL-3.0>
+ *
+ * UPGRADE NOTE:
+ * Do not edit or add to this file if you wish to upgrade AbanteCart to newer
+ * versions in the future. If you wish to customize AbanteCart for your
+ * needs please refer to http://www.abantecart.com for more information.
+ */
 namespace abc\models\layout;
 
 use abc\models\BaseModel;
 use abc\models\system\Form;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class PagesForm
@@ -15,7 +29,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property Form $form
  * @property Page $page
  *
- * @package abc\models
  */
 class PagesForm extends BaseModel
 {
@@ -30,6 +43,30 @@ class PagesForm extends BaseModel
     protected $casts = [
         'page_id' => 'int',
         'form_id' => 'int',
+    ];
+
+    protected $rules = [
+        /** @see validate() */
+        'page_id' => [
+            'checks'   => [
+                'int',
+                'required',
+                'sometimes'
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'Page ID is empty!'],
+            ]
+        ],
+        'form_id' => [
+            'checks'   => [
+                'int',
+                'required',
+                'sometimes'
+            ],
+            'messages' => [
+                '*' => ['default_text' => 'Form ID is empty!'],
+            ]
+        ],
     ];
 
     public function form()

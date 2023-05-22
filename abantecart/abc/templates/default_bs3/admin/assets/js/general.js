@@ -344,15 +344,15 @@ jQuery(document).ready(function() {
 	});
 
 	//check if ads blocking is enabled in user browser
-	var div = $('<div>').attr('class', 'afs_ads').html('&nbsp;');
-	$('body').prepend(div);
-	setTimeout(function(){
-		if(!$(".afs_ads").is(':visible')) {
-			warning_alert('Ads block is enabled in your browser. Some AbanteCart administration features might not function as they will be blocked. Disable ads blocking in your browser.');
-		} else {
-			$(".afs_ads").remove();
-		}
-	}, 500);
+	// var div = $('<div>').attr('class', 'afs_ads').html('&nbsp;');
+	// $('body').prepend(div);
+	// setTimeout(function(){
+	// 	if(!$(".afs_ads").is(':visible')) {
+	// 		warning_alert('Ads block is enabled in your browser. Some AbanteCart administration features might not function as they will be blocked. Disable ads blocking in your browser.');
+	// 	} else {
+	// 		$(".afs_ads").remove();
+	// 	}
+	// }, 500);
 
 });
 
@@ -398,7 +398,7 @@ var statusMarker = function($obj) {
 	var $input = $obj.find('input.status_switch');
 	if(!$input.length){
 		//check generic marker based on input name status
-		$input = $obj.find('input[name=status]');
+		$input = $obj.find('input[name=status]').not('.ui-jqgrid-view input[name=status]');
 	}
 	if($input.length > 0){
 		if ($input.val() == 0) {
@@ -572,7 +572,7 @@ $(document).ajaxError(function (e, jqXHR, settings, exception) {
 			for (var k in errlist) {
 				if (errlist[k].length > 0) {
 					//show error and prepend the title of the error
-					gl_error_alert(err.error_title+' '+errlist[k], false);
+					gl_error_alert((err.error_title ?? '') + ' ' + errlist[k], false);
 				}
 			}
 			var sent_params = $.parseParams(settings.data);
@@ -1021,7 +1021,7 @@ function do_seqAjax(ajaxes, attempts_count){
 						$.xhrPool.splice(i, 1);
 					}
 					if( text_status!='abort' ) {
-						do_ajax();
+						setTimeout(do_ajax, 2000);
 					}
 				}
 			});

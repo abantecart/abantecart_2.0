@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -20,7 +20,7 @@
 
 namespace abc\core\engine;
 
-use abc\core\cache\ACache;
+use abc\core\lib\AbcCache;
 use abc\core\lib\ACart;
 use abc\core\lib\AConfig;
 use abc\core\lib\AConfigManager;
@@ -28,7 +28,9 @@ use abc\core\lib\ACurrency;
 use abc\core\lib\ACustomer;
 use abc\core\lib\ADataEncryption;
 use abc\core\lib\ADB;
+use abc\core\lib\ADocument;
 use abc\core\lib\ADownload;
+use abc\core\lib\AExtensionManager;
 use abc\core\lib\AIM;
 use abc\core\lib\AIMManager;
 use abc\core\lib\ALanguageManager;
@@ -36,8 +38,16 @@ use abc\core\lib\ALog;
 use abc\core\lib\AMessage;
 use abc\core\lib\AOrderStatus;
 use abc\core\lib\ARequest;
+use abc\core\lib\AResponse;
 use abc\core\lib\ASession;
+use abc\core\lib\ATax;
 use abc\core\lib\AUser;
+use abc\core\lib\CheckOut;
+use abc\core\lib\CSRFToken;
+use abc\models\admin\ModelLocalisationCountry;
+use abc\models\admin\ModelLocalisationLanguageDefinitions;
+use abc\models\admin\ModelSettingSetting;
+use abc\models\admin\ModelToolOnlineNow;
 
 /**
  * Class Registry
@@ -50,6 +60,7 @@ use abc\core\lib\AUser;
  * @method static AIM|AIMManager im()
  * @method static AConfig|AConfigManager config()
  * @method static ARequest request()
+ * @method static AResponse response()
  * @method static ASession session()
  * @method static ALoader load()
  * @method static ExtensionsApi extensions()
@@ -58,9 +69,11 @@ use abc\core\lib\AUser;
  * @method static AHtml html()
  * @method static AUser user()
  * @method static ACurrency currency()
+ * @method static ATax tax()
  * @method static ADownload download()
- * @method static ACache cache()
+ * @method static AbcCache cache()
  * @method static AOrderStatus order_status()
+ * @method static CheckOut checkout()
  * @method static AMessage messages()
  */
 final class Registry
@@ -90,11 +103,11 @@ final class Registry
     /**
      * @param $key string
      *
-     * @return \abc\core\lib\CSRFToken|\abc\core\lib\ARequest|ALoader|\abc\core\lib\ADocument|\abc\core\lib\ADB|\abc\core\lib\AConfig|AHtml|ExtensionsApi|\abc\core\lib\AExtensionManager|\abc\core\lib\ALanguageManager|\abc\core\lib\ASession|\abc\core\cache\ACache|\abc\core\lib\AMessage|\abc\core\lib\ALog|\abc\core\lib\AResponse|\abc\core\lib\AUser|ARouter|\abc\core\lib\ACurrency|\abc\models\admin\ModelLocalisationLanguageDefinitions|\abc\models\admin\ModelLocalisationCountry|\abc\models\admin\ModelSettingSetting|\abc\models\admin\ModelToolOnlineNow|\abc\core\lib\ADataEncryption|\abc\core\lib\ADownload|\abc\core\lib\AOrderStatus|\abc\core\lib\AIMManager|\abc\core\lib\ACustomer
+     * @return mixed|CSRFToken|ARequest|ALoader|ADocument|ADB|AConfig|AHtml|ExtensionsApi|AExtensionManager|ALanguageManager|ASession|AbcCache|AMessage|ALog|AResponse|AUser|ARouter|ACurrency|ModelLocalisationLanguageDefinitions|ModelLocalisationCountry|ModelSettingSetting|ModelToolOnlineNow|ADataEncryption|ADownload|AOrderStatus|AIMManager|ACustomer
      */
     public function get($key)
     {
-        return (isset($this->data[$key]) ? $this->data[$key] : null);
+        return ($this->data[$key] ?? null);
     }
 
     /**
@@ -118,8 +131,8 @@ final class Registry
 
     /**
      * Return objects by static call
-     * @param $name
-     *
+     * @param string $name
+     * @param $arguments
      * @return mixed - object or null
      */
     public static function __callStatic($name, $arguments)

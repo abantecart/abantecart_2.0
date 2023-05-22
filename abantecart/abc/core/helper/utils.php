@@ -1,9 +1,10 @@
-<?php
+<?php /** @noinspection SqlResolve */
+
 /**
  * AbanteCart, Ideal Open Source Ecommerce Solution
  * http://www.abantecart.com
  *
- * Copyright 2011-2018 Belavier Commerce LLC
+ * Copyright 2011-2022 Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
@@ -22,7 +23,6 @@ use abc\core\ABC;
 use abc\core\engine\ALanguage;
 use abc\core\engine\Registry;
 use abc\core\lib\AConfig;
-use abc\core\lib\ADataEncryption;
 use abc\core\lib\AEncryption;
 use abc\core\lib\AError;
 use abc\core\lib\AException;
@@ -32,13 +32,23 @@ use abc\core\lib\ASession;
 use abc\core\lib\Atargz;
 use abc\core\lib\AWarning;
 use abc\models\order\Order;
+use abc\models\QueryBuilder;
 use DateTime;
 use DOMDocument;
+use DOMElement;
+use DOMException;
+use DOMNode;
 use DOMXPath;
+use Error;
 use Exception;
+use Illuminate\Database\Connection;
 use Illuminate\Events\Dispatcher;
 use Illuminate\Support\Collection;
 use PharData;
+use Psr\SimpleCache\InvalidArgumentException;
+use ReflectionClass;
+use ReflectionException;
+use SimpleXmlElement;
 use wapmorgan\UnifiedArchive\UnifiedArchive;
 
 
@@ -61,7 +71,7 @@ class AHelperUtils extends AHelper
     }
 
     /*
-     * prepare prices and other floats for database writing,, based on locale settings of number formatting
+     * prepare prices and other floats for database writing, based on locale settings of number formatting
      * */
     /**
      * @param string|float $value
@@ -76,7 +86,7 @@ class AHelperUtils extends AHelper
             $value = str_replace($decimal_point, '.', $value);
         }
 
-        return (float)preg_replace('/[^0-9\-\.]/', '', $value);
+        return (float)preg_replace('/[^\d\-.]/', '', $value);
     }
 
     /*
@@ -107,31 +117,32 @@ class AHelperUtils extends AHelper
     /**
      * format money float based on locale
      *
-     * @since 1.1.8
-     *
      * @param $value
-     * @param $mode (no_round => show number with real decimal, hide_zero_decimal => remove zeros from decimal part)
+     * @param string $mode (no_round => show number with real decimal, hide_zero_decimal => remove zeros from decimal part)
      *
      * @return string
+     * @throws AException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
+     * @since 1.1.8
      */
 
     public static function moneyDisplayFormat($value, $mode = 'no_round')
     {
-        $registry = Registry::getInstance();
 
-        $decimal_point = $registry->get('language')->get('decimal_point');
+        $decimal_point = Registry::language()->get('decimal_point');
         $decimal_point = !$decimal_point ? '.' : $decimal_point;
 
-        $thousand_point = $registry->get('language')->get('thousand_point');
+        $thousand_point = Registry::language()->get('thousand_point');
         $thousand_point = !$thousand_point ? '' : $thousand_point;
 
-        $currency = $registry->get('currency')->getCurrency();
+        $currency = Registry::currency()->getCurrency();
         $decimal_place = (int)$currency['decimal_place'];
         $decimal_place = !$decimal_place ? 2 : $decimal_place;
 
         // detect if need to show raw number for decimal points
         // In admin, this is regardless of currency format. Need to show real number
-        if ($mode == 'no_round' && $value != round($value, $decimal_place)) {
+        if ($mode == 'no_round' && $value != round((float)$value, $decimal_place)) {
             //count if we have more decimal than currency configuration
             $decim_portion = explode('.', $value);
             if ($decimal_place < strlen($decim_portion[1])) {
@@ -140,7 +151,7 @@ class AHelperUtils extends AHelper
         }
 
         //if only zeros after decimal point - hide zeros
-        if ($mode == 'hide_zero_decimal' && round($value) == round($value, $decimal_place)) {
+        if ($mode == 'hide_zero_decimal' && round((float)$value) == round((float)$value, $decimal_place)) {
             $decimal_place = 0;
         }
 
@@ -204,7 +215,7 @@ class AHelperUtils extends AHelper
     }
 
     /**
-     * Function convert input text to alpha numeric string for SEO URL use
+     * Function convert input text to alphanumeric string for SEO URL use
      * if optional parameter object_key_name
      * (product, category, content etc) given function will return unique SEO keyword
      *
@@ -225,7 +236,7 @@ class AHelperUtils extends AHelper
             return $seo_key;
         } else {
             //if $object_key_name given - check is seo-key unique and return unique
-            return self::getUniqueSeoKeyword($seo_key, $object_key_name, $object_id);
+            return static::getUniqueSeoKeyword($seo_key, $object_key_name, $object_id);
         }
     }
 
@@ -259,7 +270,7 @@ class AHelperUtils extends AHelper
 
             $i = 0;
             while (in_array($seo_key, $keywords) && $i < 20) {
-                $seo_key = $seo_key.ABC::env('SEO_URL_SEPARATOR').($object_id ? $object_id : $i);
+                $seo_key = $seo_key.ABC::env('SEO_URL_SEPARATOR').($object_id ? : $i);
                 $i++;
             }
         }
@@ -268,7 +279,7 @@ class AHelperUtils extends AHelper
     }
 
     /**
-     * Echo array with readable formal. Useful in debugging of array data.
+     * Echo array with readable format. Useful in debugging of array data.
      *
      * @param array $array_data
      */
@@ -302,7 +313,7 @@ class AHelperUtils extends AHelper
 
         foreach (glob($dir.DS."*") as $f) {
             if (is_dir($f)) { // if is directory
-                $result = array_merge($result, self::getFilesInDir($f, $file_ext));
+                $result = array_merge($result, static::getFilesInDir($f, $file_ext));
             } else {
                 if ($file_ext && substr($f, -3) != $file_ext) {
                     continue;
@@ -333,9 +344,7 @@ class AHelperUtils extends AHelper
                 }
             }
         }
-        $result = implode(DS, $to);
-
-        return $result;
+        return implode(DS, $to);
     }
 
     /**
@@ -361,7 +370,7 @@ class AHelperUtils extends AHelper
 
         $file_dir = dirname($dest_file);
         if ($file_dir !== '') {
-            $output = self::MakeNestedDirs($file_dir);
+            $output = static::MakeNestedDirs($file_dir);
         }
         //copy file
         if ($output['result']) {
@@ -422,7 +431,7 @@ class AHelperUtils extends AHelper
      */
     public static function mkDir($dir_full_path, $perms = 0775)
     {
-        $result = self::MakeNestedDirs($dir_full_path, $perms);
+        $result = static::MakeNestedDirs($dir_full_path, $perms);
         return $result['result'];
     }
 
@@ -440,21 +449,22 @@ class AHelperUtils extends AHelper
 
         if (is_dir($dir)) {
             $objects = scandir($dir);
-            foreach ($objects as $obj) {
-                if ($obj != "." && $obj != "..") {
-                    @chmod($dir.DS.$obj, 0777);
-                    $err = is_dir($dir.DS.$obj) ? self::RemoveDirRecursively($dir.DS.$obj) : @unlink($dir.DS.$obj);
-                    if (!$err) {
-                        $error_text = __METHOD__.": Error: Can't to delete file or directory: '".$dir.DS.$obj."'.";
+            if ($objects) {
+                foreach ($objects as $obj) {
+                    if ($obj != "." && $obj != "..") {
+                        @chmod($dir . DS . $obj, 0777);
+                        $err = is_dir($dir . DS . $obj) ? static::RemoveDirRecursively($dir . DS . $obj) : @unlink($dir . DS . $obj);
+                        if (!$err) {
+                            $error_text = __METHOD__ . ": Error: Can't to delete file or directory: '" . $dir . DS . $obj . "'.";
 
-                        return [
-                            'result'  => false,
-                            'message' => $error_text,
-                        ];
+                            return [
+                                'result'  => false,
+                                'message' => $error_text,
+                            ];
+                        }
                     }
                 }
             }
-            reset($objects);
             $result = @rmdir($dir);
 
             return ['result' => $result];
@@ -474,12 +484,12 @@ class AHelperUtils extends AHelper
      * @param string $version2
      * @param string $operator
      *
-     * @return bool|mixed
+     * @return bool
      */
     public static function versionCompare($version1, $version2, $operator)
     {
-        $version1 = explode('.', preg_replace('/[^0-9\.]/', '', $version1));
-        $version2 = explode('.', preg_replace('/[^0-9\.]/', '', $version2));
+        $version1 = explode('.', preg_replace('/[^\d.]/', '', $version1));
+        $version2 = explode('.', preg_replace('/[^\d.]/', '', $version2));
         $i = 0;
         while ($i < 3) {
             if (isset($version1[$i])) {
@@ -490,7 +500,7 @@ class AHelperUtils extends AHelper
             if (isset($version2[$i])) {
                 $version2[$i] = (int)$version2[$i];
             } else {
-                $version2[$i] = ($i == 2 && isset($version1[$i])) ? (int)$version1[$i] : 99;;
+                $version2[$i] = ($i == 2 && isset($version1[$i])) ? (int)$version1[$i] : 99;
             }
             $i++;
         }
@@ -586,9 +596,7 @@ class AHelperUtils extends AHelper
     public static function dateISO2Int($string_date)
     {
         $string_date = trim($string_date);
-        $is_datetime = strlen($string_date) > 10 ? true : false;
-
-        return self::dateFromFormat($string_date, ($is_datetime ? 'Y-m-d H:i:s' : 'Y-m-d'));
+        return  strtotime($string_date);
     }
 
     /**
@@ -596,7 +604,7 @@ class AHelperUtils extends AHelper
      *
      * @param int $int_date
      *
-     * @return false|string
+     * @return string
      */
     public static function dateInt2ISO($int_date)
     {
@@ -611,18 +619,20 @@ class AHelperUtils extends AHelper
      * @param string $string_date
      * @param string $format
      *
-     * @return false|string
+     * @return string
+     * @throws AException
+     * @throws ReflectionException
+     * @throws InvalidArgumentException
      */
     public static function dateDisplay2ISO($string_date, $format = '')
     {
 
-        if (empty($format)) {
-            $registry = Registry::getInstance();
-            $format = $registry->get('language')->get('date_format_short');
+        if (!$format) {
+            $format = Registry::language()->get('date_format_short');
         }
 
         if ($string_date) {
-            return self::dateInt2ISO(self::dateFromFormat($string_date, $format));
+            return static::dateInt2ISO(static::dateFromFormat($string_date, $format));
         } else {
             return '';
         }
@@ -636,7 +646,10 @@ class AHelperUtils extends AHelper
      * @param string $iso_date
      * @param string $format
      *
-     * @return false|string
+     * @return string
+     * @throws AException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
      */
     public static function dateISO2Display($iso_date, $format = '')
     {
@@ -647,7 +660,7 @@ class AHelperUtils extends AHelper
         }
         $empties = ['0000-00-00', '0000-00-00 00:00:00', '1970-01-01', '1970-01-01 00:00:00'];
         if ($iso_date && !in_array($iso_date, $empties)) {
-            return date($format, self::dateISO2Int($iso_date));
+            return date($format, static::dateISO2Int($iso_date));
         } else {
             return '';
         }
@@ -659,25 +672,22 @@ class AHelperUtils extends AHelper
      * Param: int date, format based on PHP date function (optional)
      * Default format is taken from current language date_format_short setting
      *
-     * @param int    $int_date
+     * @param int $int_date
      * @param string $format
      *
-     * @return false|string
+     * @return string
+     * @throws AException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
      */
     public static function dateInt2Display($int_date, $format = '')
     {
 
-        if (empty($format)) {
-            $registry = Registry::getInstance();
-            $format = $registry->get('language')->get('date_format_short');
+        if (!$format) {
+            $format = Registry::language()->get('date_format_short');
         }
 
-        if ($int_date) {
-            return date($format, $int_date);
-        } else {
-            return '';
-        }
-
+        return $int_date ? date($format, $int_date) : '';
     }
 
     /**
@@ -687,21 +697,22 @@ class AHelperUtils extends AHelper
      *
      * @param string $format
      *
-     * @return false|string
+     * @return string
+     * @throws AException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
      */
     public static function dateNowDisplay($format = '')
     {
-        if (empty($format)) {
-            $registry = Registry::getInstance();
-            $format = $registry->get('language')->get('date_format_short');
+        if (!$format) {
+            $format = Registry::language()->get('date_format_short');
         }
-
         return date($format);
     }
 
     /**
-     * @param             $string_date
-     * @param             $date_format
+     * @param string $string_date
+     * @param string $date_format
      * @param null|string $timezone
      *
      * @return int|null
@@ -713,59 +724,17 @@ class AHelperUtils extends AHelper
         if (empty($date_format)) {
             return null;
         }
-        $string_date = empty($string_date) ? date($date_format) : $string_date;
+        $string_date = $string_date ?: date($date_format);
 
         $iso_date = DateTime::createFromFormat($date_format, $string_date, $timezone);
-        $result = $iso_date ? $iso_date->getTimestamp() : null;
-
-        return $result;
-    }
-
-    /**TODO: is really needed??
-     *
-     * @param $date
-     * @param $format
-     *
-     * @return array|bool
-     */
-    public static function strptime($date, $format)
-    {
-        if (function_exists("\strptime")) {
-            return strptime($date, $format);
-        }
-
-        //strptime function with solution for windows
-        $masks = [
-            '%d' => '(?P<d>[0-9]{2})',
-            '%m' => '(?P<m>[0-9]{2})',
-            '%Y' => '(?P<Y>[0-9]{4})',
-            '%H' => '(?P<H>[0-9]{2})',
-            '%M' => '(?P<M>[0-9]{2})',
-            '%S' => '(?P<S>[0-9]{2})',
-        ];
-
-        $regexp = "#".strtr(preg_quote($format), $masks)."#";
-        if (!preg_match($regexp, $date, $out)) {
-            return false;
-        }
-
-        $ret = [
-            "tm_sec"  => (int)$out['S'],
-            "tm_min"  => (int)$out['M'],
-            "tm_hour" => (int)$out['H'],
-            "tm_mday" => (int)$out['d'],
-            "tm_mon"  => $out['m'] ? $out['m'] - 1 : 0,
-            "tm_year" => $out['Y'] > 1900 ? $out['Y'] - 1900 : 0,
-        ];
-
-        return $ret;
+        return $iso_date ? $iso_date->getTimestamp() : null;
     }
 
     /**
      * @param string $extension_txt_id
      *
-     * @return \SimpleXMLElement | false
-     * @throws \ReflectionException
+     * @return SimpleXMLElement | false
+     * @throws DOMException
      */
     public static function getExtensionConfigXml($extension_txt_id)
     {
@@ -781,9 +750,7 @@ class AHelperUtils extends AHelper
         if (!is_file($filename) || !is_readable($filename)) {
             $ext_configs = false;
         } else {
-            /**
-             * @var $ext_configs \SimpleXMLElement|false
-             */
+            /** @var SimpleXMLElement|false $ext_configs */
             $ext_configs = @simplexml_load_file($filename);
         }
 
@@ -801,30 +768,25 @@ class AHelperUtils extends AHelper
 
         /**
          * DOMDocument of extension config
-         *
-         * @var DOMDocument $base_dom
          */
         $base_dom = new DOMDocument();
         $base_dom->load($filename);
         $xpath = new DOMXpath($base_dom);
-        /**
-         * @var  \DOMNodeList $firstNode
-         */
         $firstNode = $base_dom->getElementsByTagName('settings');
         // check is "settings" entity exists
         if (is_null($firstNode->item(0))) {
             /**
-             * @var  \DOMNode $node
+             * @var  DOMNode $node
              */
             $node = $base_dom->createElement("settings");
             $base_dom->appendChild($node);
         } else {
             /**
-             * @var  \DOMElement $fst
+             * @var  DOMElement $fst
              */
             $fst = $base_dom->getElementsByTagName('settings')->item(0);
             /**
-             * @var  \DOMNode $firstNode
+             * @var  DOMNode $firstNode
              */
             $firstNode = $fst->getElementsByTagName('item')->item(0);
         }
@@ -832,11 +794,11 @@ class AHelperUtils extends AHelper
         $xml_files = [
             'top'    => [
                 ABC::env('DIR_CORE').'extension'.DS.'default'.DS.'config_top.xml',
-                ABC::env('DIR_CORE').'extension'.DS.(string)$ext_configs->type.DS.'config_top.xml',
+                ABC::env('DIR_CORE').'extension'.DS.$ext_configs->type.DS.'config_top.xml',
             ],
             'bottom' => [
                 ABC::env('DIR_CORE').'extension'.DS.'default'.DS.'config_bottom.xml',
-                ABC::env('DIR_CORE').'extension'.DS.(string)$ext_configs->type.DS.'config_bottom.xml',
+                ABC::env('DIR_CORE').'extension'.DS.$ext_configs->type.DS.'config_bottom.xml',
             ],
         ];
 
@@ -855,7 +817,7 @@ class AHelperUtils extends AHelper
                     // loop by all settings items
                     foreach ($additional_config->settings->item as $setting_item) {
                         /**
-                         * @var  \SimpleXmlElement $setting_item
+                         * @var  SimpleXmlElement $setting_item
                          */
                         $attr = $setting_item->attributes();
                         $item_id = $extension_txt_id.'_'.$attr['id'];
@@ -906,14 +868,17 @@ class AHelperUtils extends AHelper
      * NOTE: do not try to save into session any data after this function call!
      * Also function returns false on POST-requests!
      *
-     * @param       $user_id int - control panel user_id
-     * @param array $data    data for writing into new session storage
+     * @param int $user_id - control panel user_id
+     * @param array $data data for writing into new session storage
      *
      * @return bool
+     * @throws AException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
      */
     public static function startStorefrontSession($user_id, $data = [])
     {
-        //NOTE: do not allow create sf-session via POST-request.
+        //NOTE: do not allow to create sf-session via POST-request.
         // Related to language-switcher and enabled maintenance mode(see usages)
         if ($_SERVER['REQUEST_METHOD'] != 'GET') {
             return false;
@@ -923,10 +888,13 @@ class AHelperUtils extends AHelper
         if (!$data['merchant']) {
             return false;
         }
+        unset(Registry::session()->data['curl_handler']);
         session_write_close();
-        $session = new ASession(ABC::env('UNIQUE_ID')
-            ? 'AC_SF_'.strtoupper(substr(ABC::env('UNIQUE_ID'), 0, 10))
-            : 'AC_SF_PHPSESSID'
+
+        $session = new ASession(
+            ABC::env('UNIQUE_ID')
+                ? 'AC_SF_' . strtoupper(substr(ABC::env('UNIQUE_ID'), 0, 10))
+                : 'AC_SF_PHPSESSID'
         );
         foreach ($data as $k => $v) {
             $session->data[$k] = $v;
@@ -1029,28 +997,6 @@ class AHelperUtils extends AHelper
         return false;
     }
 
-    /**
-     * Get either a Gravatar URL or complete image tag for a specified email address.
-     *
-     * @param string     $email The email address
-     * @param int|string $s     Size in pixels, defaults to 80px [ 1 - 2048 ]
-     * @param string     $d     Default image set to use [ 404 | mm | identicon | monsterid | wavatar ]
-     * @param string     $r     Maximum rating (inclusive) [ g | pg | r | x ]
-     *
-     * @return String containing either just a URL or a complete image tag
-     */
-    public static function getGravatar($email = '', $s = 80, $d = 'mm', $r = 'g')
-    {
-        if (empty($email)) {
-            return null;
-        }
-        $url = 'https://www.gravatar.com/avatar/';
-        $url .= md5(strtolower(trim($email)));
-        $url .= "?s=".$s."&d=".$d."&r=".$r;
-
-        return $url;
-    }
-
     public static function compressTarGZ($tar_filename, $tar_dir, $compress_level = 5)
     {
         if (!$tar_filename || !$tar_dir) {
@@ -1082,16 +1028,16 @@ class AHelperUtils extends AHelper
                 $a->buildFromDirectory($tar_dir);
                 // remove tar-file after zipping
                 if (file_exists($tar)) {
-                    self::gzip($tar, $compress_level);
+                    static::gzip($tar, $compress_level);
                     unlink($tar);
                 }
-            } catch (\PharException $e) {
+            } catch (Exception $e) {
                 $error = new AError('Tar GZ compressing error: '.$e->getMessage());
                 $error->toLog()->toDebug();
                 $exit_code = 1;
             }
         } else {
-            //class pharData does not exists.
+            //class pharData do not exist.
             //set mark to use targz-lib
             $exit_code = 1;
         }
@@ -1120,8 +1066,8 @@ class AHelperUtils extends AHelper
             return false;
         }
 
-        if ($dst == false) {
-            $dst = $src.".gz";
+        if (!$dst) {
+            $dst = $src . ".gz";
         }
         if (file_exists($src)) {
             $src_handle = fopen($src, "r");
@@ -1214,11 +1160,13 @@ class AHelperUtils extends AHelper
     /**
      * @param string $filename
      *
-     * @return mixed|string
+     * @return string
      */
-    public static function getMimeType($filename)
+    public static function getMimeType(string $filename): string
     {
-        $filename = (string)$filename;
+        if (!$filename) {
+            return false;
+        }
         $mime_types = [
             'txt'  => 'text/plain',
             'htm'  => 'text/html',
@@ -1278,15 +1226,13 @@ class AHelperUtils extends AHelper
         $pieces = explode('.', $filename);
         $ext = strtolower(array_pop($pieces));
 
-        if (self::has_value($mime_types[$ext])) {
+        if (static::has_value($mime_types[$ext])) {
             return $mime_types[$ext];
         } elseif (function_exists('finfo_open')) {
             $finfo = finfo_open(FILEINFO_MIME);
             $mimetype = finfo_file($finfo, $filename);
             finfo_close($finfo);
-            $mimetype = !$mimetype ? 'application/octet-stream' : $mimetype;
-
-            return $mimetype;
+            return $mimetype ? : 'application/octet-stream';
         } else {
             return 'application/octet-stream';
         }
@@ -1424,20 +1370,20 @@ class AHelperUtils extends AHelper
         if (empty($dir)) {
             return false;
         } else {
-            if (self::is_writable_dir($dir)) {
+            if (static::is_writable_dir($dir)) {
                 return true;
             } else {
                 if (is_dir($dir)) {
                     //Try to make directory writable
                     chmod($dir, 0777);
 
-                    return self::is_writable_dir($dir);
+                    return static::is_writable_dir($dir);
                 } else {
                     //Try to create directory
                     mkdir($dir, 0777);
                     chmod($dir, 0777);
 
-                    return self::is_writable_dir($dir);
+                    return static::is_writable_dir($dir);
                 }
             }
         }
@@ -1455,13 +1401,13 @@ class AHelperUtils extends AHelper
         if (empty($path)) {
             return false;
         } else {
-            if (self::is_writable_dir($path)) {
+            if (static::is_writable_dir($path)) {
                 return true;
             } else {
                 //recurse if parent directory does not exists
                 $parent = dirname($path);
                 if (strlen($parent) > 1 && !file_exists($parent)) {
-                    self::make_writable_path($parent);
+                    static::make_writable_path($parent);
                 }
                 mkdir($path, 0777, true);
                 chmod($path, 0777);
@@ -1482,9 +1428,34 @@ class AHelperUtils extends AHelper
     public static function human_filesize($bytes, $decimals = 2)
     {
         $sz = 'BKMGTP';
-        $factor = floor((strlen($bytes) - 1) / 3);
+        $factor = (int)floor((strlen($bytes) - 1) / 3);
 
-        return sprintf("%.{$decimals}f", $bytes / pow(1024, $factor)).@$sz[$factor];
+        return sprintf("%.{$decimals}f", $bytes / pow(1024, $factor)) . @$sz[$factor];
+    }
+
+    /**
+     * @param string $val
+     * @return int
+     */
+    public static function bytesFromHumanFilesize($val)
+    {
+        $val = trim($val);
+        if (is_numeric($val)) {
+            return $val;
+        }
+
+        $last = strtolower($val[strlen($val) - 1]);
+        $val = substr($val, 0, -1);
+        switch ($last) {
+            case 'g':
+                $val *= 1024;
+            case 'm':
+                $val *= 1024;
+            case 'k':
+                $val *= 1024;
+        }
+
+        return $val;
     }
 
     /**
@@ -1492,8 +1463,7 @@ class AHelperUtils extends AHelper
      *
      * @param $filename
      *
-     * @return array|bool
-     * @throws \ReflectionException
+     * @return array
      */
     public static function get_image_size($filename)
     {
@@ -1525,7 +1495,7 @@ class AHelperUtils extends AHelper
      * @param int $quality
      *
      * @return string / path to new image
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public static function check_resize_image($orig_image, $new_image, $width, $height, $quality)
     {
@@ -1610,10 +1580,15 @@ class AHelperUtils extends AHelper
             $classes[$default_class_name] = $default_args;
         }
 
+        $log = Registry::getInstance()?->get('log');
+        if(!$log){
+            $log = ABC::getObjectByAlias('ALog');
+        }
+
         foreach ($classes as $class => $arguments) {
             //check if class loaded & try to load file
             if (!class_exists($class)) {
-                $rel_path = self::getFileNameByClass($class);
+                $rel_path = static::getFileNameByClass($class);
                 $abs_path = ABC::env('DIR_ROOT').$rel_path;
 
                 if (is_file($abs_path)) {
@@ -1623,13 +1598,24 @@ class AHelperUtils extends AHelper
 
             if (class_exists($class)) {
                 try {
-                    $reflection = new \ReflectionClass($class);
-                    $instance = $reflection->newInstanceArgs($arguments);
-                } catch (\ReflectionException $e) {
-                    Registry::getInstance()->get('log')->write(
-                        'AHelperUtils Error: '.$e->getMessage().' '.$e->getLine()
-                    );
+                    $reflection = new ReflectionClass($class);
+                    if($reflection->hasMethod('__construct')) {
+                        $r = $reflection->getMethod('__construct');
+                        $params = $r->getParameters();
+                    }else{
+                        //in case when constructor does not have parameters
+                        $params = [];
+                    }
+                    $args = !$params ? [] :  $arguments;
+                    $instance = new $class(...$args);
+                } catch(Error $e){
+                    echo __CLASS__ . ' Error: ' . $e->getMessage() . ' ' . $e->getLine()
+                        . ' (Class: ' . $class . ', args: ' . var_export($arguments, true) . ' )'
+                        . "\n" . $e->getTraceAsString();
+                    exit;
                 }
+            }else{
+                throw new AException('Class '.$class_name.' not found in config/*/classmap.php file', 1000);
             }
 
             if (is_object($instance)) {
@@ -1638,14 +1624,14 @@ class AHelperUtils extends AHelper
         }
 
         if (!$instance) {
-            throw new AException('Class '.$class_name.' not found in config/*.classmap.php file', 1000);
+            throw new AException('Cannot to create instance of class '.$class_name, 1000);
         }
         return $instance;
     }
 
     /**
      * Function returns relative path of class based on full class name.
-     * Example: on "\abc\core\lib\ALanguageManager" will return "/abc/lib/language_manager.php"
+     * Example: on "\abc\core\lib\ALanguageManager" will return "/abc/lib/ALanguageManager.php"
      *
      * @param string $class_name - full class name
      *
@@ -1679,7 +1665,7 @@ class AHelperUtils extends AHelper
 
         //check is archive tar.gz
         if (sizeof($files) == 1 && strtolower(pathinfo($files[0], PATHINFO_EXTENSION)) == 'tar') {
-            $archive->extractNode($dest_directory, '/');
+            $archive->extractFiles($dest_directory, '/');
             $archive = UnifiedArchive::open(dirname($archive_filename).'/'.$files[0]);
             if (is_null($archive)) {
                 //remove destination folder first
@@ -1695,7 +1681,7 @@ class AHelperUtils extends AHelper
                 }
             }
         }
-        return (bool)$archive->extractNode($dest_directory, '/');
+        return (bool)$archive->extractFiles($dest_directory, '/');
     }
 
     /**
@@ -1717,10 +1703,8 @@ class AHelperUtils extends AHelper
                 ],
             ];
         } else {
-            /**
-             * @var $handler JobManager
-             */
-            $handler = self::getInstance($class_name, ['registry' => Registry::getInstance()]);
+            /** @var $handler JobManager */
+            $handler = static::getInstance($class_name, ['registry' => Registry::getInstance()]);
             $result = $handler->addJob($data);
             $output = ['job_id' => $result, 'errors' => $handler->errors];
         }
@@ -1729,7 +1713,7 @@ class AHelperUtils extends AHelper
     }
 
     /**
-     * Function returns array with user_type, user name and user id for database audit log
+     * Function returns array with user_type, username and user id for database audit log
      * This data will be set as database global variables and used by database triggers
      */
     public static function recognizeUser()
@@ -1744,23 +1728,22 @@ class AHelperUtils extends AHelper
                 'user_name' => (function_exists('posix_getpwuid') ? posix_getpwuid($user_id)['name'] : 'system user'),
             ];
         } elseif (ABC::env('IS_ADMIN')) {
-            if (!class_exists(Registry::class) || !Registry::user()) {
+            $user_id = Registry::user()?->getId() ?: Registry::session()->data['user_id'];
+            if (!class_exists(Registry::class) || !$user_id ) {
                 return [];
             }
-            $registry = Registry::getInstance();
-            $user_id = $registry->get('user')->getId();
             $output = [
                 'user_type' => 1,
                 'user_type_name' => 'user',
                 'user_id'   => $user_id,
-                'user_name' => ($user_id ? $registry->get('user')->getUserName() : 'unknown admin'),
+                'user_name' => Registry::user()?->getUserName() ?: 'unknown admin',
             ];
         } else {
             if (!class_exists(Registry::class)) {
                 return [];
             }
-            $user_id = Registry::customer() ? Registry::customer()->getId() : 0;
-            $user_name = Registry::customer() ? Registry::customer()->getLoginName() : 'guest';
+            $user_id = (int)Registry::customer()?->getId();
+            $user_name = Registry::customer()?->getLoginName() ?: 'guest';
             $output = [
                 'user_type' => 2,
                 'user_type_name' => 'customer',
@@ -1783,7 +1766,7 @@ class AHelperUtils extends AHelper
         if (!class_exists(Registry::class)) {
             return [];
         }
-        $user_info = self::recognizeUser();
+        $user_info = static::recognizeUser();
         if (!$user_info || !$user_info['user_name']) {
             return false;
         }
@@ -1806,7 +1789,7 @@ class AHelperUtils extends AHelper
                     $orm::select(
                         $orm::raw("SET @GLOBAL.abc_user_type = '".$user_info['user_type']."';")
                     );
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
 
                 }
                 return true;
@@ -1874,7 +1857,7 @@ class AHelperUtils extends AHelper
         }
         $content = glob(rtrim($directory,DS).DS.'*',GLOB_NOSORT);
 
-        return ($content ? false : true);
+        return !$content;
     }
 
     public static function isCamelCase($className)
@@ -1883,9 +1866,11 @@ class AHelperUtils extends AHelper
     }
 
     /**
-     * Function changes and cleans data base on entity codes, such as language_code, sku etc
+     * Function changes and cleans database on entity codes, such as language_code, sku etc
      *
-     * @param array $data
+     * @param $string
+     * @param int $width
+     * @param bool $addEllipses
      *
      * @return array
      */
@@ -1914,7 +1899,7 @@ class AHelperUtils extends AHelper
         //go deep
         foreach($output as $k => &$item){
             if(!is_array($item)){ continue; }
-            $item = self::prepareDataForImport($item);
+            $item = static::prepareDataForImport($item);
         }
         return $output;
     }*/
@@ -1964,7 +1949,7 @@ class AHelperUtils extends AHelper
     {
         return  sprintf(
             "%08x",
-            abs(crc32(self::getRemoteIP() . $_SERVER['REQUEST_TIME'] . $_SERVER['REMOTE_PORT']))
+            abs(crc32(static::getRemoteIP() . $_SERVER['REQUEST_TIME'] . $_SERVER['REMOTE_PORT']))
         );
     }
 
@@ -1989,18 +1974,15 @@ class AHelperUtils extends AHelper
      * @param mixed $value
      *
      * @return array
-     * @throws \abc\core\lib\AException
+     * @throws AException
      */
     public static function filterByEncryptedField($data, $field, $value)
     {
-        /**
-         * @var ADataEncryption $dcrypt
-         */
         $dcrypt = Registry::dcrypt();
         if (!count($data)) {
             return [];
         }
-        if (!self::has_value($field) || !self::has_value($value)) {
+        if (!static::has_value($field) || !static::has_value($value)) {
             return $data;
         }
         $result_rows = [];
@@ -2019,22 +2001,14 @@ class AHelperUtils extends AHelper
 
     public static function parseOrderToken( $ot )
     {
-        /**
-         * @var ADataEncryption $dcrypt
-         */
         $dcrypt = Registry::dcrypt();
-        /**
-         * @var AConfig $config
-         */
         $config = Registry::config();
         if ( ! $ot || ! $config->get( 'config_guest_checkout' ) ) {
             return [];
         }
 
         //try to decrypt order token
-        /**
-         * @var AEncryption $enc
-         */
+        /** @var AEncryption $enc */
         $enc = ABC::getObjectByAlias('AEncryption', [$config->get('encryption_key')]);
         $decrypted = $enc->decrypt( (string)$ot );
         list( $order_id, $email ) = explode( '::', $decrypted );
@@ -2066,7 +2040,8 @@ class AHelperUtils extends AHelper
      *
      * @return null|string
      * @throws AException
-     * @throws \ReflectionException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
      */
     public static function lng(string $key, $block= '', $default_text = '', $section = ''){
         $registry = Registry::getInstance();
@@ -2092,6 +2067,20 @@ class AHelperUtils extends AHelper
         }
     }
 
+    public static function getAppErrorText()
+    {
+        $language = Registry::language();
+        if (!ABC::env('IS_ADMIN')) {
+            return 'Application Error!';
+        }
+        if ($language) {
+            return sprintf($language->get('error_system'), Registry::html()->getSecureURL('tool/error_log'));
+        } else {
+            return 'Application Error! Please check error log for details.';
+        }
+
+    }
+
     /**
      * Return true if $table (short name) already joined
      *
@@ -2104,5 +2093,32 @@ class AHelperUtils extends AHelper
     {
         $joins = new Collection($query->getQuery()->joins);
         return $joins->pluck('table')->contains($table);
+    }
+
+    /**
+     * @param $array
+     *
+     * @return bool
+     */
+    public static function isAssocArray($array)
+    {
+        $keys = array_keys($array);
+        return $keys !== array_keys($keys);
+    }
+
+    /**
+     * @param array $array - source array
+     * @param string $itemKey - new key name
+     * @param mixed $itemValue - value
+     * @param string|int|null $positionAfter - paste after key
+     * @return array
+     */
+    public static function insert2ArrayAfter(array $array, string $itemKey, $itemValue, string|int $positionAfter = null): array
+    {
+        $positionAfter = $positionAfter ?? array_key_last($array);
+        $pos = array_search($positionAfter, array_keys($array)) + 1;
+        return array_slice($array, 0, $pos, true) +
+            [$itemKey => $itemValue] +
+            array_slice($array, $pos, count($array) - $pos, true);
     }
 }

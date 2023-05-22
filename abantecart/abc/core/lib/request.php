@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -21,6 +21,8 @@
 namespace abc\core\lib;
 
 use abc\core\ABC;
+use H;
+use function apache_request_headers;
 
 final class ARequest
 {
@@ -29,18 +31,18 @@ final class ARequest
     public $cookie = [];
     public $files = [];
     public $server = [];
+    public $headers = [];
 
     private $http;
     private $uniqueId;
     private $version;
     private $browser;
-    private $browser_version;
     private $platform;
     private $device_type;
 
     public function __construct()
     {
-        if (strpos($_SERVER['CONTENT_TYPE'], 'application/json') !== false) {
+        if (str_contains($_SERVER['CONTENT_TYPE'], 'application/json')) {
             $_POST = json_decode(file_get_contents('php://input'), true);
         }
 
@@ -50,14 +52,16 @@ final class ARequest
         $_FILES = $this->clean($_FILES);
         $_SERVER = $this->clean($_SERVER);
 
+
         $this->get = $_GET;
         $this->post = $_POST;
         $this->cookie = $_COOKIE;
         $this->files = $_FILES;
         $this->server = $_SERVER;
+        $this->headers = $this->getRequestHeaders();
 
         //generate unique request
-        $this->uniqueId = \H::genRequestId();
+        $this->setRequestId();
 
         //check if there is any encrypted data
         if (isset($this->get['__e']) && $this->get['__e']) {
@@ -67,6 +71,40 @@ final class ARequest
             $this->post = array_replace_recursive($this->post, $this->decodeURI($this->post['__e']));
         }
         $this->detectBrowser();
+    }
+
+    public function getRequestHeaders()
+    {
+        if (function_exists('apache_request_headers')) {
+            return apache_request_headers();
+        } else {
+            {
+                $arh = [];
+                $rx_http = '/\AHTTP_/';
+                foreach ($_SERVER as $key => $val) {
+                    if (preg_match($rx_http, $key)) {
+                        $arh_key = preg_replace($rx_http, '', $key);
+                        // do some nasty string manipulations to restore the original letter case
+                        // this should work in most cases
+                        $rx_matches = explode('_', $arh_key);
+                        if (count($rx_matches) > 0 and strlen($arh_key) > 2) {
+                            foreach ($rx_matches as $ak_key => $ak_val) $rx_matches[$ak_key] = ucfirst($ak_val);
+                            $arh_key = implode('-', $rx_matches);
+                        }
+                        $arh[$arh_key] = $val;
+                    }
+                }
+                return ($arh);
+            }
+        }
+    }
+
+    /**
+     * @param string|null $requestId
+     */
+    public function setRequestId(string $requestId = null)
+    {
+        $this->uniqueId = $requestId ?? H::genRequestId();
     }
 
     //todo: Include PHP module filter to process input params. http://us3.php.net/manual/en/book.filter.php
@@ -118,7 +156,9 @@ final class ARequest
      */
     public function clean($data)
     {
-        if (is_array($data)) {
+        if ($data === null) {
+            return null;
+        } elseif (is_array($data)) {
             foreach ($data as $key => $value) {
                 unset($data[$key]);
                 $key = $this->clean($key);
@@ -129,14 +169,14 @@ final class ARequest
                     exit('Request forbidden');
                 }
             }
-        } else if(!is_numeric($data)) {
+        } else if (!is_numeric($data)) {
             $data = htmlspecialchars($data, ENT_NOQUOTES, ABC::env('APP_CHARSET'));
         }
         return $data;
     }
 
     /**
-     * @param string - base64 $uri
+     * @param string $uri - base64 encoded
      *
      * @return array
      */
@@ -159,7 +199,7 @@ final class ARequest
 
         $nua = strtolower($_SERVER['HTTP_USER_AGENT']);
 
-        $agent['http'] = isset($nua) ? $nua : "";
+        $agent['http'] = $nua ?? "";
         $agent['version'] = 'unknown';
         $agent['browser'] = 'unknown';
         $agent['platform'] = 'unknown';
@@ -230,14 +270,10 @@ final class ARequest
     {
         return $this->uniqueId;
     }
+
     public function getBrowser()
     {
         return $this->browser;
-    }
-
-    public function getBrowserVersion()
-    {
-        return $this->browser_version;
     }
 
     public function getDeviceType()
@@ -268,8 +304,10 @@ final class ARequest
             $ip = $this->server['HTTP_CF_CONNECTING_IP'];
         } elseif (!empty($this->server['HTTP_X_FORWARDED_FOR'])) {
             $ip = $this->server['HTTP_X_FORWARDED_FOR'];
-        } else {
+        } elseif ($this->server['REMOTE_ADDR']) {
             $ip = $this->server['REMOTE_ADDR'];
+        } else {
+            $ip = 'localhost';
         }
         return $ip;
     }
@@ -279,7 +317,7 @@ final class ARequest
      */
     public function is_POST()
     {
-        return ($this->server['REQUEST_METHOD'] == 'POST' ? true : false);
+        return $this->server['REQUEST_METHOD'] == 'POST';
     }
 
     /**
@@ -287,7 +325,7 @@ final class ARequest
      */
     public function is_GET()
     {
-        return ($this->server['REQUEST_METHOD'] == 'GET' ? true : false);
+        return $this->server['REQUEST_METHOD'] == 'GET';
     }
 
     /**
@@ -304,5 +342,10 @@ final class ARequest
         setcookie($name, null, -1, $path);
         unset($this->cookie[$name], $_COOKIE[$name]);
         return true;
+    }
+
+    public function getHeaders()
+    {
+        return $this->headers;
     }
 }

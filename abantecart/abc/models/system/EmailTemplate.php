@@ -1,11 +1,26 @@
 <?php
+/**
+ * AbanteCart, Ideal Open Source Ecommerce Solution
+ * http://www.abantecart.com
+ *
+ * Copyright 2011-2022 Belavier Commerce LLC
+ *
+ * This source file is subject to Open Software License (OSL 3.0)
+ * License details is bundled with this package in the file LICENSE.txt.
+ * It is also available at this URL:
+ * <http://www.opensource.org/licenses/OSL-3.0>
+ *
+ * UPGRADE NOTE:
+ * Do not edit or add to this file if you wish to upgrade AbanteCart to newer
+ * versions in the future. If you wish to customize AbanteCart for your
+ * needs please refer to http://www.abantecart.com for more information.
+ */
 
 namespace abc\models\system;
 
 use abc\core\engine\Registry;
 use abc\models\BaseModel;
 use H;
-use Illuminate\Validation\Rule;
 
 class EmailTemplate extends BaseModel
 {
@@ -97,7 +112,7 @@ class EmailTemplate extends BaseModel
     {
         $db = Registry::db();
         $arSelect = [
-            $db->raw($db->raw_sql_row_count().' '.$db->table_name('email_templates').'.id'),
+            $db->raw($db->raw_sql_row_count() . ' ' . $db->table_name('email_templates') . '.id'),
             'email_templates.status',
             'email_templates.language_id',
             'email_templates.text_id',
@@ -143,15 +158,15 @@ class EmailTemplate extends BaseModel
                 if (!$allowedSearchFields[$filter['field']]) {
                     continue;
                 }
-                $query->where($allowedSearchFields[$filter['field']], 'LIKE', '%'.$filter['data'].'%');
+                $query->where($allowedSearchFields[$filter['field']], 'LIKE', '%' . $filter['data'] . '%');
             }
         }
 
         Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, func_get_args());
-        $result = $query->get();
+        $result = $query->get()?->toArray();
         if ($result) {
             return [
-                'items' => $result->toArray(),
+                'items' => $result,
                 'total' => $db->sql_get_row_count(),
                 'page'  => $page,
                 'limit' => $limit,

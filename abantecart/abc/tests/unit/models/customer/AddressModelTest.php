@@ -1,24 +1,17 @@
 <?php
-namespace abc\tests\unit;
+namespace Tests\unit\models\customer;
 
 use abc\models\customer\Address;
 use Illuminate\Validation\ValidationException;
+use Tests\unit\ATestCase;
 
 /**
  * Class AddressModelTest
  */
 class AddressModelTest extends ATestCase{
 
-
-    protected function setUp(){
-        //init
-    }
-
     public function testUpdate()
     {
-        /**
-         * @var Address $address
-         */
         $address = Address::find(1);
         $address->update(['company' => 'abc']);
         $this->assertEquals('abc', $address->company);
@@ -28,9 +21,6 @@ class AddressModelTest extends ATestCase{
     public function testValidation()
     {
         $errors = [];
-        /**
-         * @var Address $address
-         */
         $address = new Address(
             [
                 'company' => '',
@@ -70,12 +60,12 @@ class AddressModelTest extends ATestCase{
         try {
             $address->validate(
                 [   'customer_id' => 1,
-                    'company' => 'abc',
-                    'firstname' => 'testfirstname',
-                    'lastname' => 'testlastname',
-                    'address_1' => 'asasa',
-                    'address_2' => 'dsdsds',
-                    'postcode' => '12345',
+                    'company' => 'ACORN-Team',
+                    'firstname' => 'test-first-name',
+                    'lastname' => 'test-last-name',
+                    'address_1' => 'Grushevsky Street',
+                    'address_2' => 'Motel Crocodile',
+                    'postcode' => '36021',
                     'city' => 'Poltava',
                     'country_id' => '12',
                     'zone_id' => '23'
@@ -84,7 +74,7 @@ class AddressModelTest extends ATestCase{
         }catch(ValidationException $e){
             $errors = $address->errors()['validation'];
         }
-        $this->assertEquals(0, count($errors));
+        $this->assertCount(0, $errors);
 
         //check nullable zone_id
         $address = new Address();
@@ -110,7 +100,7 @@ class AddressModelTest extends ATestCase{
         }catch(ValidationException $e){
             $errors = $address->errors()['validation'];
         }
-        $this->assertEquals(7, count($errors));
+        $this->assertCount(7, $errors);
 
         $errors = [];
         //try save without customer_id - expect errors
@@ -132,7 +122,7 @@ class AddressModelTest extends ATestCase{
         }catch(ValidationException $e){
             $errors = $address->errors()['validation'];
         }
-        $this->assertEquals(1, count($errors));
+        $this->assertCount(1, $errors);
 
 
         $errors = [];
@@ -155,8 +145,6 @@ class AddressModelTest extends ATestCase{
         }catch(ValidationException $e){
             $errors = $address->errors()['validation'];
         }
-        $this->assertEquals(1, count($errors));
-
-
+        $this->assertCount(1, $errors);
     }
 }

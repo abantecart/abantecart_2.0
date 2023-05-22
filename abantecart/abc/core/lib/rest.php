@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -23,16 +23,10 @@ namespace abc\core\lib;
 use abc\core\engine\Registry;
 use XMLWriter;
 
-if (!class_exists('abc\core\ABC')) {
-    header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
-
 class ARest
 {
-    private $request = array();
-    private $response = array();
-    private $responseStatus;
-    private $registry;
+    private $request = [];
+    private $response = [];
 
     const DEFAULT_RESPONSE_FORMAT = 'json'; // Default response format
 
@@ -40,15 +34,15 @@ class ARest
      * Supported data types and static data
      *
      */
-    private static $formats = array('xml', 'json', 'qs');
+    private static $formats = ['xml', 'json', 'qs'];
 
-    private static $contentTypes = array(
+    private static $contentTypes = [
         'xml'  => 'application/xml',
         'json' => 'application/json',
         'qs'   => 'text/plain',
-    );
+    ];
 
-    private static $status_codes = array(
+    private static $status_codes = [
         100 => 'Continue',
         101 => 'Switching Protocols',
         200 => 'OK',
@@ -90,11 +84,10 @@ class ARest
         503 => 'Service Unavailable',
         504 => 'Gateway Timeout',
         505 => 'HTTP Version Not Supported',
-    );
+    ];
 
     public function __construct()
     {
-        $this->registry = Registry::getInstance();
         $this->processRequest();
     }
 
@@ -107,23 +100,29 @@ class ARest
         $this->request['headers'] = $this->_getHeaders();
         $this->request['format'] = isset($_GET['format']) ? trim($_GET['format']) : null;
         switch ($this->request['method']) {
+            case 'delete':
             case 'get':
                 $this->request['params'] = $_GET;
                 break;
             case 'post':
-                $this->request['params'] = $_POST;
+                $get = $_GET ?? [];
+                $post = $_POST ?? [];
+                $this->request['params'] = $post ? array_merge($get, $post) : $get;
+                $this->request['params'] = $_FILES ? array_merge($get, $_FILES) : $this->request['params'];
                 break;
             case 'put':
                 parse_str(file_get_contents('php://input'), $this->request['params']);
-                break;
-            case 'delete':
-                $this->request['params'] = $_GET;
                 break;
             default:
                 break;
         }
         $this->request['content-type'] = $this->_getResponseFormat($this->request['format']);
         array_walk_recursive($this->request, 'trim');
+    }
+
+    public function clearRequestParams()
+    {
+        $this->request['params'] = [];
     }
 
     /*
@@ -134,34 +133,33 @@ class ARest
         $this->response = $response_arr;
     }
 
-    public function sendResponse($status, $response_arr = array())
+    public function sendResponse($status, $response_arr = [])
     {
-        $this->responseStatus = $status;
-
         if (!empty($response_arr)) {
             $this->setResponseData($response_arr);
         }
 
         if (!empty($this->response)) {
-            $method = $this->request['content-type'].'Response';
-            $this->response = array('status' => $this->responseStatus, 'body' => $this->$method());
+            $method = $this->request['content-type'] . 'Response';
+            $this->response = ['status' => $status, 'body' => $this->$method()];
         } else {
             $this->request['content-type'] = 'qs';
-            $this->response = array('status' => $this->responseStatus, 'body' => $this->response);
+            $this->response = ['status' => $status, 'body' => $this->response];
         }
 
         $status = (isset($this->response['status'])) ? $this->response['status'] : 200;
         $contentType = $this->_getResponseContentType($this->request['content-type']);
         $body = (empty($this->response['body'])) ? '' : $this->response['body'];
 
-        $headers = 'HTTP/1.1 '.$status.' '.$this->_getStatusMessage($status);
+        $headers = 'HTTP/1.1 ' . $status . ' ' . $this->_getStatusMessage($status);
 
         //Prepare output
-        $this->registry->get('response')->addHeader($headers);
-        $this->registry->get('response')->addHeader('Content-Type: '.$contentType);
-        $this->registry->get('response')->addHeader("Access-Control-Allow-Origin:  ".$_SERVER['HTTP_ORIGIN']);
-        $this->registry->get('response')->addHeader("Access-Control-Allow-Credentials: true");
-        $this->registry->get('response')->setOutput($body);
+        $responseObj = Registry::response();
+        $responseObj?->addHeader($headers);
+        $responseObj?->addHeader('Content-Type: ' . $contentType);
+        $responseObj?->addHeader("Access-Control-Allow-Origin:  " . $_SERVER['HTTP_ORIGIN']);
+        $responseObj?->addHeader("Access-Control-Allow-Credentials: true");
+        $responseObj?->setOutput($body);
     }
 
     public function getRequestMethod()
@@ -176,7 +174,10 @@ class ARest
 
     public function getRequestParam($param_name)
     {
-        return $this->request['params'][$param_name];
+        if (is_array($this->request['params']) && isset($this->request['params'][$param_name])) {
+            return $this->request['params'][$param_name];
+        }
+        return null;
     }
 
     private function _xmlHelper($data, $version = '1.0', $encoding = 'UTF-8')
@@ -206,7 +207,7 @@ class ARest
             }
         }
         write($xml, $data);
-        return $xml->outputMemory(true);
+        return $xml->outputMemory();
     }
 
     private function xmlResponse()
@@ -216,9 +217,9 @@ class ARest
 
     private function jsonResponse()
     {
-        $this->registry->get('load')->library('json');
+        Registry::load()?->library('json');
         //autodetect JSON/JSONP
-        if ($this->request['params']['callback']) {
+        if ($this->request['params'] && $this->request['params']['callback']) {
             return $this->request['params']['callback']."(".AJson::encode($this->response).")";
         } else {
             return AJson::encode($this->response);
@@ -233,9 +234,9 @@ class ARest
     private function _getHeaders()
     {
         if (function_exists('apache_request_headers')) {
-            return apache_request_headers();
+            return \apache_request_headers();
         }
-        $headers = array();
+        $headers = [];
         $keys = preg_grep('{^HTTP_}i', array_keys($_SERVER));
         foreach ($keys as $val) {
             $key = str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($val, 5)))));

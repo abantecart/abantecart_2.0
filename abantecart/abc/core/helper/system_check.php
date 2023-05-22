@@ -23,7 +23,6 @@ namespace abc\core\helper;
 use abc\core\ABC;
 use abc\core\engine\Registry;
 use abc\core\lib\AError;
-use abc\core\lib\ALanguageManager;
 use Exception;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -139,7 +138,7 @@ class AHelperSystemCheck extends AHelper
         }
 
         //if cache is enabled
-        if ($registry->get('config')->get('config_cache_enable') && ABC::env('CACHE')['CACHE_DRIVER'] == 'file') {
+        if ($registry->get('config')->get('config_cache_enable') && ABC::env('CACHE')['driver'] == 'file') {
             $cache_files = self::get_all_files_dirs(ABC::env('DIR_SYSTEM').'cache'.DS);
             $cache_message = '';
             foreach ($cache_files as $file) {
@@ -364,7 +363,9 @@ class AHelperSystemCheck extends AHelper
         }
 
         //if SEO is enabled
-        if ($registry->get('config')->get('enable_seo_url')) {
+        if ($registry->get('config')->get('enable_seo_url')
+            && str_contains($_SERVER['SERVER_SOFTWARE'], 'Apache')
+        ) {
             $htaccess = ABC::env('DIR_PUBLIC').'/.htaccess';
             if (!file_exists($htaccess)) {
                 $ret_array[] = [

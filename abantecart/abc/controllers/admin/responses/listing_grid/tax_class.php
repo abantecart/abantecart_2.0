@@ -83,7 +83,7 @@ class ControllerResponsesListingGridTaxClass extends AController
         $this->loadLanguage('localisation/tax_class');
         if (!$this->user->canModify('listing_grid/tax_class')) {
             $error = new AError('');
-            return $error->toJSONResponse('NO_PERMISSIONS_402',
+            return $error->toJSONResponse('NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/tax_class'),
                     'reset_value' => true,
@@ -135,6 +135,9 @@ class ControllerResponsesListingGridTaxClass extends AController
      * update only one field
      *
      * @return void
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
      */
     public function update_field()
     {
@@ -145,7 +148,7 @@ class ControllerResponsesListingGridTaxClass extends AController
         $this->loadLanguage('localisation/tax_class');
         if (!$this->user->canModify('listing_grid/tax_class')) {
             $error = new AError('');
-            return $error->toJSONResponse('NO_PERMISSIONS_402',
+            return $error->toJSONResponse('NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/tax_class'),
                     'reset_value' => true,
@@ -197,6 +200,9 @@ class ControllerResponsesListingGridTaxClass extends AController
      * update only one field
      *
      * @return void
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
      */
     public function update_rate_field()
     {
@@ -207,7 +213,7 @@ class ControllerResponsesListingGridTaxClass extends AController
         $this->loadLanguage('localisation/tax_class');
         if (!$this->user->canModify('listing_grid/tax_class')) {
             $error = new AError('');
-            return $error->toJSONResponse('NO_PERMISSIONS_402',
+            return $error->toJSONResponse('NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/tax_class'),
                     'reset_value' => true,
@@ -249,7 +255,7 @@ class ControllerResponsesListingGridTaxClass extends AController
                 break;
         }
 
-        $this->extensions->hk_ValidateData($this, [__FUNCTION__, $field, $value]);
+        $this->extensions->hk_ValidateData($this, __FUNCTION__, $field, $value);
         return $this->data['error'];
     }
 
@@ -263,7 +269,7 @@ class ControllerResponsesListingGridTaxClass extends AController
             $this->data['error'] = sprintf($this->language->get('error_product'), $product_total);
         }
 
-        $this->extensions->hk_ValidateData($this, [__FUNCTION__, $tax_class_id]);
+        $this->extensions->hk_ValidateData($this, __FUNCTION__, $tax_class_id);
         return $this->data['error'];
     }
 

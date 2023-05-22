@@ -22,42 +22,104 @@ namespace abc\controllers\storefront;
 use abc\core\engine\AControllerAPI;
 use abc\core\engine\AResource;
 use abc\core\lib\AFilter;
+use abc\models\catalog\Product;
+use Illuminate\Support\Collection;
 use stdClass;
-
 
 class ControllerApiProductLatest extends AControllerAPI
 {
 
+    /**
+     * @OA\Get (
+     *     path="/index.php/?rt=a/product/latest",
+     *     summary="Get latest products",
+     *     description="Get kist of latest products",
+     *     tags={"Product"},
+     *     security={{"apiKey":{}}},
+     *    @OA\Parameter(
+     *         name="language_id",
+     *         in="query",
+     *         required=true,
+     *         description="Language Id",
+     *        @OA\Schema(
+     *              type="integer"
+     *          ),
+     *      ),
+     *      @OA\Parameter(
+     *         name="store_id",
+     *         in="query",
+     *         required=true,
+     *         description="Store Id",
+     *     @OA\Schema(
+     *              type="integer"
+     *          ),
+     *      ),
+     *     @OA\Response(
+     *         response="200",
+     *         description="Products",
+     *         @OA\JsonContent(ref="#/components/schemas/GetProductsModel"),
+     *     ),
+     *     @OA\Response(
+     *         response="400",
+     *         description="Bad Request",
+     *         @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"),
+     *     ),
+     *     @OA\Response(
+     *         response="403",
+     *         description="Access denied",
+     *         @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"),
+     *     ),
+     *     @OA\Response(
+     *         response="404",
+     *         description="Not Found",
+     *         @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"),
+     *     ),
+     *      @OA\Response(
+     *         response="500",
+     *         description="Server Error",
+     *         @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"),
+     *     )
+     * )
+     *
+     */
     public function get()
     {
+
+        //TODO: Add support store_id and language_id, maybe currency
+        //TODO: Remove old models usage.
+        //TODO: Change Error response to standart
+
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
-        $this->loadModel('catalog/product');
-
-        $filter_data = array(
+        $filter_data = [
             'method' => 'get',
-        );
+        ];
 
         $filter = new AFilter($filter_data);
         $filters = $filter->getFilterData();
 
-        $results = $this->model_catalog_product->getLatestProducts($filters['limit']);
+        $results = Product::search(
+            [
+                'with_final_price' => true,
+                'with_rating'      => true,
+                'limit' => $filters['limit'],
+                'sort'  => 'date_added',
+                'order' => 'desc',
+            ]
+        );
 
         $response = new stdClass();
         $response->page = $filter->getParam('page');
-        $response->total = sizeof($results);
+        $response->total = $results->count();
         $response->records = $filters['limit'];
         $response->limit = $filters['limit'];
         $response->sidx = $filters['sort'];
         $response->sord = $filters['order'];
         $response->params = $filters;
 
-        $i = 0;
+
         if ($results) {
-            $product_ids = array();
-            foreach ($results as $result) {
-                $product_ids[] = (int)$result['product_id'];
-            }
+            $product_ids = $results->pluck('product_id')->toArray();
             $resource = new AResource('image');
             $thumbnails = $resource->getMainThumbList(
                 'products',
@@ -65,25 +127,23 @@ class ControllerApiProductLatest extends AControllerAPI
                 $this->config->get('config_image_thumb_width'),
                 $this->config->get('config_image_thumb_height')
             );
+            $i = 0;
+            /** @var Collection $result */
             foreach ($results as $result) {
                 $thumbnail = $thumbnails[$result['product_id']];
+                $cell = $result->toArray();
+                $cell['thumb'] = $thumbnail['thumb_url'];
+                $cell['price'] = $this->currency->convert(
+                    $result['final_price'],
+                    $this->config->get('config_currency'),
+                    $this->currency->getCode()
+                );
+                $cell['currency_code'] = $this->currency->getCode();
+
                 $response->rows[$i] = [
                     'id'   => $result['product_id'],
-                    'cell' => [
-                        'thumb'         => $thumbnail['thumb_url'],
-                        'name'          => $result['name'],
-                        'description'   => $result['description'],
-                        'model'         => $result['model'],
-                        'price'         => $this->currency->convert(
-                            $result['final_price'],
-                            $this->config->get('config_currency'),
-                            $this->currency->getCode()
-                        ),
-                        'currency_code' => $this->currency->getCode(),
-                        'rating'        => $result['rating'],
-                    ],
+                    'cell' => $cell,
                 ];
-
                 $i++;
             }
         }

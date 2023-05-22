@@ -4,7 +4,6 @@ namespace abc\models\order;
 
 use abc\models\BaseModel;
 use abc\models\locale\Language;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class OrderStatusDescription
@@ -20,23 +19,22 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class OrderStatusDescription extends BaseModel
 {
-    use SoftDeletes;
-
     protected $primaryKey = 'id';
     protected $primaryKeySet = [
         'order_status_id',
         'language_id',
     ];
+
+    protected $touches = ['order_status'];
+
     protected $mainClassName = OrderStatus::class;
     protected $mainClassKey = 'order_status_id';
-    protected $dates = [
-        'date_added',
-        'date_modified',
-    ];
 
     protected $casts = [
         'order_status_id' => 'int',
         'language_id'     => 'int',
+        'date_added'      => 'datetime',
+        'date_modified'   => 'datetime'
     ];
 
     protected $fillable = [

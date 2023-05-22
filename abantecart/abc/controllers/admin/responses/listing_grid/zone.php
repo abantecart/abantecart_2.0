@@ -129,7 +129,7 @@ class ControllerResponsesListingGridZone extends AController
 
         if (!$this->user->canModify('listing_grid/zone')) {
             $error = new AError('');
-            return $error->toJSONResponse('NO_PERMISSIONS_402',
+            return $error->toJSONResponse('NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/zone'),
                     'reset_value' => true,
@@ -206,6 +206,7 @@ class ControllerResponsesListingGridZone extends AController
      * update only one field
      *
      * @return void
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \ReflectionException
      * @throws \abc\core\lib\AException
      */
@@ -216,7 +217,7 @@ class ControllerResponsesListingGridZone extends AController
         $this->extensions->hk_InitData($this, __FUNCTION__);
         if (!$this->user->canModify('listing_grid/zone')) {
             $error = new AError('');
-            return $error->toJSONResponse('NO_PERMISSIONS_402',
+            return $error->toJSONResponse('NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/zone'),
                     'reset_value' => true,
@@ -288,7 +289,7 @@ class ControllerResponsesListingGridZone extends AController
                 }
                 break;
         }
-        $this->extensions->hk_ValidateData($this, [__FUNCTION__, $field, $value]);
+        $this->extensions->hk_ValidateData($this, __FUNCTION__, $field, $value);
         return $this->data['error'];
     }
 
@@ -314,7 +315,7 @@ class ControllerResponsesListingGridZone extends AController
             $this->data['error'] = sprintf($this->language->get('error_zone_to_location'), $zone_to_location_total);
         }
 
-        $this->extensions->hk_ValidateData($this, [__FUNCTION__, $zone_id]);
+        $this->extensions->hk_ValidateData($this, __FUNCTION__, $zone_id);
         return $this->data['error'];
     }
 

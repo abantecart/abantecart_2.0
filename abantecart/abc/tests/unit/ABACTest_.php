@@ -1,7 +1,7 @@
 <?php
 namespace abc\banner_manager\tests\unit;
 
-use abc\tests\unit\ATestCase;
+use Tests\unit\ATestCase;
 use abc\core\ABC;
 use abc\core\engine\Registry;
 use abc\core\lib\Abac;
@@ -23,7 +23,7 @@ class ABACTest extends ATestCase{
      */
     protected $abac;
 
-    protected function SetUp(){
+    protected function SetUp():void{
         //init
         /**
          * @var Registry

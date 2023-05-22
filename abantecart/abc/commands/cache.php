@@ -3,7 +3,7 @@
  * AbanteCart, Ideal Open Source Ecommerce Solution
  * http://www.abantecart.com
  *
- * Copyright 2011-2018 Belavier Commerce LLC
+ * Copyright 2011-2023 Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
@@ -24,12 +24,13 @@ use abc\controllers\admin\ControllerPagesToolCache;
 use abc\core\engine\Registry;
 use abc\core\lib\AConfig;
 use abc\core\lib\AConnect;
-use abc\core\lib\AContentManager;
 use abc\core\lib\ACurrency;
 use abc\core\lib\ALanguageManager;
 use abc\models\admin\ModelSettingStore;
 use abc\models\admin\ModelToolInstallUpgradeHistory;
 use abc\models\catalog\Category;
+use abc\models\catalog\Product;
+use abc\models\content\Content;
 
 /**
  * Class Cache
@@ -155,21 +156,26 @@ class Cache extends BaseCommand
             ABC::env('HTTP_SERVER', $store_url, true);
 
             //loop by all content pages
-            $cm = new AContentManager();
-            $contents = $cm->getContents([], 'default', $store['store_id']);
+            $contents = Content::getContents([]);
             foreach ($contents as $content) {
-                $seo_url = $registry->get('html')->getSEOURL('content/content', '&content_id='.$content['content_id']);
+                $seo_url = $registry->get('html')->getSEOURL('content/content', '&content_id=' . $content['content_id']);
                 //loop for all variants
                 $this->touchUrl($seo_url);
                 $this->results['contents']++;
             }
 
             //loop by all categories of store
-            $categories = Category::getCategoriesData(['store_id' => $store['store_id']]);
+            $categories = Category::getCategoriesData(
+                [
+                    'filter' => [
+                        'store_id' => $store['store_id']
+                    ]
+                ]
+            );
             foreach ($categories as $category) {
                 $seo_url = $registry->get('html')->getSEOURL(
                     'product/category',
-                    '&category_id='.$category['category_id']
+                    '&category_id=' . $category['category_id']
                 );
                 //loop for all variants
                 $this->touchUrl($seo_url);
@@ -177,22 +183,19 @@ class Cache extends BaseCommand
             }
 
             //loop by all products of store
-            $registry->get('load')->model('catalog/product', 'storefront');
-            /**
-             * @var \abc\models\storefront\ModelCatalogProduct $model
-             */
-            $model = $registry->get('model_catalog_product');
-            $total_products = $model->getTotalProducts(['store_id' => $store['store_id']]);
+            $total_products = Product::where(['store_id' => $store['store_id']])->count();
             $i = 0;
+            $html = $registry->get('html');
             while ($i <= $total_products) {
-                $products = $model->getProducts(
+                $products = Product::getProducts(
                     [
                         'store_id' => $store['store_id'],
                         'start'    => $i,
                         'limit'    => 20,
-                    ]);
+                    ]
+                );
                 foreach ($products as $product) {
-                    $seo_url = $registry->get('html')->getSEOURL(
+                    $seo_url = $html->getSEOURL(
                         'product/product',
                         '&product_id='.$product['product_id']
                     );
@@ -226,7 +229,7 @@ class Cache extends BaseCommand
     {
         $this->errors = [];
         $registry = Registry::getInstance();
-        $app_cache = $registry->get('cache');
+        $cache = $registry->get('cache');
         $lang_obj = new ALanguageManager($registry);
         $languages = $lang_obj->getActiveLanguages();
         $registry->get('load')->model('setting/store');
@@ -270,12 +273,12 @@ class Cache extends BaseCommand
                     unlink($file);
                 }
             } elseif ($group == 'html_cache') {
-                $app_cache->remove('html_cache');
+                $cache->flush('html_cache');
             } else {
-                $app_cache->remove($group);
+                $cache->flush($group);
                 foreach ($languages as $lang) {
                     foreach ($stores as $store) {
-                        $app_cache->remove($group."_".$store['store_id']."_".$lang['language_id']);
+                        $cache->flush($group."_".$store['store_id']."_".$lang['language_id']);
                     }
                 }
             }

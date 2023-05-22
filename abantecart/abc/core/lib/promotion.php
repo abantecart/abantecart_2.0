@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2018 Belavier Commerce LLC
+  Copyright © 2011-2023 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -20,63 +20,61 @@
 
 namespace abc\core\lib;
 
-use abc\core\cache\ACache;
+use abc\core\ABC;
+use abc\core\engine\ALoader;
 use abc\core\engine\Registry;
+use abc\models\catalog\Product;
+use abc\models\catalog\ProductDiscount;
+use abc\models\catalog\ProductSpecial;
+use abc\models\order\Coupon;
+use abc\models\order\CouponDescription;
+use abc\models\order\Order;
+use Exception;
+use Psr\SimpleCache\InvalidArgumentException;
+use ReflectionException;
 
 /**
  * Class APromotion
  *
- * @property AConfig   $config
- * @property ACache    $cache
- * @property ADB       $db
+ * @property AbcCache $cache
+ * @property ADB $db
+ * @property ALoader $load
  */
 class APromotion
 {
-    /**
-     * @var Registry
-     */
-    protected $registry;
-    /**
-     * @var ACart
-     */
+    /** @var AConfig */
+    protected $config;
+    /** @var ACart */
     protected $cart;
-    /**
-     * @var ACustomer
-     */
+    /** @var ADB */
+    protected $db;
+    /** ACache */
+    protected $cache;
+    /** @var ACustomer */
     protected $customer;
-    /**
-     * @var int
-     */
+    /** @var int */
     protected $customer_group_id;
-    /**
-     * @var array
-     */
+    /** @var array */
     public $condition_objects = [];
-    /**
-     * @var array
-     */
+    /** @var array */
     public $bonus_objects = [];
 
     /**
-     * @param null $customer
-     * @param null $cart
+     * @param ACustomer|null $customer
+     * @param ACart|null $cart
      */
     public function __construct(ACustomer $customer = null, ACart $cart = null)
     {
-        $this->registry = Registry::getInstance();
         $this->customer = $customer ?: Registry::customer();
         $this->cart = $cart ?: Registry::cart();
+        $this->config = Registry::config();
+        $this->cache = Registry::cache();
+        $this->db = Registry::db();
 
-        if (!is_null($this->customer)) {
-            //set customer group
-            if ($this->customer->isLogged()) {
-                $this->customer_group_id = $this->customer->getCustomerGroupId();
-            } else {
-                $this->customer_group_id = $this->config->get('config_customer_group_id');
-
-            }
-        }
-
+        //set customer group
+        $this->customer_group_id = $this->customer?->isLogged()
+            ? $this->customer->getCustomerGroupId()
+            : $this->config->get('config_customer_group_id');
 
         $this->condition_objects = [
             'product_price',
@@ -103,26 +101,96 @@ class APromotion
         ];
     }
 
-    public function __get($key)
-    {
-        return $this->registry->get($key);
-    }
-
     /**
-     * @param $key
-     * @param $value
+     * @return array
+     * @deprecated
      */
-    public function __set($key, $value)
+    public function getConditionObjects()
     {
-        $this->registry->set($key, $value);
+        return $this->condition_objects;
     }
 
     /**
      * @return array
      */
-    public function getConditionObjects()
+    public function getConditionList($section = 'storefront')
     {
-        return $this->condition_objects;
+        $indx = $output = [];
+        foreach (ABC::env('incentive_conditions') as $class) {
+            try {
+                /** @var BaseIncentiveCondition $node */
+                $node = new $class();
+                if (in_array($node->getSection(), ['both', $section])) {
+                    $indx[] = $output[$node->getKey()] = $node->getName();
+                }
+            } catch (Exception $e) {
+                Registry::log()->error($e->getMessage());
+            }
+        }
+        array_multisort($indx, SORT_STRING, $output);
+        return $output;
+    }
+
+    /**
+     * @return array
+     */
+    public function getBonusList($section = 'both')
+    {
+        $indx = $output = [];
+        foreach (ABC::env('incentive_bonuses') as $class) {
+            try {
+                /** @var BaseIncentiveBonus $node */
+                $node = new $class();
+                if (!in_array($node->getSection(), ['both', $section])) {
+                    continue;
+                }
+                $indx[] = $output[$node->getKey()] = $node->getName();
+            } catch (Exception $e) {
+                Registry::log()->error($e->getMessage());
+            }
+        }
+        array_multisort($indx, SORT_STRING, $output);
+        return $output;
+    }
+
+    /**
+     * @param string $id
+     * @return BaseIncentiveCondition|false
+     */
+    public function getConditionObjectByKey(string $id)
+    {
+        foreach (ABC::env('incentive_conditions') as $class) {
+            try {
+                /** @var BaseIncentiveCondition $node */
+                $node = new $class();
+                if ($node->getKey() == $id) {
+                    return $node;
+                }
+            } catch (Exception $e) {
+                Registry::log()->error($e->getMessage());
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @param string $id
+     * @return BaseIncentiveBonus|false
+     */
+    public function getBonusObjectByKey(string $id)
+    {
+        foreach (ABC::env('incentive_bonuses') as $class) {
+            try {
+                /** @var BaseIncentiveBonus $node */
+                $node = new $class();
+                if ($node->getKey() == $id) {
+                    return $node;
+                }
+            } catch (Exception $e) {
+                Registry::log()->error($e->getMessage());
+            }
+        }
+        return false;
     }
 
     /**
@@ -134,172 +202,165 @@ class APromotion
     }
 
     /**
-     * @param int $product_id
-     * @param int $discount_quantity
+     * @param int $productId
+     * @param int $discountQuantity
      *
      * @return float
-     * @throws \Exception
+     * @throws Exception
+     * @throws InvalidArgumentException
      */
-    public function getProductQtyDiscount($product_id, $discount_quantity)
+    public function getProductQtyDiscount($productId, $discountQuantity)
     {
-        $product_id = (int)$product_id;
-        $discount_quantity = (int)$discount_quantity;
-        $customer_group_id = (int)$this->customer_group_id;
+        $productId = (int)$productId;
+        $discountQuantity = (int)$discountQuantity;
+        $customerGroupId = (int)$this->customer_group_id;
 
-        if (!$product_id && !$discount_quantity) {
+        if (!$productId && !$discountQuantity) {
             return 0.00;
         }
 
-        $cache_key = 'product.discount.qty.'.$discount_quantity.'.'.(int)$product_id.'.'.$customer_group_id;
-        $output = $this->cache->pull($cache_key);
-        if ($output !== false) {
-            return $output;
-        }
-
-        $sql = "SELECT price
-                FROM ".$this->db->table_name("product_discounts")."
-                WHERE product_id = '".(int)$product_id."'
-                        AND customer_group_id = '".$customer_group_id."'
-                        AND quantity <= '".(int)$discount_quantity."'
-                        AND ((date_start = '0000-00-00' OR date_start < NOW()) 
-                                AND (date_end = '0000-00-00' OR date_end > NOW()))
-                ORDER BY quantity DESC, priority ASC, price ASC
-                LIMIT 1";
-        $product_discount_query = $this->db->query($sql);
-        $output = (float)$product_discount_query->row['price'];
-        $this->cache->push($cache_key, $output);
-
-        return $output;
+        /** @var ProductDiscount $result */
+        $result = ProductDiscount::select('price')
+            ->where('product_id', '=', $productId)
+            ->where('customer_group_id', '=', $customerGroupId)
+            ->where('quantity', '<=', $discountQuantity)
+            ->where(function ($query) {
+                $query->where('date_start', '<', date("Y-m-d H:i:s"))
+                    ->orWhereNull('date_start');
+            })
+            ->where(function ($query) {
+                $query->where('date_end', '>', date("Y-m-d H:i:s"))
+                    ->orWhereNull('date_start');
+            })->orderBy('quantity', 'desc')
+            ->orderBy('priority')
+            ->orderBy('price')
+            ->useCache('product')
+            ->first();
+        return (float)$result->price;
     }
 
     /**
-     * @param int $product_id
+     * @param int $productId
      *
-     * @return bool|float
-     * @throws \Exception
+     * @return float
+     * @throws Exception
+     * @throws InvalidArgumentException
      */
-    public function getProductDiscount($product_id)
+    public function getProductDiscount($productId)
     {
-        $product_id = (int)$product_id;
-        $customer_group_id = (int)$this->customer_group_id;
-        $cache_key = 'product.discount.'.(int)$product_id.'.'.$customer_group_id;
-        $output = $this->cache->pull($cache_key);
+        $productId = (int)$productId;
+        $customerGroupId = (int)$this->customer_group_id;
 
-        if ($output !== false) {
-            return $output;
-        }
+        /** @var ProductDiscount $result */
+        $result = ProductDiscount::select('price')
+            ->where('product_id', '=', $productId)
+            ->where('customer_group_id', '=', $customerGroupId)
+            ->where('quantity', '=', 1)
+            ->where(function ($query) {
+                $query->where('date_start', '<', date("Y-m-d H:i:s"))
+                    ->orWhereNull('date_start');
+            })
+            ->where(function ($query) {
+                $query->where('date_end', '>', date("Y-m-d H:i:s"))
+                    ->orWhereNull('date_start');
+            })
+            ->orderBy('priority')
+            ->orderBy('price')
+            ->useCache('product')
+            ->first();
+        return (float)$result->price;
 
-        $query = $this->db->query("SELECT price
-                                    FROM ".$this->db->table_name("product_discounts")."
-                                    WHERE product_id = '".(int)$product_id."'
-                                        AND customer_group_id = '".$customer_group_id."'
-                                        AND quantity = '1'
-                                        AND ((date_start = '0000-00-00' OR date_start < NOW())
-                                        AND (date_end = '0000-00-00' OR date_end > NOW()))
-                                    ORDER BY priority ASC, price ASC
-                                    LIMIT 1");
-        if ($query->num_rows) {
-            $output = $query->row['price'];
-        } else {
-            $output = '';
-        }
-
-        $this->cache->push($cache_key, $output);
-
-        return $output;
     }
 
     /**
-     * @param int $product_id
+     * @param int $productId
      *
      * @return array
-     * @throws \Exception
+     * @throws AException|Exception
+     * @throws InvalidArgumentException
      */
-    public function getProductDiscounts($product_id)
+    public function getProductDiscounts($productId)
     {
-        $product_id = (int)$product_id;
-        $customer_group_id = (int)$this->customer_group_id;
-        $cache_key = 'product.discounts.'.(int)$product_id.'.'.$customer_group_id;
-        $output = $this->cache->pull($cache_key);
-        if ($output !== false) {
-            return $output;
-        }
-        $query = $this->db->query("	SELECT *
-                                    FROM ".$this->db->table_name("product_discounts")."
-                                    WHERE product_id = '".(int)$product_id."'
-                                        AND customer_group_id = '".(int)$customer_group_id."'
-                                        AND quantity > 1
-                                        AND ((date_start = '0000-00-00' OR date_start < NOW())
-                                        AND (date_end = '0000-00-00' OR date_end > NOW()))
-                                    ORDER BY quantity ASC, priority ASC, price ASC");
-        $output = $query->rows;
-        $this->cache->push($cache_key, $output);
-
-        return $output;
+        $productId = (int)$productId;
+        $customerGroupId = (int)$this->customer_group_id;
+        /** @var ProductDiscount $result */
+        $result = ProductDiscount::where('product_id', '=', $productId)
+            ->where('customer_group_id', '=', $customerGroupId)
+            ->where('quantity', '>', 1)
+            ->where(function ($query) {
+                $query->where('date_start', '<', date("Y-m-d H:i:s"))
+                    ->orWhereNull('date_start');
+            })
+            ->where(function ($query) {
+                $query->where('date_end', '>', date("Y-m-d H:i:s"))
+                    ->orWhereNull('date_start');
+            })->orderBy('quantity')
+            ->orderBy('priority')
+            ->orderBy('price')
+            ->useCache('product')
+            ->get();
+        return (array)$result?->toArray();
     }
 
     /**
-     * @param int $product_id
-     *
+     * @param $productId
      * @return null|float
-     * @throws \Exception
      */
-    public function getProductSpecial($product_id)
+    public function getProductSpecial($productId)
     {
-        $product_id = (int)$product_id;
-        $customer_group_id = (int)$this->customer_group_id;
-        $cache_key = 'product.special.'.(int)$product_id.'.'.$customer_group_id;
-        $output = $this->cache->pull($cache_key);
-        if ($output !== false) {
-            return $output;
-        }
+        $productId = (int)$productId;
+        $customerGroupId = (int)$this->customer_group_id;
 
-        $output = '';
-        $query = $this->db->query("SELECT price
-                                    FROM ".$this->db->table_name("product_specials")."
-                                    WHERE product_id = '".(int)$product_id."'
-                                        AND customer_group_id = '".$customer_group_id."'
-                                        AND ((date_start = '0000-00-00' OR date_start < NOW())
-                                        AND (date_end = '0000-00-00' OR date_end > NOW()))
-                                    ORDER BY priority ASC, price ASC LIMIT 1");
-        if ($query->num_rows) {
-            $output = (float)$query->row['price'];
-        }
-        $this->cache->push($cache_key, $output);
-
-        return $output;
+        /** @var ProductSpecial $result */
+        $result = ProductSpecial::select('price')
+            ->where('product_id', '=', $productId)
+            ->where('customer_group_id', '=', $customerGroupId)
+            ->where(function ($query) {
+                $query->where('date_start', '<', date("Y-m-d H:i:s"))
+                    ->orWhereNull('date_start');
+            })
+            ->where(function ($query) {
+                $query->where('date_end', '>', date("Y-m-d H:i:s"))
+                    ->orWhereNull('date_start');
+            })
+            ->orderBy('priority')
+            ->orderBy('price')
+            ->useCache('product')
+            ->first();
+        return (float)$result->price;
     }
 
     /**
-     * @deprecated since 1.2.7
-     *
      * @param string $sort
      * @param string $order
      * @param int $start
      * @param int $limit
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
+     * @throws InvalidArgumentException
      */
     public function getProductSpecials($sort = 'p.sort_order', $order = 'ASC', $start = 0, $limit = 20)
     {
-
-        $language_id = (int)$this->config->get('storefront_language_id');
-        $store_id = (int)$this->config->get('config_store_id');
-        $customer_group_id = (int)$this->customer_group_id;
+        $start = abs((int) $start);
+        $limit = abs((int) $limit);
+        $language_id = (int) $this->config->get('storefront_language_id');
+        $store_id = (int) $this->config->get('config_store_id');
+        $customer_group_id = (int) $this->customer_group_id;
 
         $cache_key = 'product.specials.'.$customer_group_id;
         $cache_key .= $this->cache->paramsToString(
             [
                 'sort'  => $sort,
                 'order' => $order,
-                'start' => (int)$start,
-                'limit' => (int)$limit,
-            ]);
+                'start' => (int) $start,
+                'limit' => (int) $limit,
+            ]
+        );
         $cache_key .= '.store_'.$store_id.'.lang_'.$language_id;
 
-        $cache = $this->cache->pull($cache_key);
-        if ($cache !== false) {
+        $cache = $this->cache->get($cache_key);
+        if ($cache !== null) {
             return $cache;
         }
 
@@ -320,8 +381,8 @@ class APromotion
                 WHERE p.status = '1'
                     AND p.date_available <= NOW() AND p2s.store_id = '".$store_id."'
                     AND ps.customer_group_id = '".$customer_group_id."'
-                    AND ((ps.date_start = '0000-00-00' OR ps.date_start < NOW())
-                    AND (ps.date_end = '0000-00-00' OR ps.date_end > NOW()))
+                    AND ((ps.date_start IS NULL OR ps.date_start < NOW())
+                    AND (ps.date_end IS NULL OR ps.date_end > NOW()))
                 GROUP BY ps.product_id";
 
         $sort_data = [
@@ -351,44 +412,42 @@ class APromotion
         if ($start < 0) {
             $start = 0;
         }
-        if ((int)$limit) {
-            $sql .= " LIMIT ".(int)$start.",".(int)$limit;
+        if ((int) $limit) {
+            $sql .= " LIMIT ".(int) $start.",".(int) $limit;
         }
 
         $query = $this->db->query($sql);
         $output = $query->rows;
 
-        $this->cache->push($cache_key, $output);
+        $this->cache->put($cache_key, $output);
 
         return $output;
     }
 
     /**
-     * @since 1.2.7
-     *
      * @param array $data
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
+     * @throws InvalidArgumentException
      */
     public function getSpecialProducts($data = [])
     {
-
         $data['sort'] = !isset($data['sort']) ? 'p.sort_order' : $data['sort'];
         $data['order'] = !isset($data['order']) ? 'ASC' : $data['order'];
         $data['start'] = !isset($data['start']) ? 0 : $data['start'];
         $data['limit'] = !isset($data['limit']) ? 20 : $data['limit'];
 
-        $language_id = (int)$this->config->get('storefront_language_id');
-        $store_id = (int)$this->config->get('config_store_id');
-        $customer_group_id = (int)$this->customer_group_id;
+        $language_id = (int) $this->config->get('storefront_language_id');
+        $store_id = (int) $this->config->get('config_store_id');
+        $customer_group_id = (int) $this->customer_group_id;
 
         $cache_key = 'product.specials.'.$customer_group_id;
         $cache_key .= $this->cache->paramsToString($data);
         $cache_key .= '.store_'.$store_id.'.lang_'.$language_id;
 
-        $cache = $this->cache->pull($cache_key);
-        if ($cache !== false) {
+        $cache = $this->cache->get($cache_key);
+        if ($cache !== null) {
             return $cache;
         }
 
@@ -406,8 +465,8 @@ class APromotion
                     WHERE rd.product_id = ps.product_id
                         AND customer_group_id = '".$customer_group_id."'
                         AND quantity = '1'
-                        AND ((date_start = '0000-00-00' OR date_start < NOW())
-                        AND (date_end = '0000-00-00' OR date_end > NOW()))
+                        AND ((date_start IS NULL OR date_start < NOW())
+                        AND (date_end IS NULL OR date_end > NOW()))
                     ORDER BY priority ASC, price ASC
                     LIMIT 1) as discount_price\n ";
 
@@ -422,8 +481,8 @@ class APromotion
                 WHERE p.status = '1'
                     AND p.date_available <= NOW() AND p2s.store_id = '".$store_id."'
                     AND ps.customer_group_id = '".$customer_group_id."'
-                    AND ((ps.date_start = '0000-00-00' OR ps.date_start < NOW())
-                    AND (ps.date_end = '0000-00-00' OR ps.date_end > NOW()))
+                    AND ((ps.date_start IS NULL OR ps.date_start < NOW())
+                    AND (ps.date_end IS NULL OR ps.date_end > NOW()))
                 GROUP BY ps.product_id";
 
         $sort_data = [
@@ -453,166 +512,136 @@ class APromotion
         if ($data['start'] < 0) {
             $data['start'] = 0;
         }
-        if ((int)$data['limit']) {
-            $sql .= " LIMIT ".(int)$data['start'].",".(int)$data['limit'];
+        if ((int) $data['limit']) {
+            $sql .= " LIMIT ".(int) $data['start'].",".(int) $data['limit'];
         }
 
         $query = $this->db->query($sql);
         $output = $query->rows;
 
-        $this->cache->push($cache_key, $output);
+        $this->cache->put($cache_key, $output);
 
         return $output;
     }
 
     /**
      * @return int
-     * @throws \Exception
+     * @throws AException|Exception
+     * @throws InvalidArgumentException
      */
     public function getTotalProductSpecials()
     {
+        $storeId = (int)$this->config->get('config_store_id');
 
-        $customer_group_id = (int)$this->customer_group_id;
-        $store_id = (int)$this->config->get('config_store_id');
-
-        $cache_key = 'product.special.total.'.$customer_group_id.'.store_'.$store_id;
-        $output = $this->cache->pull($cache_key);
-        if ($output !== false) {
-            return $output;
-        }
-
-        $query = $this->db->query("SELECT COUNT(DISTINCT ps.product_id) AS total
-                                    FROM ".$this->db->table_name("product_specials")." ps
-                                    LEFT JOIN ".$this->db->table_name("products")." p
-                                        ON (ps.product_id = p.product_id)
-                                    LEFT JOIN ".$this->db->table_name("products_to_stores")." p2s
-                                        ON (p.product_id = p2s.product_id)
-                                    WHERE p.status = '1'
-                                        AND p.date_available <= NOW()
-                                        AND p2s.store_id = '".(int)$store_id."'
-                                        AND ps.customer_group_id = '".(int)$customer_group_id."'
-                                        AND ((ps.date_start = '0000-00-00' OR ps.date_start < NOW())
-                                        AND (ps.date_end = '0000-00-00' OR ps.date_end > NOW()))");
-
-        $output = (int)$query->row['total'];
-        $this->cache->push($cache_key, $output);
-
-        return $output;
+        return ProductSpecial::where('product_specials.customer_group_id', '=', $this->customer_group_id)
+            ->where(function ($query) {
+                $query->where('date_start', '<', date("Y-m-d H:i:s"))
+                    ->orWhereNull('date_start');
+            })
+            ->where(function ($query) {
+                $query->where('date_end', '>', date("Y-m-d H:i:s"))
+                    ->orWhereNull('date_start');
+            })
+            ->join(
+                'products',
+                'products.product_id',
+                '=',
+                'product_specials.product_id'
+            )->where('products.date_available', '<=', date("Y-m-d H:i:s"))
+            ->where('products.status', '=', 1)
+            ->join(
+                'products_to_stores',
+                'products_to_stores.product_id',
+                '=',
+                'product_specials.product_id'
+            )
+            ->where('products_to_stores.store_id', '=', $storeId)
+            ->count();
     }
 
     /**
-     * @param string $coupon_code
+     * @param string $couponCode
      *
      * @return array
-     * @throws AException
+     * @throws AException|ReflectionException|InvalidArgumentException
      */
-    public function getCouponData($coupon_code)
+    public function getCouponData($couponCode)
     {
-        if (empty ($coupon_code)) {
+        if (empty ($couponCode)) {
             return [];
         }
 
-        $status = true;
-        $sql = "SELECT *
-                  FROM ".$this->db->table_name("coupons")." c
-                  LEFT JOIN ".$this->db->table_name("coupon_descriptions")." cd
-                        ON (c.coupon_id = cd.coupon_id 
-                            AND cd.language_id = '".(int)$this->config->get('storefront_language_id')."' )
-                  WHERE c.code = '".$this->db->escape($coupon_code)."'
-                        AND ((date_start IS NULL OR date_start < NOW())
-                        AND (date_end IS NULL  OR date_end > NOW()))
-                        AND c.status = '1'";
+        Coupon::setCurrentLanguageID($this->config->get('storefront_language_id'));
+        /** @var Coupon|CouponDescription $coupon */
+        $coupon = Coupon::with('description')
+            ->where('code', '=', $couponCode)
+            ->where(function ($query) {
+                $query->where('date_start', '<', date("Y-m-d H:i:s"))
+                    ->orWhereNull('date_start');
+            })
+            ->where(function ($query) {
+                $query->where('date_end', '>', date("Y-m-d H:i:s"))
+                    ->orWhereNull('date_start');
+            })
+            ->active()->first();
 
-        $coupon_query = $this->db->query($sql);
-
-        $coupon_product_data = [];
-        if ($coupon_query->num_rows) {
-            if ($coupon_query->row['total'] > $this->cart->getSubTotal()) {
-                var_Dump($coupon_query->row['total'], $this->cart->getSubTotal());
-                exit;
-                $status = false;
-            }
-            $coupon_redeem_query = $this->db->query(
-                "SELECT COUNT(*) AS total
-                 FROM `".$this->db->table_name("orders")."`
-                 WHERE order_status_id > '0' 
-                    AND coupon_id = '".(int)$coupon_query->row['coupon_id']."'");
-
-            if ($coupon_redeem_query->row['total'] >= $coupon_query->row['uses_total']
-                && $coupon_query->row['uses_total'] > 0
-            ) {
-                $status = false;
-            }
-            if ($coupon_query->row['logged']
-                && !is_null($this->customer)
-                && !$this->customer->getId()
-            ) {
-                $status = false;
-            }
-
-            if (!is_null($this->customer) && $this->customer->getId()) {
-                $coupon_redeem_query = $this->db->query(
-                    "SELECT COUNT(*) AS total
-                     FROM `".$this->db->table_name("orders")."`
-                     WHERE order_status_id > '0'
-                            AND coupon_id = '".(int)$coupon_query->row['coupon_id']."'
-                            AND customer_id = '".(int)$this->customer->getId()."'");
-
-                if ($coupon_redeem_query->row['total'] >= $coupon_query->row['uses_customer']
-                    && $coupon_query->row['uses_customer'] > 0) {
-                    $status = false;
-                }
-            }
-
-            $coupon_product_query = $this->db->query(
-                "SELECT *
-                 FROM ".$this->db->table_name("coupons_products")."
-                 WHERE coupon_id = '".(int)$coupon_query->row['coupon_id']."'");
-
-            foreach ($coupon_product_query->rows as $result) {
-                $coupon_product_data[] = $result['product_id'];
-            }
-
-            if ($coupon_product_data) {
-                $coupon_product = false;
-
-                foreach ($this->cart->getProducts() as $product) {
-                    if (in_array($product['product_id'], $coupon_product_data)) {
-                        $coupon_product = true;
-
-                        break;
-                    }
-                }
-
-                if (!$coupon_product) {
-                    $status = false;
-                }
-            }
-        } else {
-            $status = false;
-        }
-        if ($status) {
-            $coupon_data = [
-                'coupon_id'     => $coupon_query->row['coupon_id'],
-                'code'          => $coupon_query->row['code'],
-                'name'          => $coupon_query->row['name'],
-                'type'          => $coupon_query->row['type'],
-                'discount'      => $coupon_query->row['discount'],
-                'shipping'      => $coupon_query->row['shipping'],
-                'total'         => $coupon_query->row['total'],
-                'product'       => $coupon_product_data,
-                'date_start'    => $coupon_query->row['date_start'],
-                'date_end'      => $coupon_query->row['date_end'],
-                'uses_total'    => $coupon_query->row['uses_total'],
-                'uses_customer' => $coupon_query->row['uses_customer'],
-                'status'        => $coupon_query->row['status'],
-                'date_added'    => $coupon_query->row['date_added'],
-            ];
-
-            return $coupon_data;
+        if (!$coupon) {
+            return [];
         }
 
-        return [];
+
+        if ($coupon->total > $this->cart->getSubTotal()) {
+            return [];
+        }
+
+        $couponRedeemCount = Order::where('order_status_id', '>', 0)
+            ->where('coupon_id', '=', $coupon->coupon_id)
+            ->count();
+
+        if ($couponRedeemCount >= $coupon->uses_total
+            && $coupon->uses_total > 0
+        ) {
+            return [];
+        }
+
+        if ($coupon->logged && !is_null($this->customer) && !$this->customer->getId()
+        ) {
+            return [];
+        }
+        if (!is_null($this->customer) && $this->customer->getId()) {
+            $couponRedeemCount = Order::where('order_status_id', '>', 0)
+                ->where('coupon_id', '=', $coupon->coupon_id)
+                ->where('customer_id', '=', $this->customer->getId())
+                ->count();
+            if ($couponRedeemCount >= $coupon->uses_customer && $coupon->uses_customer > 0) {
+                return [];
+            }
+        }
+
+        $couponProductIds = Coupon::with('products')
+            ->where('coupon_id', '=', $coupon->coupon_id)
+            ->get()
+            ?->pluck('products.product_id')
+            ->toArray();
+        $couponProductIds = array_filter($couponProductIds);
+
+        if ($couponProductIds) {
+            $couponProduct = false;
+            foreach ($this->cart->getProducts() as $product) {
+                if (in_array($product['product_id'], $couponProductIds)) {
+                    $couponProduct = true;
+                    break;
+                }
+            }
+            if (!$couponProduct) {
+                return [];
+            }
+        }
+
+        $coupon_data = $coupon->toArray();
+        $coupon_data = array_merge($coupon_data['description'], $coupon_data);
+        $coupon_data['product'] = $couponProductIds;
+        return $coupon_data;
     }
 
     /**
@@ -629,12 +658,10 @@ class APromotion
         } else {
             $result = $this->_apply_promotions($total_data, $total);
         }
-
         return $result;
     }
 
     //adding native promotions
-
     /**
      * @param array $total_data
      * @param array $total
@@ -645,5 +672,4 @@ class APromotion
     {
         return [];
     }
-
 }

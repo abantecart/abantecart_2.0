@@ -1,11 +1,25 @@
 <?php
+/**
+ * AbanteCart, Ideal Open Source Ecommerce Solution
+ * http://www.abantecart.com
+ *
+ * Copyright 2011-2022 Belavier Commerce LLC
+ *
+ * This source file is subject to Open Software License (OSL 3.0)
+ * License details is bundled with this package in the file LICENSE.txt.
+ * It is also available at this URL:
+ * <http://www.opensource.org/licenses/OSL-3.0>
+ *
+ * UPGRADE NOTE:
+ * Do not edit or add to this file if you wish to upgrade AbanteCart to newer
+ * versions in the future. If you wish to customize AbanteCart for your
+ * needs please refer to http://www.abantecart.com for more information.
+ */
 
 namespace abc\models\order;
 
 use abc\models\BaseModel;
-use abc\modules\events\ABaseEvent;
-use H;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Carbon\Carbon;
 
 /**
  * Class OrderHistory
@@ -15,8 +29,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $order_status_id
  * @property int $notify
  * @property string $comment
- * @property \Carbon\Carbon $date_added
- * @property \Carbon\Carbon $date_modified
+ * @property Carbon $date_added
+ * @property Carbon $date_modified
  *
  * @property OrderStatus $order_status
  *
@@ -24,8 +38,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class OrderHistory extends BaseModel
 {
-    use SoftDeletes;
-
     protected $table = 'order_history';
     protected $primaryKey = 'order_history_id';
     protected $mainClassName = Order::class;
@@ -35,11 +47,8 @@ class OrderHistory extends BaseModel
         'order_id'        => 'int',
         'order_status_id' => 'int',
         'notify'          => 'int',
-    ];
-
-    protected $dates = [
-        'date_added',
-        'date_modified',
+        'date_added'      => 'datetime',
+        'date_modified'   => 'datetime'
     ];
 
     protected $fillable = [
@@ -100,7 +109,7 @@ class OrderHistory extends BaseModel
 
     public function SetCommentAttribute($value)
     {
-        $this->attributes['comment'] = strip_tags($value);
+        $this->attributes['comment'] = is_string($value) ?  strip_tags($value) : $value;
     }
 
     public function order_status()

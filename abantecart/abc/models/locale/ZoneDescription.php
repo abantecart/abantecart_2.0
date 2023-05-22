@@ -1,5 +1,20 @@
 <?php
-
+/**
+ * AbanteCart, Ideal Open Source Ecommerce Solution
+ * http://www.abantecart.com
+ *
+ * Copyright 2011-2022 Belavier Commerce LLC
+ *
+ * This source file is subject to Open Software License (OSL 3.0)
+ * License details is bundled with this package in the file LICENSE.txt.
+ * It is also available at this URL:
+ * <http://www.opensource.org/licenses/OSL-3.0>
+ *
+ * UPGRADE NOTE:
+ * Do not edit or add to this file if you wish to upgrade AbanteCart to newer
+ * versions in the future. If you wish to customize AbanteCart for your
+ * needs please refer to http://www.abantecart.com for more information.
+ */
 namespace abc\models\locale;
 
 use abc\models\BaseModel;
@@ -27,15 +42,80 @@ class ZoneDescription extends BaseModel
         'language_id',
     ];
 
-    public $timestamps = false;
-
+    protected $touches = ['zone'];
     protected $casts = [
-        'zone_id'     => 'int',
+        'zone_id' => 'int',
         'language_id' => 'int',
     ];
 
     protected $fillable = [
         'name',
+        'id'
+    ];
+    protected $rules = [
+        'id' => [
+            'checks' => [
+                'integer',
+                'required',
+                'sometimes',
+                'min:1'
+            ],
+            'messages' => [
+                'integer' => [
+                    'language_key' => 'error_id',
+                    'language_block' => 'localisation/zone',
+                    'default_text' => 'id must be integer!',
+                    'section' => 'admin'
+                ],
+                'required' => [
+                    'language_key' => 'error_id',
+                    'language_block' => 'localisation/zone',
+                    'default_text' => 'id required!',
+                    'section' => 'admin'
+                ],
+                'min' => [
+                    'language_key' => 'error_id',
+                    'language_block' => 'localisation/zone',
+                    'default_text' => 'id must be more 1!',
+                    'section' => 'admin'
+                ],
+            ]
+        ],
+        'name' => [
+            'checks' => [
+                'string',
+                'required',
+                'sometimes',
+                'min:2',
+                'max:128'
+            ],
+            'messages' => [
+                'min' => [
+                    'language_key' => 'error_name',
+                    'language_block' => 'localisation/zone',
+                    'default_text' => 'Name must be more 2 characters',
+                    'section' => 'admin'
+                ],
+                'max' => [
+                    'language_key' => 'error_name',
+                    'language_block' => 'localisation/zone',
+                    'default_text' => 'Name must be no more than 255 characters',
+                    'section' => 'admin'
+                ],
+                'required' => [
+                    'language_key' => 'error_name',
+                    'language_block' => 'localisation/zone',
+                    'default_text' => 'Name required!',
+                    'section' => 'admin'
+                ],
+                'string' => [
+                    'language_key' => 'error_name',
+                    'language_block' => 'localisation/zone',
+                    'default_text' => 'Name must be string!',
+                    'section' => 'admin'
+                ],
+            ]
+        ]
     ];
 
     public function zone()

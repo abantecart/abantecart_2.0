@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -27,23 +27,23 @@ use H;
 
 class ControllerResponsesCommonTabs extends AController
 {
-    public $data = [];
-    public $parent_controller = ''; //rt of page where you plan to place tabs
+    public $group = ''; //rt of page where you plan to place tabs
+    public $parentRt = ''; //rt of page where you plan to place tabs
 
-    public function main($parent_controller, $data)
+    public function main(string $group, string $parentRt, ?array $data)
     {
         $this->data = $data;
-        $this->parent_controller = $parent_controller; //use it in hooks to recognize what page controller calls
+        $this->parentRt = $parentRt; //use it in hooks to recognize what page controller calls
+        $this->group = $group; //group of pages, ex. customer, product, category etc
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
         $tabs = (array)$this->data['tabs'];
-        $this->data['tabs'] = $idx = [];
-        foreach ($tabs as $k => $tab) {
-            $idx[] = (int)$tab['sort_order'];
+        $idx = array_map('intval', array_column($tabs, 'sort_order'));
+        //resort an array
+        if (count($idx) > 1 && count($tabs) == count($idx)) {
+            array_multisort($idx, SORT_ASC, $tabs);
         }
-
-        array_multisort($idx, SORT_ASC, $tabs);
         $this->data['tabs'] = $tabs;
 
         $this->view->batchAssign($this->data);
@@ -63,7 +63,7 @@ class ControllerResponsesCommonTabs extends AController
             'start' => 0,
             'limit' => 10,
         ];
-        $top_customers = Customer::getCustomers($filter);
+        $top_customers = Customer::search($filter);
         foreach ($top_customers as $idx => $customer) {
             $top_customers[$idx]['url'] = $this->html->getSecureURL(
                 'sale/customer/update',
@@ -89,16 +89,16 @@ class ControllerResponsesCommonTabs extends AController
             'start' => 0,
             'limit' => 10,
         ];
-        $top_orders = Order::getOrders($filter)->toArray();
+        $top_orders = Order::search($filter)->toArray();
         foreach ($top_orders as $idx => &$order) {
             $top_orders[$idx]['url'] = $this->html->getSecureURL(
-                                            'sale/order/details',
-                                            '&order_id='.$order['order_id']
+                'sale/order/details',
+                '&order_id='.$order['order_id']
             );
 
             $top_orders[$idx]['total'] = $this->currency->format(
-                                            $order['total'],
-                                            $this->config->get('config_currency')
+                $order['total'],
+                $this->config->get('config_currency')
             );
             $order['date_added'] = H::dateISO2Display(
                 $order['date_added'],

@@ -271,20 +271,31 @@ class ControllerResponsesCommonDoEmbed extends AController
             }
         } else {
             if (!sizeof($categoryIds)) {
-                $options = Category::getCategoriesData(['parent_id' => 0]);
+                $options = Category::getCategoriesData(
+                    [
+                        'filter' => [
+                            'parent_id' => 0
+                        ]
+                    ]
+                );
                 $categoryIds = array_column($options->toArray(), 'category_id');
             } else {
-                foreach ($categoryIds as &$c) {
-                    $c = (int)$c;
-                }
-                unset($c);
-                $options = Category::getCategoriesData(['include' => $categoryIds]);
+                $categoryIds = array_map('intval', $categoryIds);
+                $options = Category::getCategoriesData(
+                    [
+                        'filter' => [
+                            'include' => $categoryIds
+                        ]
+                    ]
+                )->toArray();
             }
         }
 
         if ($subcategories) {
             $options = array_merge($options, $subcategories);
         }
+
+
         $opt = [];
         foreach ($options as $cat) {
             $opt[$cat['category_id']] = $cat['name'];
@@ -363,9 +374,8 @@ class ControllerResponsesCommonDoEmbed extends AController
         ]);
 
         $results = $this->language->getAvailableLanguages();
-        $languages = $language_codes = [];
+        $language_codes = [];
         foreach ($results as $v) {
-            $languages[$v['code']] = $v['name'];
             $lng_code = $this->language->getLanguageCodeByLocale($v['locale']);
             $language_codes[$lng_code] = $v['name'];
         }

@@ -23,7 +23,9 @@ class AdminSendNewTransactionNotifyEmailListener
     /**
      * @param ABaseEvent $event
      *
-     * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
      */
     public function handle(ABaseEvent $event)
     {
@@ -73,13 +75,8 @@ class AdminSendNewTransactionNotifyEmailListener
                     $mail->setTo($customer_info->email);
                     $mail->setFrom($config->get('store_main_email'));
                     $mail->setSender($store_info->store_name);
-                    if($mail->setTemplate(
-                        'admin_new_transaction_notify',
-                        $this->data,
-                        $this->registry->get('language')->getContentLanguageID())
-                    ){
-                        $mail->send();
-                    }
+                    $mail->setTemplate('admin_new_transaction_notify', $this->data, $this->registry->get('language')->getContentLanguageID());
+                    $mail->send();
 
                     //notify customer
                     $language->load('common/im');

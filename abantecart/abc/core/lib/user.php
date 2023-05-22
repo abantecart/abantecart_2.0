@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2018 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -24,7 +24,6 @@ use abc\core\ABC;
 use abc\core\engine\Registry;
 use abc\models\user\User;
 use Cake\Database\Exception;
-use H;
 use Illuminate\Support\Carbon;
 
 /**
@@ -47,16 +46,16 @@ final class AUser
     private $lastname;
     private $lastLogin;
     /**
-     * @var \abc\core\lib\ARequest
+     * @var ARequest
      */
     private $request;
     /**
-     * @var \abc\core\lib\ASession
+     * @var ASession
      */
     private $session;
 
     /**
-     * @var \abc\core\lib\ADB
+     * @var ADB
      */
     private $db;
 
@@ -66,7 +65,7 @@ final class AUser
     private $permission = [];
 
     /**
-     * @param $registry \abc\core\engine\Registry
+     * @param $registry Registry
      *
      * @throws \Exception
      */
@@ -76,11 +75,12 @@ final class AUser
         $this->request = $registry->get('request');
         $this->session = $registry->get('session');
 
-        if (isset($this->session->data['user_id'])) {
+        if ((int)$this->session->data['user_id']) {
             $user = User::find((int)$this->session->data['user_id']);
+
             if ($user) {
-                $this->userId = (int)$user->user_id;
-                $this->userGroupId = (int)$user->user_group_id;
+                $this->userId = $user->user_id;
+                $this->userGroupId = $user->user_group_id;
                 $this->email = $user->email;
                 $this->username = $user->username;
                 $this->firstname = $user->firstname;
@@ -118,14 +118,13 @@ final class AUser
                 'users.status'   => 1,
             ]
         )->whereRaw(Registry::db()->table_name('users').'.password = '.$sqlString)
-         ->first();
-
+                    ->first();
         if ($user) {
-            $this->userId = $this->session->data['user_id'] = (int)$user->user_id;
-            $this->userGroupId = (int)$user->user_group_id;
+            $this->userId = $this->session->data['user_id'] = $user->user_id;
+            $this->userGroupId = $user->user_group_id;
             $this->username = $user->username;
 
-            $this->lastLogin = $this->session->data['user_last_login'] = $user->last_login;
+            $this->lastLogin = $this->session->data['user_last_login'] = (string)$user->last_login;
             if (!$this->lastLogin || $this->lastLogin == 'null' || $this->lastLogin == '0000-00-00 00:00:00') {
                 $this->session->data['user_last_login'] = $this->lastLogin = '';
             }
@@ -202,12 +201,13 @@ final class AUser
      */
     public function hasPermission($key, $value)
     {
+
         //If top_admin allow all permission. Make sure Top Admin Group is set to ID 1
         if ($this->userGroupId == 1) {
             return true;
         } else {
             if (isset($this->permission[$key])) {
-                return $this->permission[$key][$value] == 1 ? true : false;
+                return ($this->permission[$key][$value] == 1);
             } else {
                 return false;
             }
@@ -267,7 +267,7 @@ final class AUser
      */
     public function getId()
     {
-        return (int)$this->userId;
+        return $this->userId;
     }
 
     /**
@@ -275,7 +275,7 @@ final class AUser
      */
     public function getUserGroupId()
     {
-        return (int)$this->userGroupId;
+        return $this->userGroupId;
     }
 
     /**
@@ -284,6 +284,13 @@ final class AUser
     public function getUserName()
     {
         return $this->username;
+    }
+    /**
+     * @return string
+     */
+    public function getEmail()
+    {
+        return $this->email;
     }
 
     /**
@@ -338,7 +345,7 @@ final class AUser
      */
     public function getAvatar()
     {
-        return H::getGravatar($this->email);
+        return '';
     }
 
     /**

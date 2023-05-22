@@ -1,17 +1,33 @@
 <?php
-
+/**
+ * AbanteCart, Ideal Open Source Ecommerce Solution
+ * http://www.abantecart.com
+ *
+ * Copyright 2011-2022 Belavier Commerce LLC
+ *
+ * This source file is subject to Open Software License (OSL 3.0)
+ * License details is bundled with this package in the file LICENSE.txt.
+ * It is also available at this URL:
+ * <http://www.opensource.org/licenses/OSL-3.0>
+ *
+ * UPGRADE NOTE:
+ * Do not edit or add to this file if you wish to upgrade AbanteCart to newer
+ * versions in the future. If you wish to customize AbanteCart for your
+ * needs please refer to http://www.abantecart.com for more information.
+ */
 namespace abc\models\order;
 
 use abc\core\ABC;
 use abc\core\engine\Registry;
-use abc\core\lib\ADB;
 use abc\core\lib\AException;
 use abc\models\BaseModel;
 use abc\models\QueryBuilder;
-use Iatstuti\Database\Support\CascadeSoftDeletes;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
+use Psr\SimpleCache\InvalidArgumentException;
+use ReflectionException;
 
 /**
  * Class OrderStatus
@@ -19,27 +35,29 @@ use Illuminate\Validation\Rule;
  * @property int $order_status_id
  * @property string $status_text_id
  * @property int $display_status
+ * @property Carbon $date_added
+ * @property Carbon $date_modified
  *
  * @property Collection $order_histories
  * @property Collection $descriptions
  * @property OrderStatusDescription $description
  * @property Order $orders
  *
+ * @method static OrderStatus find(int $order_status_id) OrderStatus
+ *
  * @package abc\models
  */
 class OrderStatus extends BaseModel
 {
-    use SoftDeletes, CascadeSoftDeletes;
 
     protected $primaryKey = 'order_status_id';
     protected $cascadeDeletes = ['descriptions'];
 
-    protected $dates = [
-        'date_added',
-        'date_modified',
+    protected $casts = [
+        'date_added'    => 'datetime',
+        'date_modified' => 'datetime'
     ];
 
-    protected $casts = [];
     protected $fillable = [
         'status_text_id',
         'display_status',
@@ -81,10 +99,9 @@ class OrderStatus extends BaseModel
      * @param array $messages
      * @param array $customAttributes
      *
-     * @return bool|void
-     * @throws \Illuminate\Validation\ValidationException
-     * @throws \ReflectionException
-     * @throws \abc\core\lib\AException
+     * @throws ValidationException
+     * @throws ReflectionException
+     * @throws AException|InvalidArgumentException
      */
     public function validate(array $data = [], array $messages = [], array $customAttributes = [])
     {
@@ -136,15 +153,11 @@ class OrderStatus extends BaseModel
      * @param array $inputData
      * @param string $mode - can be empty or "total_only" (for counting rows)
      *
-     * @return int|\Illuminate\Support\Collection
+     * @return \Illuminate\Support\Collection|int
      */
     public static function getOrderStatuses($inputData = [], $mode = '')
     {
         $language_id = static::$current_language_id;
-
-        /**
-         * @var ADB $db
-         */
         $db = Registry::db();
         $aliasO = $db->table_name('order_statuses');
         $order = new OrderStatus();
@@ -176,9 +189,9 @@ class OrderStatus extends BaseModel
         );
         $query->where('order_status_descriptions.language_id', '=', $language_id);
 
-        //If for total, we done building the query
+        //If for total, we'done building the query
         if ($mode == 'total_only') {
-            //allow to extends this method from extensions
+            //allow to extend this method from extensions
             Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $inputData);
             $result = $query->first();
             return (int)$result->total;
@@ -193,7 +206,7 @@ class OrderStatus extends BaseModel
 
         // NOTE: Performance slowdown might be noticed or larger search results
 
-        $orderBy = $sort_data[$inputData['sort']] ? $sort_data[$inputData['sort']] : 'name';
+        $orderBy = $sort_data[$inputData['sort']] ? : 'name';
         if (isset($inputData['order']) && (strtoupper($inputData['order']) == 'DESC')) {
             $sorting = "desc";
         } else {
@@ -211,12 +224,9 @@ class OrderStatus extends BaseModel
             $query->offset((int)$inputData['start'])->limit((int)$inputData['limit']);
         }
 
-        //allow to extends this method from extensions
+        //allow to extend this method from extensions
         Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $inputData);
-        $result_rows = $query->get();
-
-        return $result_rows;
-
+        $query->useCache('order_status');
+        return $query->get();
     }
-
 }

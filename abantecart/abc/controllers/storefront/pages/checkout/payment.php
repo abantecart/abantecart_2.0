@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -25,19 +25,18 @@ use abc\core\engine\AForm;
 use abc\core\lib\APromotion;
 use abc\core\engine\HtmlElementFactory;
 use abc\core\lib\CheckOut;
+use abc\models\content\Content;
 use abc\models\customer\Address;
 
 /**
  * Class ControllerPagesCheckoutPayment
  *
  * @package abc\controllers\storefront
- * @property \abc\models\storefront\ModelCatalogContent $model_catalog_content
  * @property  Checkout $checkout
  */
 class ControllerPagesCheckoutPayment extends AController
 {
     public $error = [];
-    public $data = [];
 
     public function main()
     {
@@ -51,7 +50,7 @@ class ControllerPagesCheckoutPayment extends AController
         $login_rt = 'account/login';
         $address_rt = 'checkout/address/payment';
         $confirm_rt = 'checkout/confirm';
-        if ($this->config->get('embed_mode') == true) {
+        if ($this->config->get('embed_mode')) {
             $cart_rt = 'r/checkout/cart/embed';
         }
 
@@ -147,11 +146,11 @@ class ControllerPagesCheckoutPayment extends AController
 
         $payment_address = [];
         $address = Address::getAddresses(
-                                        $this->customer->getId(),
-                                        $this->language->getLanguageID(),
-                                        $this->session->data['payment_address_id']
+            $this->customer->getId(),
+            $this->language->getLanguageID(),
+            $this->session->data['payment_address_id']
         );
-        if($address){
+        if ($address) {
             $payment_address = $address->toArray();
         }
 
@@ -193,7 +192,7 @@ class ControllerPagesCheckoutPayment extends AController
             $only_method = $this->session->data['payment_methods'];
             reset($only_method);
             $pkey = key($only_method);
-            if ($only_method[$pkey]['settings'][$pkey."_autoselect"]) {
+            if ($only_method[$pkey]['settings'][$pkey . "_autoselect"]) {
                 $this->session->data['payment_method'] = $only_method[$pkey];
                 abc_redirect($this->html->getSecureURL($confirm_rt));
             }
@@ -241,7 +240,7 @@ class ControllerPagesCheckoutPayment extends AController
         if (isset($this->session->data['success'])) {
             unset($this->session->data['success']);
         }
-        $action = $this->html->getSecureURL($payment_rt, '&mode='.$this->request->get['mode'], true);
+        $action = $this->html->getSecureURL($payment_rt, '&mode=' . $this->request->get['mode'], true);
 
         $this->data['change_address'] = HtmlElementFactory::create([
             'type'  => 'button',
@@ -276,14 +275,12 @@ class ControllerPagesCheckoutPayment extends AController
         );
 
         $this->data['payment_methods'] = $this->session->data['payment_methods'];
-        $payment = isset($this->request->post['payment_method'])
-            ? $this->request->post['payment_method']
-            : $this->session->data['payment_method']['id'];
+        $payment = $this->request->post['payment_method'] ?? $this->session->data['payment_method']['id'];
 
         //balance handling
         $balance_def_currency = $this->customer->getBalance();
         //is balance enough to cover all order amount
-        $this->data['balance_enough'] = $balance_def_currency >= $order_total ? true : false;
+        $this->data['balance_enough'] = $balance_def_currency >= $order_total;
 
         $balance = $this->currency->convert(
             $balance_def_currency,
@@ -291,8 +288,7 @@ class ControllerPagesCheckoutPayment extends AController
             $this->session->data['currency']
         );
 
-        if ($balance != 0
-            || ($balance == 0 && $this->config->get('config_zero_customer_balance'))
+        if ($balance != 0 || ($balance == 0 && $this->config->get('config_zero_customer_balance'))
             && (float)$this->session->data['used_balance'] != 0) {
             if ((float)$this->session->data['used_balance'] == 0 && $balance > 0) {
                 $this->data['apply_balance_button'] = $this->html->buildElement(
@@ -303,7 +299,8 @@ class ControllerPagesCheckoutPayment extends AController
                         'text'  => $this->language->get('button_pay_with_balance'),
                         'icon'  => 'fa fa-money',
                         'style' => 'btn-default',
-                    ]);
+                    ]
+                );
             } elseif ((float)$this->session->data['used_balance'] > 0) {
                 $this->data['apply_balance_button'] = $this->html->buildElement(
                     [
@@ -313,7 +310,8 @@ class ControllerPagesCheckoutPayment extends AController
                         'text'  => $this->language->get('button_disapply_balance'),
                         'icon'  => 'fa fa-times',
                         'style' => 'btn btn-default',
-                    ]);
+                    ]
+                );
                 //if balance cover all order amount - build button for continue checkout
                 if ($this->session->data['used_balance_full']) {
                     $this->data['balance_continue_button'] = $this->html->buildElement(
@@ -321,7 +319,8 @@ class ControllerPagesCheckoutPayment extends AController
                             'type' => 'submit',
                             'name' => $this->language->get('button_continue'),
                             'icon' => 'fa fa-arrow-right',
-                        ]);
+                        ]
+                    );
                 }
             }
 
@@ -342,14 +341,14 @@ class ControllerPagesCheckoutPayment extends AController
             foreach ($this->data['payment_methods'] as $k => $v) {
                 //check if we have only one method and select by default if was selected before
                 $selected = false;
-                $autoselect = $v['settings'][$k."_autoselect"];
+                $autoSelect = $v['settings'][$k . "_autoselect"];
                 if (count($this->data['payment_methods']) == 1) {
                     $selected = true;
                 } else {
                     if ($payment == $v['id']) {
                         $selected = true;
                     } else {
-                        if ($autoselect) {
+                        if ($autoSelect) {
                             $selected = true;
                         }
                     }
@@ -367,8 +366,7 @@ class ControllerPagesCheckoutPayment extends AController
             $this->data['payment_methods'] = [];
         }
 
-        $this->data['comment'] =
-            isset($this->request->post['comment']) ? $this->request->post['comment'] : $this->session->data['comment'];
+        $this->data['comment'] = $this->request->post['comment'] ?? $this->session->data['comment'];
         $this->data['form']['comment'] = $form->getFieldHtml(
             [
                 'type'  => 'textarea',
@@ -378,13 +376,12 @@ class ControllerPagesCheckoutPayment extends AController
             ]);
 
         if ($this->config->get('config_checkout_id')) {
-            $this->loadModel('catalog/content');
-            $content_info = $this->model_catalog_content->getContent($this->config->get('config_checkout_id'));
+            $content_info = Content::getContent((int)$this->config->get('config_checkout_id'))?->toArray();
             if ($content_info) {
                 $this->data['text_agree'] = $this->language->get('text_agree');
                 $this->data['text_agree_href'] = $this->html->getURL(
                     'r/content/content/loadInfo',
-                    '&content_id='.$this->config->get('config_checkout_id'),
+                    '&content_id=' . $this->config->get('config_checkout_id'),
                     true
                 );
                 $this->data['text_agree_href_text'] = $content_info['title'];
@@ -400,7 +397,7 @@ class ControllerPagesCheckoutPayment extends AController
                 'type'    => 'checkbox',
                 'name'    => 'agree',
                 'value'   => '1',
-                'checked' => ($this->request->post['agree'] ? true : false),
+                'checked' => (bool)$this->request->post['agree'],
             ]);
         }
 
@@ -412,20 +409,24 @@ class ControllerPagesCheckoutPayment extends AController
             $this->data['back'] = $this->html->getSecureURL($checkout_rt);
         }
 
-        $this->data['form']['back'] = $form->getFieldHtml([
-            'type'  => 'button',
-            'name'  => 'back',
-            'style' => 'button',
-            'text'  => $this->language->get('button_back'),
-        ]);
-        $this->data['form']['continue'] = $form->getFieldHtml([
-            'type' => 'submit',
-            'name' => $this->language->get('button_continue'),
-        ]);
+        $this->data['form']['back'] = $form->getFieldHtml(
+            [
+                'type'  => 'button',
+                'name'  => 'back',
+                'style' => 'button',
+                'text'  => $this->language->get('button_back'),
+            ]
+        );
+        $this->data['form']['continue'] = $form->getFieldHtml(
+            [
+                'type' => 'submit',
+                'name' => $this->language->get('button_continue'),
+            ]
+        );
 
         //render buttons
         $this->view->batchAssign($this->data);
-        if ($this->config->get('embed_mode') == true) {
+        if ($this->config->get('embed_mode')) {
             $this->view->assign('buttons', $this->view->fetch('embed/checkout/payment.buttons.tpl'));
             //load special headers
             $this->addChild('responses/embed/head', 'head');
@@ -501,10 +502,7 @@ class ControllerPagesCheckoutPayment extends AController
         }
 
         if ($this->config->get('config_checkout_id')) {
-            $this->loadModel('catalog/content');
-
-            $content_info = $this->model_catalog_content->getContent($this->config->get('config_checkout_id'));
-
+            $content_info = Content::getContent((int)$this->config->get('config_checkout_id'))?->toArray();
             if ($content_info) {
                 if (!isset($this->request->post['agree'])) {
                     $this->error['warning'] = sprintf($this->language->get('error_agree'), $content_info['title']);
@@ -514,13 +512,9 @@ class ControllerPagesCheckoutPayment extends AController
         }
 
         //validate post data
-        $this->extensions->hk_ValidateData($this);
+        $this->extensions->hk_ValidateData($this, __FUNCTION__);
 
-        if (!$this->error) {
-            return true;
-        } else {
-            return false;
-        }
+        return (!$this->error);
     }
 
     protected function validateCoupon()
@@ -532,12 +526,8 @@ class ControllerPagesCheckoutPayment extends AController
         }
 
         //validate post data
-        $this->extensions->hk_ValidateData($this);
+        $this->extensions->hk_ValidateData($this, __FUNCTION__);
 
-        if (!$this->error) {
-            return true;
-        } else {
-            return false;
-        }
+        return (!$this->error);
     }
 }

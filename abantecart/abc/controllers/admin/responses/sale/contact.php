@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2018 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -22,12 +22,13 @@ namespace abc\controllers\admin;
 
 use abc\core\ABC;
 use abc\core\engine\AController;
-use abc\core\helper\AHelperUtils;
 use abc\core\lib\AError;
 use abc\core\lib\AJson;
 use abc\core\lib\ATaskManager;
+use abc\models\admin\ModelSaleContact;
 use abc\models\customer\Customer;
 use abc\models\order\Order;
+use H;
 
 if (ABC::env('IS_DEMO')) {
     header('Location: static_pages/demo_mode.php');
@@ -36,11 +37,10 @@ if (ABC::env('IS_DEMO')) {
 /**
  * Class ControllerResponsesSaleContact
  *
- * @property \abc\models\admin\ModelSaleContact $model_sale_contact
+ * @property ModelSaleContact $model_sale_contact
  */
 class ControllerResponsesSaleContact extends AController
 {
-    public $data = [];
     public $errors = [];
 
     public function buildTask()
@@ -50,38 +50,47 @@ class ControllerResponsesSaleContact extends AController
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
         if ($this->request->is_POST() && $this->_validate()) {
-            $this->loadModel('sale/contact');
-            $task_details = $this->model_sale_contact->createTask('send_now_'.date('Ymd-H:i:s'), $this->request->post);
+            /** @var ModelSaleContact $mdl */
+            $mdl = $this->loadModel('sale/contact');
+            $task_details = $mdl->createTask('send_now_' . date('Ymd-H:i:s'), $this->request->post);
             $task_api_key = $this->config->get('task_api_key');
 
             if (!$task_details) {
-                $this->errors = array_merge($this->errors, $this->model_sale_contact->errors);
-                $error = new AError("Mail/Notification Sending Error: \n ".implode(' ', $this->errors));
-                return $error->toJSONResponse('APP_ERROR_402',
+                $this->errors = array_merge($this->errors, $mdl->errors);
+                $error = new AError("Mail/Notification Sending Error: \n " . implode(' ', $this->errors));
+                $error->toJSONResponse(
+                    'APP_ERROR_402',
                     [
                         'error_text'  => implode(' ', $this->errors),
                         'reset_value' => true,
-                    ]);
+                    ]
+                );
+                return;
             } elseif (!$task_api_key) {
                 $error = new AError('files backup error');
-                return $error->toJSONResponse('APP_ERROR_402',
+                $error->toJSONResponse(
+                    'APP_ERROR_402',
                     [
                         'error_text'  => 'Please set up Task API Key in the settings!',
                         'reset_value' => true,
-                    ]);
+                    ]
+                );
+                return;
             } else {
                 $task_details['task_api_key'] = $task_api_key;
                 $task_details['url'] = ABC::env('HTTPS_SERVER').'task.php';
                 $this->data['output']['task_details'] = $task_details;
             }
-
         } else {
             $error = new AError(implode('<br>', $this->errors));
-            return $error->toJSONResponse('VALIDATION_ERROR_406',
+            $error->toJSONResponse(
+                'VALIDATION_ERROR_406',
                 [
                     'error_text'  => implode('<br>', $this->errors),
                     'reset_value' => true,
-                ]);
+                ]
+            );
+            return;
         }
 
         //update controller data
@@ -90,7 +99,6 @@ class ControllerResponsesSaleContact extends AController
         $this->load->library('json');
         $this->response->addJSONHeader();
         $this->response->setOutput(AJson::encode($this->data['output']));
-
     }
 
     public function complete()
@@ -98,9 +106,9 @@ class ControllerResponsesSaleContact extends AController
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
-        $task_id = (int)$this->request->post['task_id'];
+        $task_id = (int) $this->request->post['task_id'];
         if (!$task_id) {
-            return null;
+            return;
         }
 
         //check task result
@@ -110,7 +118,7 @@ class ControllerResponsesSaleContact extends AController
         if ($task_result) {
             $tm->deleteTask($task_id);
             $result_text = sprintf($this->language->get('text_success_sent'), $task_info['settings']['sent']);
-            if (AHelperUtils::has_value($this->session->data['sale_contact_presave'])) {
+            if (H::has_value($this->session->data['sale_contact_presave'])) {
                 unset($this->session->data['sale_contact_presave']);
             }
         } else {
@@ -122,10 +130,13 @@ class ControllerResponsesSaleContact extends AController
 
         $this->load->library('json');
         $this->response->addJSONHeader();
-        $this->response->setOutput(AJson::encode([
-            'result'      => $task_result,
-            'result_text' => $result_text,
-        ])
+        $this->response->setOutput(
+            AJson::encode(
+                [
+                    'result'      => $task_result,
+                    'result_text' => $result_text,
+                ]
+            )
         );
     }
 
@@ -134,7 +145,7 @@ class ControllerResponsesSaleContact extends AController
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
-        $task_id = (int)$this->request->post['task_id'];
+        $task_id = (int) $this->request->post['task_id'];
         if (!$task_id) {
             return null;
         }
@@ -149,11 +160,14 @@ class ControllerResponsesSaleContact extends AController
         } else {
             $error_text = 'Task #'.$task_id.' not found!';
             $error = new AError($error_text);
-            return $error->toJSONResponse('APP_ERROR_402',
+            $error->toJSONResponse(
+                'APP_ERROR_402',
                 [
                     'error_text'  => $error_text,
                     'reset_value' => true,
-                ]);
+                ]
+            );
+            return;
         }
 
         //update controller data
@@ -161,10 +175,13 @@ class ControllerResponsesSaleContact extends AController
 
         $this->load->library('json');
         $this->response->addJSONHeader();
-        $this->response->setOutput(AJson::encode([
-            'result'      => true,
-            'result_text' => $result_text,
-        ])
+        $this->response->setOutput(
+            AJson::encode(
+                [
+                    'result'      => true,
+                    'result_text' => $result_text,
+                ]
+            )
         );
     }
 
@@ -174,7 +191,7 @@ class ControllerResponsesSaleContact extends AController
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
-        $task_id = (int)$this->request->get_or_post('task_id');
+        $task_id = (int) $this->request->get_or_post('task_id');
         $task_api_key = $this->config->get('task_api_key');
         $etas = [];
         if ($task_id) {
@@ -198,18 +215,24 @@ class ControllerResponsesSaleContact extends AController
                 }
                 $error_text = "Mail/Notification Sending Error: Cannot to restart task #".$task_id.'. Task removed.';
                 $error = new AError($error_text);
-                return $error->toJSONResponse('APP_ERROR_402',
+                $error->toJSONResponse(
+                    'APP_ERROR_402',
                     [
                         'error_text'  => $error_text,
                         'reset_value' => true,
-                    ]);
+                    ]
+                );
+                return;
             } elseif (!$task_api_key) {
                 $error = new AError('files backup error');
-                return $error->toJSONResponse('APP_ERROR_402',
+                $error->toJSONResponse(
+                    'APP_ERROR_402',
                     [
                         'error_text'  => 'Please set up Task API Key in the settings!',
                         'reset_value' => true,
-                    ]);
+                    ]
+                );
+                return;
             } else {
                 $task_details['task_api_key'] = $task_api_key;
                 $task_details['url'] = ABC::env('HTTPS_SERVER').'task.php';
@@ -223,14 +246,16 @@ class ControllerResponsesSaleContact extends AController
             }
 
             $this->data['output']['task_details'] = $task_details;
-
         } else {
             $error = new AError(implode('<br>', $this->errors));
-            return $error->toJSONResponse('VALIDATION_ERROR_406',
+            $error->toJSONResponse(
+                'VALIDATION_ERROR_406',
                 [
                     'error_text'  => 'Unknown task ID.',
                     'reset_value' => true,
-                ]);
+                ]
+            );
+            return;
         }
 
         //update controller data
@@ -239,7 +264,6 @@ class ControllerResponsesSaleContact extends AController
         $this->load->library('json');
         $this->response->addJSONHeader();
         $this->response->setOutput(AJson::encode($this->data['output']));
-
     }
 
     public function presave()
@@ -262,11 +286,13 @@ class ControllerResponsesSaleContact extends AController
         $this->data = $this->language->getASet('sale/contact');
 
         $tm = new ATaskManager();
-        $incomplete = $tm->getTasks([
-            'filter' => [
-                'name' => 'send_now',
-            ],
-        ]);
+        $incomplete = $tm->getTasks(
+            [
+                'filter' => [
+                    'name' => 'send_now',
+                ],
+            ]
+        );
 
         $k = 0;
         foreach ($incomplete as $incm_task) {
@@ -277,34 +303,39 @@ class ControllerResponsesSaleContact extends AController
                 }
             }
             //define incomplete tasks by last time run
-            $max_exec_time = (int)$incm_task['max_execution_time'];
+            $max_exec_time = (int) $incm_task['max_execution_time'];
             if (!$max_exec_time) {
                 //if no limitations for execution time for task - think it's 2 hours
-                //$max_exec_time = 7200;
                 $max_exec_time = 7200;
             }
-            if (time() - AHelperUtils::dateISO2Int($incm_task['last_time_run']) > $max_exec_time) {
-
+            if (time() - H::dateISO2Int($incm_task['last_time_run']) > $max_exec_time) {
                 //get some info about task, for ex message-text and subject
                 $steps = $tm->getTaskSteps($incm_task['task_id']);
                 if (!$steps) {
                     $tm->deleteTask($incm_task['task_id']);
                 }
                 $user_info = $this->model_user_user->getUser($incm_task['starter']);
-                $incm_task['starter_name'] =
-                    $user_info['username'].' '.$user_info['firstname'].' '.$user_info['lastname'];
+                $incm_task['starter_name'] = $user_info['username']
+                    .' '.$user_info['firstname']
+                    .' '.$user_info['lastname'];
                 $step = current($steps);
                 $step_settings = $step['settings'];
                 if ($step_settings['subject']) {
                     $incm_task['subject'] = $step_settings['subject'];
                 }
                 $incm_task['message'] = mb_substr($step_settings['message'], 0, 300);
-                $incm_task['date_added'] = AHelperUtils::dateISO2Display($incm_task['date_added'],
-                    $this->language->get('date_format_short').' '.$this->language->get('time_format'));
-                $incm_task['last_time_run'] = AHelperUtils::dateISO2Display($incm_task['last_time_run'],
-                    $this->language->get('date_format_short').' '.$this->language->get('time_format'));
-                $incm_task['sent'] = sprintf($this->language->get('text_sent'), $incm_task['settings']['sent'],
-                    $incm_task['settings']['recipients_count']);
+                $incm_task['date_added'] = H::dateISO2Display(
+                    $incm_task['date_added'],
+                    $this->language->get('date_format_short').' '.$this->language->get('time_format')
+                );
+                $incm_task['last_time_run'] = H::dateISO2Display(
+                    $incm_task['last_time_run'],
+                    $this->language->get('date_format_short').' '.$this->language->get('time_format')
+                );
+                $incm_task['sent'] = sprintf(
+                    $this->language->get('text_sent'), $incm_task['settings']['sent'],
+                    $incm_task['settings']['recipients_count']
+                );
 
                 $this->data['tasks'][$k] = $incm_task;
             }
@@ -320,7 +351,6 @@ class ControllerResponsesSaleContact extends AController
         $this->processTemplate('responses/sale/contact_incomplete.tpl');
         //update controller data
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
-
     }
 
     private function _validate()
@@ -345,16 +375,11 @@ class ControllerResponsesSaleContact extends AController
 
         $this->extensions->hk_ValidateData($this);
 
-        if (!$this->errors) {
-            return true;
-        } else {
-            return false;
-        }
+        return (!$this->errors);
     }
 
     public function getRecipientsCount()
     {
-
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
@@ -376,23 +401,29 @@ class ControllerResponsesSaleContact extends AController
             case 'all_subscribers':
                 $filter = $newsletter_db_filter;
                 $filter['filter']['all_subscribers'] = 1;
-                $count = Customer::getCustomers($filter, 'total_only');
+                $count = Customer::getTotalCustomers($filter);
                 break;
             case 'only_subscribers':
                 $filter = $newsletter_db_filter;
                 $filter['filter']['only_subscribers'] = 1;
-                $count = Customer::getCustomers($filter, 'total_only');
+                $count = Customer::getTotalCustomers($filter);
                 break;
             case 'only_customers':
                 $filter = $newsletter_db_filter;
                 $filter['filter']['only_customers'] = 1;
-                $count = Customer::getCustomers($filter, 'total_only');
+                $count = Customer::getTotalCustomers($filter);
                 break;
             case 'ordered':
                 $products = $this->request->post['products'];
                 if (is_array($products)) {
                     foreach ($products as $product_id) {
-                        $results = Customer::getCustomersByProduct($product_id);
+                        $results = Customer::search(
+                            [
+                                'filter' => [
+                                    'product_id' => $product_id,
+                                ],
+                            ]
+                        );
                         foreach ($results as $result) {
                             $emails[] = trim($result[$protocol]);
                         }
@@ -402,7 +433,7 @@ class ControllerResponsesSaleContact extends AController
                             if ($protocol == 'email') {
                                 $emails[] = trim($result[$protocol]);
                             } elseif ($protocol == 'sms') {
-                                $order_id = (int)$result['order_id'];
+                                $order_id = (int) $result['order_id'];
                                 if (!$order_id) {
                                     continue;
                                 }
@@ -425,7 +456,7 @@ class ControllerResponsesSaleContact extends AController
         }
 
         $this->data['output'] = [
-            'count' => (int)$count,
+            'count' => (int) $count,
             'text'  => $text,
         ];
 

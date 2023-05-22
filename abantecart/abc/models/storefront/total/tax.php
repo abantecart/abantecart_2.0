@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -64,9 +64,9 @@ class ModelTotalTax extends Model
                         $decimal_place = 2;
                         $tax_amount = round($tax_amount, $decimal_place);
                         if ($tax_amount > 0) {
-                            $sort_order = $this->config->get('tax_sort_order');
+                            $sort_order = (int)$this->config->get('tax_sort_order');
                             if (is_numeric($tax_class['priority'])) {
-                                $sort_order = $sort_order.'.'.$tax_class['priority'];
+                                $sort_order = (float)$sort_order . '.' . $tax_class['priority'];
                             }
 
                             $total_data[] = [

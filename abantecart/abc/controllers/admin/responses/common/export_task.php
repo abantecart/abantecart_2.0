@@ -1,5 +1,22 @@
 <?php
+/*------------------------------------------------------------------------------
+  $Id$
 
+  AbanteCart, Ideal OpenSource Ecommerce Solution
+  http://www.AbanteCart.com
+
+  Copyright © 2011-2022 Belavier Commerce LLC
+
+  This source file is subject to Open Software License (OSL 3.0)
+  License details is bundled with this package in the file LICENSE.txt.
+  It is also available at this URL:
+  <http://www.opensource.org/licenses/OSL-3.0>
+
+ UPGRADE NOTE:
+   Do not edit or add to this file if you wish to upgrade AbanteCart to newer
+   versions in the future. If you wish to customize AbanteCart for your
+   needs please refer to http://www.AbanteCart.com for more information.
+------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
 
 use abc\core\ABC;
@@ -9,15 +26,14 @@ use abc\core\engine\Registry;
 use abc\core\lib\AError;
 use abc\core\lib\AJson;
 use abc\core\lib\ATaskManager;
+use Exception;
 use H;
-use ReflectionClass;
-use ZipArchive;
+use RuntimeException;
 
 class ControllerResponsesCommonExportTask extends AController
 {
-    public $data = [];
     protected $zipFile = '';
-    protected $errors;
+    protected $errors = [];
     /**
      * @var string
      */
@@ -30,7 +46,7 @@ class ControllerResponsesCommonExportTask extends AController
     public function buildTask()
     {
         $this->loadLanguage('common/export_task');
-        $this->data['output'] = array();
+        $this->data['output'] = [];
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
@@ -40,26 +56,31 @@ class ControllerResponsesCommonExportTask extends AController
             $this->exportTaskController = $this->request->get['controller'];
             $task_details = $this->addTask();
 
-            if (!$task_details) {
-                $error = new AError("Create export error: \n ".implode(' ', $this->errors));
-                return $error->toJSONResponse('APP_ERROR_402',
-                    array(
-                        'error_text'  => implode(' ', $this->errors),
+            if (is_bool($task_details)) {
+                $error = new AError("Create export error: \n Result: " . var_export($task_details, true) . " \n" . implode("\n", $this->errors));
+                $error->toLog()->toJSONResponse(
+                    'APP_ERROR_402',
+                    [
+                        'error_text'  => 'Result: ' . var_export($task_details, true) . '  ' . implode("\n", $this->errors),
                         'reset_value' => true,
-                    ));
+                    ]
+                );
+                return;
             } else {
                 $task_details['task_api_key'] = $task_api_key;
                 $task_details['url'] = ABC::env('HTTPS_SERVER').'task.php';
                 $this->data['output']['task_details'] = $task_details;
             }
-
         } else {
-            $error = new AError(implode('<br>', $this->errors));
-            return $error->toJSONResponse('VALIDATION_ERROR_406',
-                array(
+            $error = new AError('Invalid task Data: ' . implode('<br>', $this->errors));
+            $error->toLog()->toJSONResponse(
+                'VALIDATION_ERROR_406',
+                [
                     'error_text'  => implode('<br>', $this->errors),
                     'reset_value' => true,
-                ));
+                ]
+            );
+            return;
         }
 
         //update controller data
@@ -70,27 +91,33 @@ class ControllerResponsesCommonExportTask extends AController
         $this->response->setOutput(AJson::encode($this->data['output']));
     }
 
-    private function addTask()
+    protected function addTask()
     {
         $tm = new ATaskManager();
         $timePerItem = 10;
+        $itemsCount = 0;
 
         try {
-            $dd = new ADispatcher($this->exportTaskController.'/getCount', [$this->request->get]);
+            $dd = new ADispatcher(
+                $this->exportTaskController.'/getCount',
+                [$this->request->get]
+            );
             $response = $dd->dispatchGetOutput();
+
             $json = json_decode($response, true);
             if (json_last_error() === JSON_ERROR_NONE) {
                 $response = $json;
             }
-            $itemsCount = 0;
-            $result = isset($response['result']) && $response['result'] ? true : false;
+
+            $result = isset($response['result']) && $response['result'];
             if ($result) {
-                $itemsCount = isset($response['count']) ? $response['count'] : 0;
+                $itemsCount = $response['count'] ?? 0;
             } else {
-                $this->errors[] = isset($response['error_text']) ? $response['error_text'] : '';
+                $this->errors[] = $response['error_text'] ?? '';
             }
-        } catch (\Exception $exception) {
-            Registry::log()->write($exception->getMessage());
+        } catch (Exception|\Error $e) {
+            $this->errors[] = $e->getMessage();
+            Registry::log()->error($e->getMessage());
         }
 
         if ($itemsCount === 0) {
@@ -99,7 +126,7 @@ class ControllerResponsesCommonExportTask extends AController
 
         //1. create new task
         $task_id = $tm->addTask(
-            array(
+            [
                 'name'               => 'Export to CSV '.date('Y-m-d H:i:s'),
                 //admin-side is starter
                 'starter'            => 1,
@@ -112,32 +139,35 @@ class ControllerResponsesCommonExportTask extends AController
                 'last_result'        => '0',
                 'run_interval'       => '0',
                 'max_execution_time' => $timePerItem * $itemsCount,
-            )
+            ]
         );
         if (!$task_id) {
+            $this->errors[] = 'unexpected error during adding of task';
             $this->errors = array_merge($this->errors, $tm->errors);
             return false;
         }
 
-        $limit = (int)$this->request->get['limit'];
+        $limit = (int) $this->request->get['limit'];
         $stepCount = ceil($itemsCount / $limit);
 
         for ($i = 1; $i <= $stepCount; $i++) {
-            $step_id = $tm->addStep(array(
-                'task_id'            => $task_id,
-                'sort_order'         => 1,
-                'status'             => 1,
-                'last_time_run'      => '0000-00-00 00:00:00',
-                'last_result'        => '0',
-                'max_execution_time' => $timePerItem * $limit,
-                'controller'         => $this->exportTaskController.'/export',
-                'settings'           => [
-                    'start'   => $i * $limit - $limit,
-                    'limit'   => $limit,
-                    'file'    => $this->getExportFile($task_id),
-                    'request' => $this->request->get,
-                ],
-            ));
+            $step_id = $tm->addStep(
+                [
+                    'task_id'            => $task_id,
+                    'sort_order'         => 1,
+                    'status'             => 1,
+                    'last_time_run'      => null,
+                    'last_result'        => 0,
+                    'max_execution_time' => $timePerItem * $limit,
+                    'controller'         => $this->exportTaskController . '/export',
+                    'settings'           => [
+                        'start'   => $i * $limit - $limit,
+                        'limit'   => $limit,
+                        'file'    => $this->getExportFile($task_id),
+                        'request' => $this->request->get,
+                    ],
+                ]
+            );
 
             if (!$step_id) {
                 $this->errors = array_merge($this->errors, $tm->errors);
@@ -155,7 +185,7 @@ class ControllerResponsesCommonExportTask extends AController
         return false;
     }
 
-    private function validate()
+    protected function validate()
     {
         $this->extensions->hk_ValidateData($this);
         if (!H::has_value($this->request->get['controller'])) {
@@ -165,7 +195,7 @@ class ControllerResponsesCommonExportTask extends AController
         if (!H::has_value($this->request->get['limit'])) {
             $this->errors[] = '"limit" - get param is empty or not exist';
         }
-        if ((int)$this->request->get['limit'] === 0) {
+        if ((int) $this->request->get['limit'] === 0) {
             $this->errors[] = '"limit" - should be greater then 0';
         }
 
@@ -183,9 +213,9 @@ class ControllerResponsesCommonExportTask extends AController
 
         $this->exportTaskController = $this->request->get['controller'];
 
-        $task_id = (int)$this->request->post['task_id'];
+        $task_id = (int) $this->request->post['task_id'];
         if (!$task_id) {
-            return null;
+            return;
         }
 
         //check task result
@@ -194,15 +224,13 @@ class ControllerResponsesCommonExportTask extends AController
         $task_result = $task_info['last_result'];
         if ($task_result) {
             $tm->deleteTask($task_id);
-            //$rt = $this->rt();
-            rename($this->getExportFile($task_id), $this->getPublicExportFile($task_id));
-            @unlink($this->getExportFile($task_id));
-            //$rt = str_replace('responses/', 'r/', $rt);
-            $downloadLink = $this->html->getHomeURL().'export/'.$this->zipFile;
-            $result_text = '<a href="'.$downloadLink.'">'.
-                $this->language->get('text_export_task_download')
-                .'</a>';
-
+            $resultFile = $this->getExportFile($task_id);
+            $tmpFile = $this->getPublicExportFilePath($task_id);
+            rename($resultFile, ABC::env('DIR_SYSTEM').$tmpFile);
+            @unlink($resultFile);
+            $downloadLink = $this->html->getSecureURL('r/common/export_task/downloadFile', '&file='.$tmpFile);
+            $result_text = '<a href="'.$downloadLink.'">'
+                .$this->language->get('text_export_task_download').'</a>';
         } else {
             $result_text = $this->language->get('text_export_task_failed');
         }
@@ -212,10 +240,13 @@ class ControllerResponsesCommonExportTask extends AController
 
         $this->load->library('json');
         $this->response->addJSONHeader();
-        $this->response->setOutput(AJson::encode(array(
-            'result'      => $task_result,
-            'result_text' => $result_text,
-        ))
+        $this->response->setOutput(
+            AJson::encode(
+                [
+                    'result'      => $task_result,
+                    'result_text' => $result_text,
+                ]
+            )
         );
     }
 
@@ -225,7 +256,7 @@ class ControllerResponsesCommonExportTask extends AController
         $this->extensions->hk_InitData($this, __FUNCTION__);
         $this->loadLanguage('common/export_task');
 
-        $task_id = (int)$this->request->post['task_id'];
+        $task_id = (int) $this->request->post['task_id'];
         if (!$task_id) {
             return null;
         }
@@ -240,11 +271,14 @@ class ControllerResponsesCommonExportTask extends AController
         } else {
             $error_text = 'Task #'.$task_id.' not found!';
             $error = new AError($error_text);
-            return $error->toJSONResponse('APP_ERROR_402',
-                array(
+            $error->toJSONResponse(
+                'APP_ERROR_402',
+                [
                     'error_text'  => $error_text,
                     'reset_value' => true,
-                ));
+                ]
+            );
+            return;
         }
 
         //update controller data
@@ -252,22 +286,27 @@ class ControllerResponsesCommonExportTask extends AController
 
         $this->load->library('json');
         $this->response->addJSONHeader();
-        $this->response->setOutput(AJson::encode(array(
-            'result'      => true,
-            'result_text' => $result_text,
-        ))
+        $this->response->setOutput(
+            AJson::encode(
+                [
+                    'result'      => true,
+                    'result_text' => $result_text,
+                ]
+            )
         );
     }
 
     public function downloadFile()
     {
-
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
         if ($this->user->canAccess('tool/backup')) {
             $filename = str_replace(['../', '..\\',], '', $this->request->get['file']);
-            $file = ABC::env('DIR_SYSTEM').'export'.DS.$filename;
+            //look into temporary directory first, then dig into system/export directory
+            $file = is_file(ABC::env('DIR_SYSTEM').$filename) &&  str_starts_with($filename, 'temp')
+                ? ABC::env('DIR_SYSTEM').$filename
+                : ABC::env('DIR_SYSTEM').'export'.DS.$filename;
             if (file_exists($file)) {
                 header('Content-Description: File Transfer');
                 header('Content-Type: application/x-gzip');
@@ -290,36 +329,43 @@ class ControllerResponsesCommonExportTask extends AController
                 abc_redirect($this->html->getSecureURL('sale/order'));
             }
         } else {
-            return $this->dispatch('error/permission');
+            $this->dispatch('error/permission');
         }
     }
 
     private function getExportFile($taskId)
     {
         if (!file_exists(ABC::env('DIR_SYSTEM').'export')) {
-            if (!mkdir($concurrentDirectory = ABC::env('DIR_SYSTEM').'export', 0775, true) && !is_dir($concurrentDirectory)) {
-                throw new \RuntimeException(sprintf('Directory "%s" was not created', $concurrentDirectory));
+            if (!mkdir($concurrentDirectory = ABC::env('DIR_SYSTEM').'export', 0775, true)
+                && !is_dir(
+                    $concurrentDirectory
+                )) {
+                throw new RuntimeException(sprintf('Directory "%s" was not created', $concurrentDirectory));
             }
         }
         if (!file_exists(ABC::env('DIR_PUBLIC').'resources'.DS.'download'.DS.'export')) {
-            if (!mkdir($concurrentDirectory = ABC::env('DIR_PUBLIC').'resources'.DS.'download'.DS.'export', 0775, true) && !is_dir($concurrentDirectory)) {
-                throw new \RuntimeException(sprintf('Directory "%s" was not created', $concurrentDirectory));
+            if (!mkdir($concurrentDirectory = ABC::env('DIR_PUBLIC').'resources'.DS.'download'.DS.'export', 0775, true)
+                && !is_dir($concurrentDirectory)
+            ) {
+                throw new RuntimeException(sprintf('Directory "%s" was not created', $concurrentDirectory));
             }
         }
 
         return ABC::env('DIR_SYSTEM').'export'.DS.'export_'.$taskId.'.csv';
     }
 
-    private function getPublicExportFile($taskId)
+    private function getPublicExportFilePath($taskId)
     {
-        if (!file_exists(ABC::env('DIR_PUBLIC').'export')) {
-            if (!mkdir($concurrentDirectory = ABC::env('DIR_PUBLIC').'export', 0775, true) && !is_dir($concurrentDirectory)) {
-                throw new \RuntimeException(sprintf('Directory "%s" was not created', $concurrentDirectory));
+        if (!file_exists(ABC::env('DIR_SYSTEM').'temp'.DS.'export')) {
+            if (!mkdir($concurrentDirectory = ABC::env('DIR_SYSTEM').'temp'.DS.'export', 0775, true)
+                && !is_dir($concurrentDirectory)
+            ) {
+                throw new RuntimeException(sprintf('Directory "%s" was not created', $concurrentDirectory));
             }
         }
 
         $this->zipFile = 'export_'.$taskId.microtime(true).'.csv';
 
-        return ABC::env('DIR_PUBLIC').'export'.DS.$this->zipFile;
+        return 'temp'.DS.'export'.DS.$this->zipFile;
     }
 }

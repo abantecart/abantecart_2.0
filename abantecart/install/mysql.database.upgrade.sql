@@ -40,7 +40,6 @@ ALTER TABLE `ac_order_totals` ENGINE=INNODB;
 ALTER TABLE `ac_products` ENGINE=INNODB;
 ALTER TABLE `ac_product_descriptions` ENGINE=INNODB;
 ALTER TABLE `ac_product_discounts` ENGINE=INNODB;
-ALTER TABLE `ac_products_featured` ENGINE=INNODB;
 ALTER TABLE `ac_product_options` ENGINE=INNODB;
 ALTER TABLE `ac_product_option_descriptions` ENGINE=INNODB;
 ALTER TABLE `ac_product_option_values` ENGINE=INNODB;
@@ -111,30 +110,44 @@ ALTER TABLE `ac_global_attributes_groups` ENGINE=INNODB;
 ALTER TABLE `ac_global_attributes_groups_descriptions` ENGINE=INNODB;
 ALTER TABLE `ac_global_attributes_types` ENGINE=INNODB;
 ALTER TABLE `ac_global_attributes_type_descriptions` ENGINE=INNODB;
---ALTER TABLE `ac_product_filters` ENGINE=INNODB;
---ALTER TABLE `ac_product_filter_descriptions` ENGINE=INNODB;
---ALTER TABLE `ac_product_filter_ranges` ENGINE=INNODB;
---ALTER TABLE `ac_product_filter_ranges_descriptions` ENGINE=INNODB;
 ALTER TABLE `ac_extension_dependencies` ENGINE=INNODB;
-ALTER TABLE `ac_encryption_keys` ENGINE=INNODB;
-ALTER TABLE `ac_tasks` ENGINE=INNODB;
-ALTER TABLE `ac_task_details` ENGINE=INNODB;
-ALTER TABLE `ac_task_steps` ENGINE=INNODB;
+ALTER TABLE `ac_encryption_keys`
+    ENGINE =INNODB;
+ALTER TABLE `ac_tasks`
+    ENGINE =INNODB;
+ALTER TABLE `ac_task_details`
+    ENGINE =INNODB;
+ALTER TABLE `ac_task_steps`
+    ENGINE =INNODB;
 
-UPDATE `ac_orders` SET `customer_id` = NULL WHERE `customer_id` = 0;
+UPDATE `ac_orders`
+SET `customer_id` = NULL
+WHERE `customer_id` = 0;
 
 
 
-ALTER TABLE `ac_orders` CHANGE COLUMN `coupon_id` `coupon_id` int(11) DEFAULT NULL;
-UPDATE `ac_orders` SET `coupon_id` = NULL WHERE `coupon_id` = 0;
+ALTER TABLE `ac_orders`
+    CHANGE COLUMN `coupon_id` `coupon_id` int(11) DEFAULT NULL;
+ALTER TABLE `ac_orders`
+    modify shipping_company varchar(64) null;
+ALTER TABLE `ac_orders`
+    modify payment_company varchar(64) null;
 
-ALTER TABLE `ac_tax_rates` CHANGE COLUMN `zone_id` `zone_id` int(11) DEFAULT NULL;
-UPDATE `ac_tax_rates` SET `zone_id` = NULL WHERE `zone_id` = 0;
+
+UPDATE `ac_orders`
+SET `coupon_id` = NULL
+WHERE `coupon_id` = 0;
+
+ALTER TABLE `ac_tax_rates`
+    CHANGE COLUMN `zone_id` `zone_id` int(11) DEFAULT NULL;
+UPDATE `ac_tax_rates`
+SET `zone_id` = NULL
+WHERE `zone_id` = 0;
 
 
 ALTER TABLE `ac_category_descriptions`
-  ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+    ADD COLUMN `date_added`    timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+    ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   ADD COLUMN `date_deleted` timestamp NULL,
   ADD COLUMN `stage_id` INT(6) NULL,
   ADD COLUMN `id` INT NOT NULL AUTO_INCREMENT FIRST,
@@ -239,8 +252,6 @@ ALTER TABLE `ac_order_totals`
 ALTER TABLE `ac_product_discounts`
   ADD FOREIGN KEY (`product_id`) REFERENCES `ac_products`(`product_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
-ALTER TABLE `ac_products_featured`
-  ADD FOREIGN KEY (`product_id`) REFERENCES `ac_products`(`product_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `ac_product_options`
   ADD FOREIGN KEY (`product_id`) REFERENCES `ac_products`(`product_id`) ON DELETE CASCADE ON UPDATE CASCADE;
@@ -394,34 +405,36 @@ ALTER TABLE `ac_global_attributes_value_descriptions`
 
 DROP TABLE IF EXISTS `ac_jobs`;
 CREATE TABLE `ac_jobs` (
-    `job_id` int(11) NOT NULL AUTO_INCREMENT,
-    `job_name` varchar(255) NOT NULL,
-    `status` int(11) DEFAULT '0' COMMENT '0 - disabled, 1 - ready, 2 - running, 3 - failed, 4 - scheduled, 5 - completed',
-    `configuration` longtext COMMENT 'configuration for job-class',
-    `start_time` datetime DEFAULT NULL,
-    `last_time_run` timestamp NULL DEFAULT NULL,
-    `last_result` int(11) NOT NULL DEFAULT '0' COMMENT '1 - success, 0 - failed',
-    `actor_type` int(11) DEFAULT NULL COMMENT '0 - System user, 1 - Admin user, 2 - Customer',
-    `actor_id` int(11) DEFAULT 0,
-    `actor_name` varchar(128) DEFAULT '',
-    `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-    `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (`job_id`, `job_name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+                           `job_id`        int(11) NOT NULL AUTO_INCREMENT,
+                           `job_name`      varchar(255) NOT NULL,
+                           `status`        int(11)          DEFAULT '0' COMMENT '0 - disabled, 1 - ready, 2 - running, 3 - failed, 4 - scheduled, 5 - completed',
+                           `configuration` longtext COMMENT 'configuration for job-class',
+                           `start_time`    datetime         DEFAULT NULL,
+                           `last_time_run` timestamp NULL   DEFAULT NULL,
+                           `last_result`   int(11) NOT NULL DEFAULT '0' COMMENT '1 - success, 0 - failed',
+                           `actor_type`    int(11)          DEFAULT NULL COMMENT '0 - System user, 1 - Admin user, 2 - Customer',
+                           `actor_id`      int(11)          DEFAULT 0,
+                           `actor_name`    varchar(128)     DEFAULT '',
+                           `date_added`    timestamp NULL   DEFAULT CURRENT_TIMESTAMP,
+                           `date_modified` timestamp NULL   DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                           PRIMARY KEY (`job_id`, `job_name`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
 
 ALTER TABLE `ac_customers`
-  CHANGE COLUMN `last_login` `last_login` timestamp NULL DEFAULT NULL,
-  CHANGE COLUMN `customer_group_id` `customer_group_id` INT(11) NULL;
+    CHANGE COLUMN `last_login` `last_login` timestamp NULL DEFAULT NULL,
+    CHANGE COLUMN `customer_group_id` `customer_group_id` INT(11) NULL,
+    ADD COLUMN `settings` MEDIUMTEXT COMMENT 'php-serialized stretch data' AFTER `last_login`;
 
-CREATE INDEX `ac_customers_email_idx` ON `ac_customers` ( `email` );
+CREATE INDEX `ac_customers_email_idx` ON `ac_customers` (`email`);
 
 ALTER TABLE `ac_users`
-  CHANGE COLUMN `last_login` `last_login` timestamp NULL DEFAULT NULL;
+    CHANGE COLUMN `last_login` `last_login` timestamp NULL DEFAULT NULL;
 ALTER TABLE `ac_ant_messages`
-  CHANGE COLUMN `start_date` `start_date` timestamp NULL default NULL,
-  CHANGE COLUMN `end_date` `end_date` timestamp NULL default NULL;
+    CHANGE COLUMN `start_date` `start_date` timestamp NULL default NULL,
+    CHANGE COLUMN `end_date` `end_date` timestamp NULL default NULL;
 ALTER TABLE `ac_extensions`
-  CHANGE COLUMN `date_installed` `date_installed` timestamp NULL default NULL;
+    CHANGE COLUMN `date_installed` `date_installed` timestamp NULL default NULL;
 ALTER TABLE `ac_tasks`
   CHANGE COLUMN `last_time_run` `date_installed` timestamp NULL default NULL;
 ALTER TABLE `ac_task_steps`
@@ -494,7 +507,8 @@ ALTER TABLE `ac_block_descriptions`
 MODIFY COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP;
 
 ALTER TABLE `ac_block_descriptions`
-MODIFY COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP
+  MODIFY COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP
+  ON UPDATE CURRENT_TIMESTAMP;
 
 ALTER TABLE `ac_block_layouts`
 MODIFY COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP;
@@ -904,40 +918,52 @@ ADD COLUMN `id` INT NOT NULL AUTO_INCREMENT FIRST,
 ADD INDEX `ac_global_attributes_type_descriptions_fk_2_idx` (`language_id` ASC);
 ALTER TABLE `ac_global_attributes_type_descriptions`
 ADD CONSTRAINT `ac_global_attributes_type_descriptions_fk_1`
-  FOREIGN KEY (`attribute_type_id`)
-  REFERENCES `ac_global_attributes_types` (`attribute_type_id`)
-  ON DELETE CASCADE
-  ON UPDATE CASCADE,
+    FOREIGN KEY (`attribute_type_id`)
+        REFERENCES `ac_global_attributes_types` (`attribute_type_id`)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
 ADD CONSTRAINT `ac_global_attributes_type_descriptions_fk_2`
-  FOREIGN KEY (`language_id`)
-  REFERENCES `ac_languages` (`language_id`)
-  ON DELETE CASCADE
-  ON UPDATE CASCADE;
+    FOREIGN KEY (`language_id`)
+        REFERENCES `ac_languages` (`language_id`)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE;
 
-ALTER TABLE `ac_contents`
-CHANGE COLUMN `parent_content_id` `parent_content_id` INT(11) NULL DEFAULT NULL ,
-ADD COLUMN `hide_title` INT(1) NULL DEFAULT '0',
-DROP PRIMARY KEY,
-ADD INDEX `ac_contents_fk_1_idx` (`parent_content_id` ASC);
+update `ac_content_descriptions`
+SET name = title
+WHERE COALESCE(name, '') = '';
 
-UPDATE `ac_contents` SET `parent_content_id` = NULL WHERE `parent_content_id` = '0';
+alter table `ac_content_descriptions`
+    add constraint `ac_content_descriptions_fk`
+        foreign key (content_id) references `ac_contents` (content_id)
+            on update cascade on delete cascade;
 
-ALTER TABLE `ac_contents`
-ADD CONSTRAINT `ac_contents_fk_1`
-  FOREIGN KEY (`parent_content_id`)
-  REFERENCES `ac_contents` (`content_id`)
-  ON DELETE SET NULL
-  ON UPDATE CASCADE;
-
+alter table `ac_contents`
+    modify content_id int null;
+alter table `ac_contents`
+    drop foreign key `ac_contents_fk_1`;
+drop index content_id on `ac_contents`;
+drop index stage_id on `ac_contents`;
+drop index `ac_contents_fk_1_idx` on `ac_contents`;
+alter table `ac_contents`
+    change parent_content_id parent_id int null;
+alter table `ac_contents`
+    add constraint `ac_contents_pk` primary key (content_id);
+alter table `ac_contents`
+    modify content_id int auto_increment;
+alter table `ac_contents`
+    add constraint `ac_contents_tims_contents_content_id_fk`
+        foreign key (parent_id) references `ac_contents` (content_id)
+            on update cascade on delete cascade;
+# CHECK rows inside contents_to_stores!!!!
 
 ALTER TABLE `ac_global_attributes_groups_descriptions`
-ADD INDEX `ac_global_attributes_groups_descriptions_fk_2_idx` (`language_id` ASC);
+    ADD INDEX `ac_global_attributes_groups_descriptions_fk_2_idx` (`language_id` ASC);
 ALTER TABLE `ac_global_attributes_groups_descriptions`
-ADD CONSTRAINT `ac_global_attributes_groups_descriptions_fk_1`
-  FOREIGN KEY (`attribute_group_id`)
-  REFERENCES `ac_global_attributes_groups` (`attribute_group_id`)
-  ON DELETE CASCADE
-  ON UPDATE CASCADE,
+    ADD CONSTRAINT `ac_global_attributes_groups_descriptions_fk_1`
+        FOREIGN KEY (`attribute_group_id`)
+            REFERENCES `ac_global_attributes_groups` (`attribute_group_id`)
+            ON DELETE CASCADE
+            ON UPDATE CASCADE,
 ADD CONSTRAINT `ac_global_attributes_groups_descriptions_fk_2`
   FOREIGN KEY (`language_id`)
   REFERENCES `ac_languages` (`language_id`)
@@ -1457,10 +1483,11 @@ ALTER TABLE `ac_weight_classes`
 
 
 ALTER TABLE `ac_addresses`
-CHANGE COLUMN `zone_id` `zone_id` int(11) NULL DEFAULT NULL,
-ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
-ADD COLUMN `date_deleted` timestamp NULL;
+    CHANGE COLUMN `company` `company` VARCHAR(64) NOT NULL DEFAULT '',
+    CHANGE COLUMN `zone_id` `zone_id` INT(11)     NULL     DEFAULT NULL,
+    ADD COLUMN `date_added`           TIMESTAMP   NULL     DEFAULT CURRENT_TIMESTAMP,
+    ADD COLUMN `date_modified`        TIMESTAMP   NULL     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    ADD COLUMN `date_deleted`         TIMESTAMP   NULL;
 
 
 
@@ -1791,10 +1818,13 @@ ADD INDEX `stage_id` (`stage_id` ASC);
 
 ALTER TABLE `ac_product_tags`
 ADD COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  ADD COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP
+ON UPDATE CURRENT_TIMESTAMP,
+  ADD COLUMN `date_deleted` timestamp NULL,
 ADD COLUMN `stage_id` INT(6) NULL,
 ADD COLUMN `id` INT NOT NULL AUTO_INCREMENT FIRST,
   DROP PRIMARY KEY,
-  ADD PRIMARY KEY (`id`,`product_id`,`tag`,`language_id`)
+  ADD PRIMARY KEY (`id`, `product_id`, `tag`, `language_id`),
 ADD INDEX `stage_id` (`stage_id` ASC),
 ADD FOREIGN KEY (`product_id`) REFERENCES `ac_products`(`product_id`) ON DELETE CASCADE ON UPDATE CASCADE,
 ADD FOREIGN KEY (`language_id`) REFERENCES `ac_languages`(`language_id`) ON DELETE CASCADE ON UPDATE CASCADE;
@@ -2084,8 +2114,8 @@ ALTER TABLE `ac_order_options`
   ADD INDEX `ac_order_options_idx_2` (`product_option_id` ASC);
 
 ALTER TABLE `ac_order_totals`
-  ADD COLUMN `data` LONGTEXT NULL
-  AFTER `value`;
+  ADD COLUMN `data` MEDIUMTEXT NULL
+      AFTER `value`;
 
 ALTER TABLE `ac_categories`
 ADD COLUMN `path` VARCHAR(255) NOT NULL DEFAULT '' AFTER `parent_id`;
@@ -2099,6 +2129,76 @@ ADD COLUMN `children_count` int(11) NOT NULL DEFAULT '0' AFTER `active_products_
 
 INSERT INTO `ac_settings` (`group`, `key`, `value`) VALUES
 ('general','config_google_tag_manager_id','');
+
+
+ALTER TABLE `ac_products`
+CHANGE COLUMN `manufacturer_id` `manufacturer_id` INT(11) NULL DEFAULT NULL ,
+CHANGE COLUMN `tax_class_id` `tax_class_id` INT(11) NULL DEFAULT NULL ,
+CHANGE COLUMN `weight_class_id` `weight_class_id` INT(11) NULL DEFAULT NULL ,
+CHANGE COLUMN `length_class_id` `length_class_id` INT(11) NULL DEFAULT NULL ,
+ADD INDEX `ac_products_idx1` (`manufacturer_id` ASC),
+ADD INDEX `ac_products_idx2` (`tax_class_id` ASC),
+ADD INDEX `ac_products_idx3` (`weight_class_id` ASC),
+ADD INDEX `ac_products_idx4` (`length_class_id` ASC);
+ALTER TABLE `ac_products`
+ADD CONSTRAINT `ac_products_fk1`
+  FOREIGN KEY (`manufacturer_id`)
+  REFERENCES `ac_manufacturers` (`manufacturer_id`)
+  ON DELETE SET NULL
+  ON UPDATE CASCADE,
+ADD CONSTRAINT `ac_products_fk2`
+  FOREIGN KEY (`tax_class_id`)
+  REFERENCES `ac_tax_classes` (`tax_class_id`)
+  ON DELETE SET NULL
+  ON UPDATE CASCADE,
+ADD CONSTRAINT `ac_products_fk3`
+  FOREIGN KEY (`weight_class_id`)
+  REFERENCES `ac_weight_classes` (`weight_class_id`)
+  ON DELETE SET NULL
+  ON UPDATE CASCADE,
+ADD CONSTRAINT `ac_products_fk4`
+  FOREIGN KEY (`length_class_id`)
+  REFERENCES `ac_length_classes` (`length_class_id`)
+  ON DELETE SET NULL
+  ON UPDATE CASCADE;
+
+
+ALTER TABLE `ac_product_options`
+CHANGE COLUMN `product_option_id` `product_option_id` INT(11) NOT NULL ,
+CHANGE COLUMN `attribute_id` `attribute_id` INT(11) NULL DEFAULT NULL ,
+CHANGE COLUMN `group_id` `group_id` INT(11) NULL DEFAULT NULL ,
+  CHANGE COLUMN `regexp_pattern` `regexp_pattern` VARCHAR(255) NULL DEFAULT '',
+ADD INDEX `ac_product_options_ibfk_3_idx` (`group_id` ASC);
+ALTER TABLE `ac_product_options`
+ADD CONSTRAINT `ac_product_options_ibfk_2`
+  FOREIGN KEY (`attribute_id`)
+  REFERENCES `ac_global_attributes` (`attribute_id`)
+  ON DELETE SET NULL
+  ON UPDATE CASCADE,
+ADD CONSTRAINT `ac_product_options_ibfk_3`
+  FOREIGN KEY (`group_id`)
+  REFERENCES `ac_global_attributes_groups` (`attribute_group_id`)
+  ON DELETE SET NULL
+  ON UPDATE CASCADE;
+
+ALTER TABLE `ac_product_option_descriptions`
+  CHANGE COLUMN `error_text` `error_text` VARCHAR(255) NULL
+COMMENT 'translatable';
+
+
+
+ALTER TABLE `ac_product_option_values`
+  ADD INDEX `ac_product_option_values_ibfk_3_idx` (`attribute_value_id` ASC);
+ALTER TABLE `ac_product_option_values`
+  ADD CONSTRAINT `ac_product_option_values_ibfk_3`
+FOREIGN KEY (`attribute_value_id`)
+REFERENCES `ac_global_attributes_values` (`attribute_value_id`)
+  ON DELETE SET NULL
+  ON UPDATE CASCADE;
+
+ALTER TABLE `ac_products_related`
+  ADD UNIQUE INDEX `ac_product_related_unique_idx` (`product_id` ASC, `related_id` ASC),
+  ADD CONSTRAINT `ac_products_related_chk` CHECK (`product_id` <> `related_id`);
 
 
 DROP TABLE IF EXISTS `ac_email_templates`;
@@ -2147,13 +2247,20 @@ INSERT INTO `ac_dataset_values` (`dataset_column_id`, `value_varchar`,`row_id`)
 VALUES  (12,'design/email_templates',137);
 -- PARENT_ID
 INSERT INTO `ac_dataset_values` (`dataset_column_id`, `value_varchar`,`row_id`)
-VALUES   (13,'design',137);
+VALUES
+    (13, 'design', 137);
 -- SORT_ORDER
-INSERT INTO `ac_dataset_values` (`dataset_column_id`, `value_integer`,`row_id`)
-	VALUES  (14,8,137);
+INSERT INTO `ac_dataset_values` (`dataset_column_id`, `value_integer`, `row_id`)
+VALUES
+    (14, 8, 137);
 -- ITEM_TYPE
-INSERT INTO `ac_dataset_values` (`dataset_column_id`, `value_varchar`,`row_id`)
-VALUES (15,'extension',136);
+INSERT INTO `ac_dataset_values` (`dataset_column_id`, `value_varchar`, `row_id`)
+VALUES
+    (15, 'extension', 136);
 -- ITEM_RL_ID
-INSERT INTO `ac_dataset_values` (`dataset_column_id`, `value_varchar`,`row_id`)
-VALUES  (40,'281',137);
+INSERT INTO `ac_dataset_values` (`dataset_column_id`, `value_varchar`, `row_id`)
+VALUES
+    (40, '281', 137);
+
+
+##TODO: update datasources of listing blocks (see $this->data_sources = [] in the core/lib/listing.php. (use camelcase array keys!!!))

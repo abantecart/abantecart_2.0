@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2018 Belavier Commerce LLC
+  Copyright © 2011-2023 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -89,7 +89,7 @@ class ModelExtensionGdpr extends Model
                         } elseif (in_array($data_type, ['int', 'bigint', 'smallint', 'decimal', 'double'])) {
                             $value = 0;
                         } elseif (in_array($data_type, ['timestamp', 'datetime'])) {
-                            $value = '0000-00-00 00:00:00';
+                            $value = null;
                         } else {
                             $value = '';
                         }
@@ -102,9 +102,7 @@ class ModelExtensionGdpr extends Model
                     continue;
                 }
 
-                $this->db->table($table_name)
-                         ->where('customer_id', '=', $customer_id)
-                         ->update($updateData);
+                Customer::find($customer_id)?->update($updateData);
             }
 
 
@@ -127,7 +125,7 @@ class ModelExtensionGdpr extends Model
             $this->db->commit();
 
         } catch (\Exception $e) {
-            $this->log->write('GDPR view data error: '.$sql.' File: '.__FILE__);
+            $this->log->error('GDPR view data error: ' . $sql . ' File: ' . __FILE__);
             $this->db->rollback();
         }
 

@@ -2,27 +2,27 @@
 
 use abc\core\ABC;
 
-if (!file_exists(ABC::env('DIR_PUBLIC').'vendor/components/jqGrid/js/i18n/grid.locale-'.$locale.'.js')) {
+if (!file_exists(ABC::env('DIR_PUBLIC').'vendor/components/jqgrid/js/i18n/grid.locale-'.$locale.'.js')) {
     $locale = 'en';
 }
-$this->document->addScript($this->templateResource('assets/js/jqgrid/js/i18n/grid.locale-'.$locale.'.js'));
+$this->document->addScript($this->templateResource('assets/js/jqgrid/js/i18n/grid.locale-' . $locale . '.js'));
 $this->document->addScript($this->templateResource('assets/js/jqgrid/js/minified/jquery.jqGrid.min.js'));
 $this->document->addScript($this->templateResource('assets/js/jqgrid/plugins/jquery.grid.fluid.js'));
 $this->document->addScript($this->templateResource('assets/js/jqgrid/plugins/jquery.ba-bbq.min.js'));
 $this->document->addScript($this->templateResource('assets/js/jqgrid/plugins/grid.history.js'));
 
+$gridID = $data['table_id'];
 ?>
-<div class="ui-jqgrid-wrapper" id="<?php echo $data['table_id'] ?>_wrapper">
-    <form class="form-inline" id="<?php echo $data['table_id'] ?>_form" action="<?php echo $data["editurl"] ?>"
+<div class="ui-jqgrid-wrapper" id="<?php echo $gridID ?>_wrapper">
+    <form class="form-inline" id="<?php echo $gridID ?>_form" action="<?php echo $data["editurl"] ?>"
           method="POST" role="form">
-        <table id="<?php echo $data['table_id'] ?>"></table>
-        <div id="<?php echo $data['table_id'] ?>_pager"></div>
+        <table id="<?php echo $gridID ?>"></table>
+        <div id="<?php echo $gridID ?>_pager"></div>
         <div class="no_results"><?php echo $text_no_results; ?></div>
         <?php if ($data['multiselect'] == 'true' && !$data['multiselect_noselectbox']) { ?>
-            <div class="multiactions <?php echo $data['multiaction_class']; ?>"
-                 id="<?php echo $data['table_id'] ?>_multiactions" align="right">
-                <select id="<?php echo $data['table_id'] ?>_selected_action"
-                        name="<?php echo $data['table_id'] ?>_action">
+            <div id="<?php echo $gridID ?>_multiactions"
+                 class="multiactions <?php echo $data['multiaction_class']; ?>">
+                <select id="<?php echo $gridID ?>_selected_action" name="<?php echo $gridID ?>_action">
                     <?php
                     if (sizeof($multiaction_options) > 1) { ?>
                         <option value=""><?php echo $text_choose_action; ?></option>
@@ -33,7 +33,7 @@ $this->document->addScript($this->templateResource('assets/js/jqgrid/plugins/gri
                         <?php
                     } ?>
                 </select>
-                <a id="<?php echo $data['table_id'] ?>_go" class="btn btn-xs btn-default"><?php echo $text_go; ?></a>
+                <a id="<?php echo $gridID ?>_go" class="btn btn-xs btn-default"><?php echo $text_go; ?></a>
             </div>
         <?php } ?>
     </form>
@@ -48,7 +48,7 @@ echo $this->html->buildElement(
         'data_source' => 'ajax',
         'js_onload'   => " var url = $(this).data('bs.modal').options.fullmodeHref;
                             $('#viewport_modal .modal-header a.btn').attr('href',url);",
-        'js_onclose'  => "$('#".$data['table_id']."').trigger('reloadGrid',[{current:true}]);",
+        'js_onclose'  => "$('#" . $gridID . "').trigger('reloadGrid',[{current:true}]);",
     ]
 );
 ?>
@@ -57,18 +57,17 @@ echo $this->html->buildElement(
         src="<?php echo $this->templateResource('assets/js/jqgrid/plugins/jquery.tablednd.js'); ?>"></script>
 <script type="text/javascript">
 
-    var initGrid_<?php echo $data['table_id'] ?> = function ($) {
+    var initGrid_<?php echo $gridID ?> = function ($) {
 
         var text_choose_action = <?php abc_js_echo($text_choose_action); ?>;
         var text_select_items = <?php abc_js_echo($text_select_items); ?>;
-        var _table_id = '<?php echo $data['table_id'] ?>';
-        var table_id = '#<?php echo $data['table_id'] ?>';
+        var _table_id = '<?php echo $gridID ?>';
+        var table_id = '#<?php echo $gridID ?>';
         var jq_names = [<?php
             foreach ($data['colNames'] as $col_name) {
                 abc_js_echo($col_name);
                 echo ',';
             }
-            //echo "'" . implode("','", $data['colNames']) . "'"
             ?>];
         var jq_model = [<?php
             $i = 1;
@@ -270,112 +269,129 @@ echo $this->html->buildElement(
                 //add grid filter fields for saved state
                 var gridInfo = $.parseJSON($.cookie("grid_params"));
                 if (gridInfo && gridInfo.postData && gridInfo.postData.filters) {
-                    var $filters = $.parseJSON(gridInfo.postData.filters);
-                    $.each($filters.rules, function (index, value) {
-                        $('#gs_' + value.field).val(value.data);
-                    });
+                    try {
+                        var $filters = $.parseJSON(gridInfo.postData.filters);
+                        $.each($filters.rules, function (index, value) {
+                            $('#gs_' + value.field).val(value.data);
+                        });
+                    } catch (e) {
+                        console.log(e);
+                        console.log(gridInfo.postData.filters);
+                    }
                 }
 
                 var actions = '';
                 var actions_urls = {};
                 <?php
-                if (!empty($data['actions'])) {
+                if ($data['actions']) {
                     foreach ($data['actions'] as $type => $action) {
                         $html_string = '';
 
                         //for viewport mode
                         if ($action['vhref']) {
-                            $href = 'data-toggle="modal" data-target="#viewport_modal" href="'.$action['vhref']
-                                .'" data-fullmode-href="'.$action['href'].'"';
+                            $href = 'data-toggle="modal" data-target="#viewport_modal" href="' . $action['vhref']
+                                . '" data-fullmode-href="' . $action['href'] . '"';
                         } else {
-                            $href = 'href="'.(H::has_value($action['href']) ? $action['href'] : '#').'"';
+                            $href = 'href="' . ($action['href'] ?: '#') . '"';
                         }
 
-                        $html_string .= "actions_urls['".$type."'] = '".$href."';\n";
+                        $html_string .= "actions_urls['" . $type . "'] = '" . $href . "';\n";
                         $html_string .= ' actions += \'';
                         $has_children = isset($action['children']) && $action['children'];
-                        $html_btn = '<a class="btn btn-xs btn_grid tooltips grid_action_'.$type.'" title="'
-                            .htmlentities($action['text'], ENT_QUOTES, ABC::env('APP_CHARSET')).'" data-action-type="'
-                            .$type.'"';
-                        if ($has_children) {
-                            $html_btn .= ' data-toggle="dropdown" aria-expanded="false"';
-                        }
-                        switch ($type) {
-                            case 'edit':
-                                $html_btn .= ' '.$href.' rel="%ID%"><i class="fa fa-edit fa-lg"></i>';
-                                break;
-                            case 'delete':
-                                if ($href != 'href="#"') {
-                                    $html_btn .= ' '.$href.' rel="%ID%" data-confirmation="delete"><i class="fa fa-trash fa-lg"></i>';
-                                } else {
-                                    $html_btn .= ' '.$href.' rel="%ID%"><i class="fa fa-trash fa-lg"></i>';
-                                }
-                                break;
-                            case 'save':
-                                $html_btn .= ' '.$href.' rel="%ID%"><i class="fa fa-save fa-lg"></i>';
-                                break;
-                            case 'expand':
-                                $html_btn .= ' '.$href.' rel="%ID%"><i class="fa fa-plus-square-o fa-lg"></i>';
-                                break;
-                            case 'restart':
-                                $html_btn .= ' '.$href.' rel="%ID%"><i class="fa fa-repeat fa-lg"></i>';
-                                break;
-                            case 'run':
-                                $html_btn .= ' '.$href.' rel="%ID%"><i class="fa fa-play fa-lg"></i>';
-                                break;
-                            case 'approve':
-                                $html_btn .= ' '.$href.' rel="%ID%"><i class="fa fa-check-square fa-lg"></i>';
-                                break;
-                            case 'actonbehalfof':
-                                $html_btn .= ' '.$href.' target="_blank" rel="%ID%"><i class="fa fa-male fa-lg"></i>';
-                                break;
-                            case 'clone':
-                                $html_btn .= ' '.$href.' rel="%ID%"><i class="fa fa-clone fa-lg"></i>';
-                                break;
-                            case 'remote_install':
-                                $html_btn .= ' '.$href.' rel="%ID%"><i class="fa fa-play fa-lg"></i>';
-                                break;
-                            case 'install':
-                                $html_btn .= ' '.$href.' rel="%ID%"><i class="fa fa-play fa-lg"></i>';
-                                break;
-                            case 'uninstall':
-                                $html_btn .= ' '.$href .' rel="%ID%" data-confirmation="delete"><i class="fa fa-times fa-lg"></i>';
-                                break;
-                            case 'view':
-                                $html_btn .= ' '.$href.' rel="%ID%"><i class="fa fa-eye fa-lg"></i>';
-                                break;
-                            case 'tracking':
-                                $html_btn .= ' '.$href.' rel="%ID%"><i class="fa fa-box-open fa-lg"></i>';
-                                break;
-                            default:
-                                $html_btn .= ' '.$href.' id="action_'.$type.'_%ID%"  '
-                                    .(!empty($action['target']) ? 'target="'.$action['target'].'"' : '')
-                                    .'><i class="fa fa-'.$type.' fa-lg"></i>';
-                        }
 
-                        if ($has_children) {
-                            $html_btn .= '<span class="caret"></span>';
+                        // allow to use custom buttons as html-code here
+                        if ($action['html']) {
+                            $html_btn = str_replace("\n", '', $action['html']);
+                        } // otherwise use an array
+                        else {
+                            $html_btn = '<a class="btn btn-xs btn_grid tooltips grid_action_' . $type . '" title="'
+                                . htmlentities($action['text'], ENT_QUOTES, ABC::env('APP_CHARSET')) . '" data-action-type="'
+                                . $type . '"';
+                            if ($has_children) {
+                                $html_btn .= ' data-toggle="dropdown" aria-expanded="false"';
+                            }
+                            switch ($type) {
+                                case 'edit':
+                                    $html_btn .= ' ' . $href . ' rel="%ID%"><i class="fa fa-edit fa-lg"></i>';
+                                    break;
+                                case 'delete':
+                                    if ($href != 'href="#"') {
+                                        $html_btn .= ' ' . $href . ' rel="%ID%" data-confirmation="delete"><i class="fa fa-trash fa-lg"></i>';
+                                    } else {
+                                        $html_btn .= ' ' . $href . ' rel="%ID%"><i class="fa fa-trash fa-lg"></i>';
+                                    }
+                                    break;
+                                case 'save':
+                                    $html_btn .= ' ' . $href . ' rel="%ID%"><i class="fa fa-save fa-lg"></i>';
+                                    break;
+                                case 'expand':
+                                    $html_btn .= ' ' . $href . ' rel="%ID%"><i class="fa fa-plus-square-o fa-lg"></i>';
+                                    break;
+                                case 'restart':
+                                    $html_btn .= ' ' . $href . ' rel="%ID%"><i class="fa fa-repeat fa-lg"></i>';
+                                    break;
+                                case 'run':
+                                    $html_btn .= ' ' . $href . ' rel="%ID%"><i class="fa fa-play fa-lg"></i>';
+                                    break;
+                                case 'approve':
+                                    $html_btn .= ' ' . $href . ' rel="%ID%"><i class="fa fa-check-square fa-lg"></i>';
+                                    break;
+                                case 'actonbehalfof':
+                                    $html_btn .= ' ' . $href . ' target="_blank" rel="%ID%"><i class="fa fa-male fa-lg"></i>';
+                                    break;
+                                case 'clone':
+                                    $html_btn .= ' ' . $href . ' rel="%ID%"><i class="fa fa-clone fa-lg"></i>';
+                                    break;
+                                case 'remote_install':
+                                    $html_btn .= ' ' . $href . ' rel="%ID%"><i class="fa fa-play fa-lg"></i>';
+                                    break;
+                                case 'install':
+                                    $html_btn .= ' ' . $href . ' rel="%ID%"><i class="fa fa-play fa-lg"></i>';
+                                    break;
+                                case 'uninstall':
+                                    $html_btn .= ' ' . $href . ' rel="%ID%" data-confirmation="delete"><i class="fa fa-times fa-lg"></i>';
+                                    break;
+                                case 'view':
+                                    $html_btn .= ' ' . $href . ' rel="%ID%"><i class="fa fa-eye fa-lg"></i>';
+                                    break;
+                                case 'tracking':
+                                    $html_btn .= ' ' . $href . ' rel="%ID%"><i class="fa fa-box-open fa-lg"></i>';
+                                    break;
+                                default:
+                                    $html_btn .= ' ' . $href . ' id="action_' . $type . '_%ID%"  '
+                                        . (!empty($action['target']) ? 'target="' . $action['target'] . '"' : '')
+                                        . '><i class="fa fa-' . $type . ' fa-lg"></i>';
+                            }
+
+                            if ($has_children) {
+                                $html_btn .= '<span class="caret"></span>';
+                            }
+                            $html_btn .= '</a>';
                         }
-                        $html_btn .= '</a>';
 
                         //for dropdown
                         if ($action['children']) {
-                            $html_children =
-                                '<div class="dropdown-menu dropdown-menu-sm dropdown-menu-right" role="menu"><h5 class="title">'
-                                .htmlentities($text_select_from_list, ENT_QUOTES, ABC::env('APP_CHARSET'))
-                                .'</h5><ul class="dropdown-list grid-dropdown">';
+                            $html_children = '<div class="dropdown-menu dropdown-menu-sm dropdown-menu-right" role="menu"><h5 class="title">'
+                                . htmlentities($text_select_from_list, ENT_QUOTES, ABC::env('APP_CHARSET'))
+                                . '</h5><ul class="dropdown-list grid-dropdown">';
                             foreach ($action['children'] as $id => $child) {
-                                $li_class = '';
-                                $href = H::has_value($child['href']) ? $child['href'] : '#';
-                                //for viewport mode
-                                if ($child['vhref']) {
-                                    $href = 'data-toggle="modal" data-target="#viewport_modal" href="'.$child['vhref']
-                                        .'" data-fullmode-href="'.$href.'"';
+                                $html_children .= '<li class="' . $id . '">';
+                                if ($child['html']) {
+                                    $html_children .= str_replace("\n", '', $child['html']);
                                 } else {
-                                    $href = 'href="'.$href.'"';
+                                    $href = $child['href'] ?: '#';
+                                    //for viewport mode
+                                    if ($child['vhref']) {
+                                        $href = 'data-toggle="modal" data-target="#viewport_modal" href="' . $child['vhref']
+                                            . '" data-fullmode-href="' . $href . '"';
+                                    } else {
+                                        $href = 'href="' . $href . '"';
+                                    }
+                                    $html_children .= '<a ' . $href . ' rel="' . $id . '">'
+                                        . ($child['icon_class'] ? '<i class="fa fa-' . $child['icon_class'] . ' mr10"></i>' : '')
+                                        . htmlentities($child['text'], ENT_QUOTES, ABC::env('APP_CHARSET')) . '</a>';
                                 }
-                                $html_children .= '<li class="'.$li_class.' '.$id.'"><a '.$href.' rel="'.$id.'">'
-                                    .htmlentities($child['text'], ENT_QUOTES, ABC::env('APP_CHARSET')).'</a></li>';
+                                $html_children .= '</li>';
                             }
                             $html_children .= '</ul></div>';
                             $html_btn = '<div class="btn-group">'.$html_btn.''.$html_children.'</div>';
@@ -386,10 +402,10 @@ echo $this->html->buildElement(
 
                 } // end of action
                 ?>
-                if (actions != '') {
+                if (actions !== '') {
                     var ids = jQuery(table_id).jqGrid('getDataIDs');
                     for (var i = 0; i < ids.length; i++) {
-                        if (ids[i] != 'null') {
+                        if (ids[i] !== 'null') {
                             var _a = actions.replace(/%ID%/g, ids[i]);
                             jQuery(table_id).jqGrid('setRowData', ids[i], {action: _a});
                         }
@@ -493,6 +509,13 @@ echo $this->html->buildElement(
                     <?php if ($data['grid_ready']) {
                     echo $data['grid_ready'];
                 } ?>
+                    //remove delete buttons from rows that have a tree leaf
+                    if ($(table_id).find(".tree-plus, .tree-minus ").length) {
+                        let rows = $(table_id).find(".tree-plus, .tree-minus").parents('tr');
+                        $.each(rows, function (k, row) {
+                            $(row).find('.grid_action_delete').hide();
+                        });
+                    }
                     //rebind events after grid reload
                     bindCustomEvents();
                 });
@@ -560,7 +583,7 @@ echo $this->html->buildElement(
                 return false;
             },
             beforeRequest: function () {
-                <?php if($this->request->get['saved_list'] == $data['table_id']) { ?>
+                <?php if($this->request->get['saved_list'] == $gridID) { ?>
                 //apply saved grid for initial grid load only
                 var grid = $(table_id);
                 if (gridFirstLoad === true) {
@@ -855,10 +878,10 @@ echo $this->html->buildElement(
     <?php
     //run initialization if initialization on load enabled
     if ($init_onload) { ?>
-    initGrid_<?php echo $data['table_id'] ?>($);
+    initGrid_<?php echo $gridID ?>($);
     <?php } ?>
 
     //adjust grid pager:
-    $('#<?php echo $data['table_id'] ?>_pager_center').css({width: ''});
+    $('#<?php echo $gridID ?>_pager_center').css({width: ''});
 
 </script>

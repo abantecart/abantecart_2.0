@@ -18,10 +18,12 @@
 
 namespace abc\models\storefront;
 
+use abc\core\engine\Registry;
+
 class Currency extends \abc\models\locale\Currency
 {
     /**
-     * @param $operation
+     * @param string $operation
      *
      * @param array $columns
      *
@@ -42,15 +44,16 @@ class Currency extends \abc\models\locale\Currency
         if (!$this->hasPermission('read')) {
             return false;
         }
-        $currency_data = false;
-        //$currency_data = $this->cache->pull('localization.currency');
+        $currency_data = null;
+        //????
+        //$currency_data = $this->cache->get('localization.currency');
 
-        if ($currency_data === false) {
+        if ($currency_data === null) {
 
             $arCurrencies = $this->orderBy('title', 'ASC')->get()->toArray();
 
             foreach ($arCurrencies as $result) {
-                $currency_data[$result['code']] = array(
+                $currency_data[$result['code']] = [
                     'currency_id'   => $result['currency_id'],
                     'title'         => $result['title'],
                     'code'          => $result['code'],
@@ -60,10 +63,10 @@ class Currency extends \abc\models\locale\Currency
                     'value'         => $result['value'],
                     'status'        => $result['status'],
                     'date_modified' => $result['date_modified']
-                );
+                ];
             }
 
-            $this->cache->push('localization.currency', $currency_data);
+            Registry::cache()->put('localization.currency', $currency_data);
         }
 
         return $currency_data;

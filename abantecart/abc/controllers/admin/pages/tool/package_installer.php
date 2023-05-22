@@ -594,7 +594,7 @@ class ControllerPagesToolPackageInstaller extends AController
         if (!$already_downloaded) {
             $this->data['pack_info'] .= sprintf(
                 $this->language->get('text_preloading'),
-                $package_name.' ('.(round($package_info['package_size'] / 1024, 1)).'kb)'
+                $package_name.' ('.(round((int)$package_info['package_size'] / 1024, 1)).'kb)'
             );
         }
 
@@ -803,7 +803,7 @@ class ControllerPagesToolPackageInstaller extends AController
         if ($result === true) {
             // clean and redirect after install
             $this->removeTempFiles();
-            $this->cache->remove('*');
+            $this->cache->flush('*');
             unset($this->session->data['package_info']);
             $this->session->data['success'] = $this->language->get('text_success');
 
@@ -835,8 +835,10 @@ class ControllerPagesToolPackageInstaller extends AController
      * @param int $agree
      *
      * @return array|bool
-     * @throws \abc\core\lib\AException
+     * @throws \DebugBar\DebugBarException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
      */
     protected function installExtension($extension_id = '', $confirmed = false, $agree = 0)
     {
@@ -944,8 +946,9 @@ class ControllerPagesToolPackageInstaller extends AController
 
     /**
      * @return bool
-     * @throws \abc\core\lib\AException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
      */
     protected function upgradeCore()
     {

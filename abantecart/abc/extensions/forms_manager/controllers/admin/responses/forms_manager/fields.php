@@ -106,13 +106,9 @@ class ControllerResponsesFormsManagerFields extends AController
             $this->error['field_name'] = sprintf( $this->language->get( 'error_field_name_exists' ), $data['field_name'] );
         }
 
-        $this->extensions->hk_ValidateData( $this );
+        $this->extensions->hk_ValidateData($this, __FUNCTION__, $data);
 
-        if ( ! $this->error ) {
-            return true;
-        } else {
-            return false;
-        }
+        return (!$this->error);
     }
 
     public function remove_field()
@@ -385,7 +381,9 @@ class ControllerResponsesFormsManagerFields extends AController
 
     /**
      * @return string
-     * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \ReflectionException
+     * @throws \abc\core\lib\AException
      */
     private function _file_upload_settings_form()
     {

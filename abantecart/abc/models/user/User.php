@@ -1,11 +1,30 @@
 <?php
-
+/**
+ * AbanteCart, Ideal Open Source Ecommerce Solution
+ * http://www.abantecart.com
+ *
+ * Copyright 2011-2022 Belavier Commerce LLC
+ *
+ * This source file is subject to Open Software License (OSL 3.0)
+ * License details is bundled with this package in the file LICENSE.txt.
+ * It is also available at this URL:
+ * <http://www.opensource.org/licenses/OSL-3.0>
+ *
+ * UPGRADE NOTE:
+ * Do not edit or add to this file if you wish to upgrade AbanteCart to newer
+ * versions in the future. If you wish to customize AbanteCart for your
+ * needs please refer to http://www.abantecart.com for more information.
+ */
 namespace abc\models\user;
 
 use abc\models\BaseModel;
 use abc\models\system\Audit;
-use abc\core\lib\AException;
-use Iatstuti\Database\Support\CascadeSoftDeletes;
+use Carbon\Carbon;
+use Dyrynda\Database\Support\CascadeSoftDeletes;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -21,12 +40,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string $email
  * @property int $status
  * @property string $ip
- * @property \Carbon\Carbon $last_login
- * @property \Carbon\Carbon $date_added
- * @property \Carbon\Carbon $date_modified
+ * @property Carbon $last_login
+ * @property Carbon $date_added
+ * @property Carbon $date_modified
  *
  * @property UserGroup $user_group
- * @property \Illuminate\Database\Eloquent\Collection $user_notifications
+ * @property Collection $user_notifications
  *
  *
  * @method static User find(int $user_id) User
@@ -46,12 +65,10 @@ class User extends BaseModel
     protected $casts = [
         'user_group_id' => 'int',
         'status'        => 'int',
-    ];
-
-    protected $dates = [
-        'last_login',
-        'date_added',
-        'date_modified',
+        'ip'            => 'string',
+        'last_login'    => 'datetime',
+        'date_added'    => 'datetime',
+        'date_modified' => 'datetime'
     ];
 
     protected $hidden = [
@@ -74,18 +91,7 @@ class User extends BaseModel
     ];
 
     /**
-     * User constructor.
-     *
-     * @param array $attributes
-     *
-     */
-    public function __construct(array $attributes = [])
-    {
-        parent::__construct($attributes = []);
-    }
-
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo
      */
     public function user_group()
     {
@@ -93,7 +99,7 @@ class User extends BaseModel
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany
      */
     public function notifications()
     {
@@ -101,7 +107,7 @@ class User extends BaseModel
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
+     * @return MorphMany
      */
     public function audits()
     {

@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2023 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -25,9 +25,6 @@ use abc\core\lib\AMenu;
 use abc\core\lib\AResourceManager;
 use Illuminate\Database\Schema\Blueprint;
 
-if ( ! class_exists( 'abc\core\ABC' ) ) {
-    header( 'Location: static_pages/?forbidden='.basename( __FILE__ ) );
-}
 
 /**
  * @var AExtensionManager $this
@@ -46,23 +43,24 @@ $db_schema->create( 'banners', function ( Blueprint $table ) {
     $table->timestamp( 'date_modified' )->default( $this->db->CurrentTimeStamp() );
 } );
 $db_schema->create( 'banner_descriptions', function ( Blueprint $table ) {
-    $table->integer( 'banner_id' );
-    $table->integer( 'language_id' );
-    $table->string( 'name' );
-    $table->text( 'description' );
-    $table->text( 'meta' );
-    $table->timestamp( 'date_added' );
-    $table->timestamp( 'date_modified' )->default( $this->db->CurrentTimeStamp() );
-    $table->primary( [ 'banner_id', 'language_id' ] );
+    $table->increments('id');
+    $table->integer('banner_id');
+    $table->integer('language_id');
+    $table->string('name');
+    $table->text('description');
+    $table->text('meta');
+    $table->timestamp('date_added');
+    $table->timestamp('date_modified')->default($this->db->CurrentTimeStamp());
+    $table->primary(['banner_id', 'language_id']);
 } );
 $db_schema->create( 'banner_stat', function ( Blueprint $table ) {
-    $table->integer( 'banner_id' );
-    $table->integer( 'store_id' );
-    $table->integer( 'type' );
-    $table->text( 'user_info' );
-    $table->text( 'meta' );
-    $table->timestamp( 'time' )->default( $this->db->CurrentTimeStamp() );
-    $table->index( [ 'banner_id', 'store_id', 'type', 'time' ], 'banner_stat_idx' );
+    $table->integer('banner_id');
+    $table->integer('store_id');
+    $table->integer('type');
+    $table->text('user_info');
+    $table->text('meta');
+    $table->timestamp('time')->default($this->db->CurrentTimeStamp());
+    $table->index(['banner_id', 'store_id', 'type', 'time'], 'banner_stat_idx');
     /*TODO
     ALTER TABLE `ac_banner_stat`
     ADD INDEX `ac_banner_stat_ibfk_2_idx` (`store_id` ASC);
@@ -73,22 +71,22 @@ $db_schema->create( 'banner_stat', function ( Blueprint $table ) {
       ON DELETE CASCADE
       ON UPDATE CASCADE;
      * */
-} );
+});
 
 // add new menu item
 $rm = new AResourceManager();
-$rm->setType( 'image' );
+$rm->setType('image');
 
 $language_id = $this->language->getContentLanguageID();
-$data = array();
+$data = [];
 $data['resource_code'] = '<i class="fa fa-picture-o"></i>&nbsp;';
-$data['name'] = array( $language_id => 'Menu Icon Banner Manager' );
-$data['title'] = array( $language_id => '' );
-$data['description'] = array( $language_id => '' );
-$resource_id = $rm->addResource( $data );
+$data['name'] = [$language_id => 'Menu Icon Banner Manager'];
+$data['title'] = [$language_id => ''];
+$data['description'] = [$language_id => ''];
+$resource_id = $rm->addResource($data);
 
-$menu = new AMenu ( "admin" );
-$menu->insertMenuItem( array(
+$menu = new AMenu ("admin");
+$menu->insertMenuItem([
         "item_id"         => "banner_manager",
         "parent_id"       => "design",
         "item_text"       => "banner_manager_name",
@@ -96,16 +94,16 @@ $menu->insertMenuItem( array(
         "item_icon_rl_id" => $resource_id,
         "item_type"       => "extension",
         "sort_order"      => "6",
-    )
+    ]
 );
-$data = array();
+$data = [];
 $data['resource_code'] = '<i class="fa fa-reply-all"></i>&nbsp;';
-$data['name'] = array( $language_id => 'Menu Icon Banner Manager Stat' );
-$data['title'] = array( $language_id => '' );
-$data['description'] = array( $language_id => '' );
-$resource_id = $rm->addResource( $data );
+$data['name'] = [$language_id => 'Menu Icon Banner Manager Stat'];
+$data['title'] = [$language_id => ''];
+$data['description'] = [$language_id => ''];
+$resource_id = $rm->addResource($data);
 
-$menu->insertMenuItem( array(
+$menu->insertMenuItem([
         "item_id"         => "banner_manager_stat",
         "parent_id"       => "reports",
         "item_text"       => "banner_manager_name_stat",
@@ -113,13 +111,13 @@ $menu->insertMenuItem( array(
         "item_icon_rl_id" => $resource_id,
         "item_type"       => "extension",
         "sort_order"      => "4",
-    )
+    ]
 );
-$exists = $this->db->table_name('blocks')->select('block_id')->where('block_txt_id', '=', 'banner_block')->get()->count();
+$exists = $this->db->table('blocks')->select('block_id')->where('block_txt_id', '=', 'banner_block')->get()->count();
 if ( ! $exists ) {
     $now = $this->db->getORM()::raw('NOW()');
-    $block_id = $this->db->table_name('block_templates')->insertGetId(
-        [ "block_txt_id" => 'banner_block', "controller" => 'blocks/banner_block', "date_added" => $now]
+    $block_id = $this->db->table('block_templates')->insertGetId(
+        ["block_txt_id" => 'banner_block', "controller" => 'blocks/banner_block', "date_added" => $now]
     );
 
 
@@ -134,5 +132,5 @@ if ( ! $exists ) {
         [ "block_id" => $block_id, "parent_block_id" => 8, "template" =>  'blocks/banner_block_header.tpl', "date_added" => $now],
     ]);
 
-    $this->cache->remove( 'layout' );
+    $this->cache->flush('layout');
 }

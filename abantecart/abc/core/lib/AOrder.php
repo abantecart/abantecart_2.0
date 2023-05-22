@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2018 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -22,6 +22,9 @@ namespace abc\core\lib;
 
 use abc\core\ABC;
 use abc\core\engine\ALanguage;
+use abc\core\engine\ALoader;
+use abc\core\engine\AResource;
+use abc\core\engine\ExtensionsAPI;
 use abc\core\engine\Registry;
 use abc\models\catalog\Product;
 use abc\models\catalog\ProductOptionValue;
@@ -36,9 +39,14 @@ use abc\models\order\OrderOption;
 use abc\models\order\OrderProduct;
 use abc\models\order\OrderStatus;
 use abc\models\order\OrderTotal;
+use abc\models\storefront\ModelCheckoutExtension;
+use abc\models\storefront\ModelTotalSubTotal;
+use abc\models\storefront\ModelTotalTotal;
 use abc\modules\events\ABaseEvent;
 use H;
 use Illuminate\Support\Carbon;
+use Psr\SimpleCache\InvalidArgumentException;
+use ReflectionException;
 
 /**
  * Class AOrder
@@ -48,41 +56,31 @@ use Illuminate\Support\Carbon;
  * @property ATax $tax
  * @property ACurrency $currency
  * @property ARequest $request
- * @property \abc\core\engine\ALoader $load
+ * @property ALoader $load
  * @property ASession $session
- * @property \abc\core\engine\ExtensionsAPI $extensions
- * @property \abc\models\storefront\ModelCheckoutExtension $model_checkout_extension
+ * @property ExtensionsAPI $extensions
+ * @property ModelCheckoutExtension $model_checkout_extension
  * @property AIM $im
  *
  */
 class AOrder extends ALibBase
 {
-    /**
-     * @var \abc\core\engine\Registry
-     */
+    /** @var Registry */
     protected $registry;
-    /**
-     * @var int
-     */
+    /** @var int */
     protected $customer_id;
-    /**
-     * @var int
-     */
+    /** @var int */
     protected $order_id;
-    /**
-     * @var ACustomer
-     */
+    /** @var ACustomer */
     protected $customer;
     protected $order_data;
-    /**
-     * @var array public property. needs to use inside hooks
-     */
+    /** @var array public property. needs to use inside hooks */
     public $data = [];
 
     /**
      * AOrder constructor.
      *
-     * @param \abc\core\engine\Registry $registry
+     * @param Registry $registry
      * @param string $order_id
      *
      */
@@ -91,18 +89,14 @@ class AOrder extends ALibBase
         $this->registry = $registry;
 
         //if nothing is passed use session array. Customer session, can function on storefront only
-        if (!H::has_value($order_id)) {
-            $this->order_id = (int)$this->session->data['order_id'];
-        } else {
-            $this->order_id = (int)$order_id;
-        }
+        $this->order_id = $order_id ?: (int)$this->session->data['order_id'];;
 
-        if (is_object($this->registry->get('customer'))) {
-            $this->customer = $this->registry->get('customer');
-            $this->customer_id = $this->customer->getId();
+        if (is_object($registry::customer())) {
+            $this->customer = $registry::customer();
         } else {
             $this->customer = ABC::getObjectByAlias('ACustomer', [$registry]);
         }
+        $this->customer_id = $this->customer?->getId();
     }
 
     public function __get($key)
@@ -130,22 +124,22 @@ class AOrder extends ALibBase
         //get order details for specific status. NOTE: Customer ID need to be set in customer class
         $this->order_data = Order::getOrderArray($this->order_id, $order_status_id);
         $this->extensions->hk_ProcessData($this, 'load_order_data');
-        $output = (array)$this->data + (array)$this->order_data;
-        return $output;
+        return (array)$this->data + (array)$this->order_data;
     }
 
     /**
-     * @param array $indata : Session data array
+     * @param array $inData : Session data array
      *
      * @return array
      * NOTE: method to create an order based on provided data array.
      * @throws AException
-     * @throws \ReflectionException
+     * @throws ReflectionException
+     * @throws InvalidArgumentException
      */
-    public function buildOrderData($indata)
+    public function buildOrderData($inData)
     {
         $order_info = [];
-        if (empty($indata)) {
+        if (empty($inData)) {
             return [];
         }
 
@@ -153,21 +147,20 @@ class AOrder extends ALibBase
         $total = 0;
         $taxes = $this->cart->getTaxes();
 
-        $this->registry->get('load')->model('checkout/extension', 'storefront');
-
+        /** @var ModelCheckoutExtension $mdl */
+        $mdl = $this->registry::load()->model('checkout/extension', 'storefront');
+        $results = $mdl->getExtensions('total');
         $sort_order = [];
-
-        $results = $this->registry->get('model_checkout_extension')->getExtensions('total');
-
         foreach ($results as $key => $value) {
-            $sort_order[$key] = $this->config->get($value['key'].'_sort_order');
+            $sort_order[$key] = $this->config->get($value['key'] . '_sort_order');
         }
 
         array_multisort($sort_order, SORT_ASC, $results);
 
         foreach ($results as $result) {
-            $this->registry->get('load')->model('total/'.$result['key'], 'storefront');
-            $this->registry->get('model_total_'.$result['key'])->getTotal($total_data, $total, $taxes, $indata);
+            /** @var ModelTotalTotal|ModelTotalSubTotal $mdl */
+            $mdl = $this->registry::load()->model('total/' . $result['key'], 'storefront');
+            $mdl->getTotal($total_data, $total, $taxes, $inData);
         }
 
         $sort_order = [];
@@ -182,8 +175,8 @@ class AOrder extends ALibBase
         $order_info['store_name'] = $this->config->get('store_name');
         $order_info['store_url'] = $this->config->get('config_url');
         //prepare data with customer details.
-        if ($this->customer->getId()) {
-            $order_info['customer_id'] = $this->customer->getId();
+        if ($this->customer_id) {
+            $order_info['customer_id'] = $this->customer_id;
             $order_info['customer_group_id'] = $this->customer->getCustomerGroupId();
             $order_info['firstname'] = (string)$this->customer->getFirstName();
             $order_info['lastname'] = (string)$this->customer->getLastName();
@@ -193,15 +186,15 @@ class AOrder extends ALibBase
 
             if ($this->cart->hasShipping()) {
                 $shipping_address = [];
-                $address = Address::find($indata['shipping_address_id']);
+                $address = Address::find($inData['shipping_address_id']);
                 if ($address) {
                     $shipping_address = $address->toArray();
-                    $shipping_address['zone'] = (string) ZoneDescription::where(
+                    $shipping_address['zone'] = (string)ZoneDescription::where(
                         [
                             'zone_id'     => $shipping_address['zone_id'],
                             'language_id' => Registry::language()->getContentLanguageID(),
                         ]
-                    )->first()->name;
+                    )->first()?->name;
                     $country = Country::with('description')->find($shipping_address['country_id']);
                     $shipping_address['country'] = (string)$country->description->name;
                     $shipping_address['address_format'] = (string)$country->address_format;
@@ -218,7 +211,7 @@ class AOrder extends ALibBase
                 $order_info['shipping_zone'] = (string)$shipping_address['zone'];
                 $order_info['shipping_zone_id'] = $shipping_address['zone_id'];
                 $order_info['shipping_country'] = (string)$shipping_address['country'];
-                $order_info['shipping_country_id'] = $shipping_address['country_id'];
+                $order_info['shipping_country_id'] = (int)$shipping_address['country_id'];
                 $order_info['shipping_address_format'] = (string)$shipping_address['address_format'];
             } else {
                 $order_info['shipping_firstname'] = '';
@@ -237,7 +230,7 @@ class AOrder extends ALibBase
             }
 
             $payment_address = [];
-            $address = Address::find($indata['payment_address_id']);
+            $address = Address::find($inData['payment_address_id']);
             if ($address) {
                 $payment_address = $address->toArray();
                 $payment_address['zone'] = (string)ZoneDescription::where(
@@ -262,55 +255,55 @@ class AOrder extends ALibBase
             $order_info['payment_zone'] = (string)$payment_address['zone'];
             $order_info['payment_zone_id'] = $payment_address['zone_id'];
             $order_info['payment_country'] = (string)$payment_address['country'];
-            $order_info['payment_country_id'] = $payment_address['country_id'];
+            $order_info['payment_country_id'] = (int)$payment_address['country_id'];
             $order_info['payment_address_format'] = (string)$payment_address['address_format'];
         } else {
-            if (isset($indata['guest'])) {
+            if (isset($inData['guest'])) {
                 //this is a guest order
                 $order_info['customer_id'] = 0;
                 $order_info['customer_group_id'] = $this->config->get('config_customer_group_id');
-                $order_info['firstname'] = (string)$indata['guest']['firstname'];
-                $order_info['lastname'] = (string)$indata['guest']['lastname'];
-                $order_info['email'] = (string)$indata['guest']['email'];
-                $order_info['telephone'] = (string)$indata['guest']['telephone'];
-                $order_info['fax'] = (string)$indata['guest']['fax'];
+                $order_info['firstname'] = (string)$inData['guest']['firstname'];
+                $order_info['lastname'] = (string)$inData['guest']['lastname'];
+                $order_info['email'] = (string)$inData['guest']['email'];
+                $order_info['telephone'] = (string)$inData['guest']['telephone'];
+                $order_info['fax'] = (string)$inData['guest']['fax'];
 
                 //IM addresses
                 $protocols = $this->im->getProtocols();
                 foreach ($protocols as $protocol) {
-                    if (H::has_value($indata['guest'][$protocol])
+                    if (H::has_value($inData['guest'][$protocol])
                         && !H::has_value($order_info[$protocol])) {
-                        $order_info[$protocol] = $indata['guest'][$protocol];
+                        $order_info[$protocol] = $inData['guest'][$protocol];
                     }
                 }
 
                 if ($this->cart->hasShipping()) {
-                    if (isset($indata['guest']['shipping'])) {
-                        $order_info['shipping_firstname'] = (string)$indata['guest']['shipping']['firstname'];
-                        $order_info['shipping_lastname'] = (string)$indata['guest']['shipping']['lastname'];
-                        $order_info['shipping_company'] = (string)$indata['guest']['shipping']['company'];
-                        $order_info['shipping_address_1'] = (string)$indata['guest']['shipping']['address_1'];
-                        $order_info['shipping_address_2'] = (string)$indata['guest']['shipping']['address_2'];
-                        $order_info['shipping_city'] = (string)$indata['guest']['shipping']['city'];
-                        $order_info['shipping_postcode'] = (string)$indata['guest']['shipping']['postcode'];
-                        $order_info['shipping_zone'] = (string)$indata['guest']['shipping']['zone'];
-                        $order_info['shipping_zone_id'] = $indata['guest']['shipping']['zone_id'];
-                        $order_info['shipping_country'] = (string)$indata['guest']['shipping']['country'];
-                        $order_info['shipping_country_id'] = $indata['guest']['shipping']['country_id'];
-                        $order_info['shipping_address_format'] = (string)$indata['guest']['shipping']['address_format'];
+                    if (isset($inData['guest']['shipping'])) {
+                        $order_info['shipping_firstname'] = (string)$inData['guest']['shipping']['firstname'];
+                        $order_info['shipping_lastname'] = (string)$inData['guest']['shipping']['lastname'];
+                        $order_info['shipping_company'] = (string)$inData['guest']['shipping']['company'];
+                        $order_info['shipping_address_1'] = (string)$inData['guest']['shipping']['address_1'];
+                        $order_info['shipping_address_2'] = (string)$inData['guest']['shipping']['address_2'];
+                        $order_info['shipping_city'] = (string)$inData['guest']['shipping']['city'];
+                        $order_info['shipping_postcode'] = (string)$inData['guest']['shipping']['postcode'];
+                        $order_info['shipping_zone'] = (string)$inData['guest']['shipping']['zone'];
+                        $order_info['shipping_zone_id'] = $inData['guest']['shipping']['zone_id'];
+                        $order_info['shipping_country'] = (string)$inData['guest']['shipping']['country'];
+                        $order_info['shipping_country_id'] = (int)$inData['guest']['shipping']['country_id'];
+                        $order_info['shipping_address_format'] = (string)$inData['guest']['shipping']['address_format'];
                     } else {
-                        $order_info['shipping_firstname'] = (string)$indata['guest']['firstname'];
-                        $order_info['shipping_lastname'] = (string)$indata['guest']['lastname'];
-                        $order_info['shipping_company'] = (string)$indata['guest']['company'];
-                        $order_info['shipping_address_1'] = (string)$indata['guest']['address_1'];
-                        $order_info['shipping_address_2'] = (string)$indata['guest']['address_2'];
-                        $order_info['shipping_city'] = (string)$indata['guest']['city'];
-                        $order_info['shipping_postcode'] = (string)$indata['guest']['postcode'];
-                        $order_info['shipping_zone'] = (string)$indata['guest']['zone'];
-                        $order_info['shipping_zone_id'] = $indata['guest']['zone_id'];
-                        $order_info['shipping_country'] = (string)$indata['guest']['country'];
-                        $order_info['shipping_country_id'] = $indata['guest']['country_id'];
-                        $order_info['shipping_address_format'] = (string)$indata['guest']['address_format'];
+                        $order_info['shipping_firstname'] = (string)$inData['guest']['firstname'];
+                        $order_info['shipping_lastname'] = (string)$inData['guest']['lastname'];
+                        $order_info['shipping_company'] = (string)$inData['guest']['company'];
+                        $order_info['shipping_address_1'] = (string)$inData['guest']['address_1'];
+                        $order_info['shipping_address_2'] = (string)$inData['guest']['address_2'];
+                        $order_info['shipping_city'] = (string)$inData['guest']['city'];
+                        $order_info['shipping_postcode'] = (string)$inData['guest']['postcode'];
+                        $order_info['shipping_zone'] = (string)$inData['guest']['zone'];
+                        $order_info['shipping_zone_id'] = $inData['guest']['zone_id'];
+                        $order_info['shipping_country'] = (string)$inData['guest']['country'];
+                        $order_info['shipping_country_id'] = (int)$inData['guest']['country_id'];
+                        $order_info['shipping_address_format'] = (string)$inData['guest']['address_format'];
                     }
                 } else {
                     $order_info['shipping_firstname'] = '';
@@ -327,37 +320,35 @@ class AOrder extends ALibBase
                     $order_info['shipping_address_format'] = '';
                     $order_info['shipping_method'] = '';
                 }
-
-                $order_info['payment_firstname'] = (string)$indata['guest']['firstname'];
-                $order_info['payment_lastname'] = (string)$indata['guest']['lastname'];
-                $order_info['payment_company'] = (string)$indata['guest']['company'];
-                $order_info['payment_address_1'] = (string)$indata['guest']['address_1'];
-                $order_info['payment_address_2'] = (string)$indata['guest']['address_2'];
-                $order_info['payment_city'] = (string)$indata['guest']['city'];
-                $order_info['payment_postcode'] = (string)$indata['guest']['postcode'];
-                $order_info['payment_zone'] = (string)$indata['guest']['zone'];
-                $order_info['payment_zone_id'] = $indata['guest']['zone_id'];
-                $order_info['payment_country'] = (string)$indata['guest']['country'];
-                $order_info['payment_country_id'] = $indata['guest']['country_id'];
-                $order_info['payment_address_format'] = (string)$indata['guest']['address_format'];
-
+                $order_info['payment_firstname'] = (string)$inData['guest']['firstname'];
+                $order_info['payment_lastname'] = (string)$inData['guest']['lastname'];
+                $order_info['payment_company'] = (string)$inData['guest']['company'];
+                $order_info['payment_address_1'] = (string)$inData['guest']['address_1'];
+                $order_info['payment_address_2'] = (string)$inData['guest']['address_2'];
+                $order_info['payment_city'] = (string)$inData['guest']['city'];
+                $order_info['payment_postcode'] = (string)$inData['guest']['postcode'];
+                $order_info['payment_zone'] = (string)$inData['guest']['zone'];
+                $order_info['payment_zone_id'] = $inData['guest']['zone_id'];
+                $order_info['payment_country'] = (string)$inData['guest']['country'];
+                $order_info['payment_country_id'] = (int)$inData['guest']['country_id'];
+                $order_info['payment_address_format'] = (string)$inData['guest']['address_format'];
             } else {
                 return [];
             }
         }
 
-        if (isset($indata['shipping_method']['title'])) {
-            $order_info['shipping_method'] = (string)$indata['shipping_method']['title'];
+        if (isset($inData['shipping_method']['title'])) {
+            $order_info['shipping_method'] = (string)$inData['shipping_method']['title'];
             // note - id by mask method_txt_id.method_option_id. for ex. default_weight.default_weight_1
-            $order_info['shipping_method_key'] = (string)$indata['shipping_method']['id'];
+            $order_info['shipping_method_key'] = (string)$inData['shipping_method']['id'];
         } else {
             $order_info['shipping_method'] = '';
             $order_info['shipping_method_key'] = '';
         }
 
-        if (isset($indata['payment_method']['title'])) {
-            $order_info['payment_method'] = (string)$indata['payment_method']['title'];
-            preg_match('/^([^.]+)/', $indata['payment_method']['id'], $matches);
+        if (isset($inData['payment_method']['title'])) {
+            $order_info['payment_method'] = (string)$inData['payment_method']['title'];
+            preg_match('/^([^.]+)/', $inData['payment_method']['id'], $matches);
             $order_info['payment_method_key'] = (string)$matches[1];
         } else {
             $order_info['payment_method'] = '';
@@ -365,31 +356,46 @@ class AOrder extends ALibBase
 
         $product_data = [];
 
-        foreach ($this->cart->getProducts() as $key => $product) {
+        $cartProducts = $this->cart->getProducts();
+        //add thumbnails
+        $product_ids = array_column($cartProducts, 'product_id');
+        //get thumbnails by one pass
+        $resource = new AResource('image');
+        $thumbnails = $resource->getMainThumbList(
+            'products',
+            $product_ids,
+            $inData['thumbnail_width'] ?: $this->config->get('config_image_product_width'),
+            $inData['thumbnail_height'] ?: $this->config->get('config_image_product_height')
+        );
+
+        foreach ($cartProducts as $key => $product) {
             $product_data[$key] = $product;
             $product_data[$key]['key'] = $key;
             $product_data[$key]['name'] = (string)$product_data[$key]['name'];
             $product_data[$key]['model'] = (string)$product_data[$key]['model'];
             $product_data[$key]['sku'] = (string)$product_data[$key]['sku'];
             $product_data[$key]['tax'] = $this->tax->calcTotalTaxAmount($product['total'], $product['tax_class_id']);
-            $product_data[$key]['order_status_id'] = (int)$indata['order_status_id'];
+            $product_data[$key]['order_status_id'] = (int)$inData['order_status_id'];
+            if ($thumbnails[$product['product_id']]) {
+                $product_data[$key]['thumbnail'] = $thumbnails[$product['product_id']];
+            }
         }
 
         $order_info['products'] = $product_data;
         $order_info['totals'] = $total_data;
-        $order_info['comment'] = (string)$indata['comment'];
+        $order_info['comment'] = (string)$inData['comment'];
         $order_info['total'] = $total;
         $order_info['language_id'] = $this->config->get('storefront_language_id');
         $order_info['currency_id'] = $this->currency->getId();
         $order_info['currency'] = $this->currency->getCode();
         $order_info['value'] = $this->currency->getValue($this->currency->getCode());
 
-        if (isset($indata['coupon'])) {
+        if (isset($inData['coupon'])) {
             /**
              * @var APromotion $promotion
              */
             $promotion = ABC::getObjectByAlias('APromotion');
-            $coupon = $promotion->getCouponData($indata['coupon']);
+            $coupon = $promotion->getCouponData($inData['coupon']);
             if ($coupon) {
                 $order_info['coupon_id'] = $coupon['coupon_id'];
             } else {
@@ -405,9 +411,7 @@ class AOrder extends ALibBase
 
         $this->extensions->hk_ProcessData($this, 'build_order_data', $order_info);
         // merge two arrays. $this-> data can be changed by hooks.
-        $output = $this->data + $this->order_data;
-
-        return $output;
+        return $this->data + $this->order_data;
     }
 
     /**
@@ -416,8 +420,7 @@ class AOrder extends ALibBase
     public function getOrderData()
     {
         $this->extensions->hk_ProcessData($this, 'get_order_data');
-        $output = $this->data + $this->order_data;
-        return $output;
+        return $this->data + $this->order_data;
     }
 
     /**
@@ -471,7 +474,8 @@ class AOrder extends ALibBase
      *
      * @return int
      * @throws AException
-     * @throws \ReflectionException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
      */
     public function _create($data, $set_order_id = '')
     {
@@ -490,14 +494,14 @@ class AOrder extends ALibBase
 
             if (!$order) { // for already processed orders do redirect
                 $order = Order::where('order_id', '=', $set_order_id)
-                              ->where('order_status_id', '>', 0)
-                              ->first();
+                    ->where('order_status_id', '>', 0)
+                    ->first();
                 if ($order) {
                     return false;
                 }
             } //remove
             else {
-                //this will remove order with dependencies by Fkeys
+                //this will remove order with dependencies by foreign keys
                 $order->forceDelete();
             }
         }
@@ -507,18 +511,19 @@ class AOrder extends ALibBase
         if ($expireDays) {
             try {
                 Order::where('order_status_id', '=', 0)
-                     ->where(
-                         'date_modified',
-                         '<',
-                         Carbon::now()->subDays($expireDays)->toISOString()
-                     )->forceDelete();
-            }catch(\Exception $e){
-                Registry::log()->write(__FILE__. "Cannot to delete obsolete incomplete orders!\n".$e->getMessage());
+                    ->where(
+                        'date_modified',
+                        '<',
+                        Carbon::now()->subDays($expireDays)->toISOString()
+                    )
+                    ->forceDelete();
+            } catch (\Exception $e) {
+                Registry::log()->error(__FILE__ . "Cannot to delete obsolete incomplete orders!\n" . $e->getMessage());
             }
         }
 
         if (!$set_order_id && (int)$settings->get('config_start_order_id')) {
-            $maxOrderId = Order::max();
+            $maxOrderId = Order::max('order_id');
             if ($maxOrderId && $maxOrderId >= $settings->get('config_start_order_id')) {
                 $set_order_id = $maxOrderId + 1;
             } elseif ($settings->get('config_start_order_id')) {
@@ -554,6 +559,10 @@ class AOrder extends ALibBase
             foreach ($product['option'] as $option) {
                 $option['order_id'] = $order_id;
                 $option['order_product_id'] = $order_product_id;
+                $option['name'] = $option['name'] ?: 'n/a';
+                if ($option['name'] == 'n/a') {
+                    Registry::log()->error('Product option name is empty! Order Product Data (id ' . $order_product_id . '): ' . var_export($product, true));
+                }
                 $orderOption = new OrderOption($option);
                 $orderOption->save();
             }
@@ -567,7 +576,7 @@ class AOrder extends ALibBase
                 //disable download for manual mode for customer
                 $download['status'] = $download['activate'] == 'manually' ? 0 : 1;
                 $download['attributes_data'] = Registry::download()
-                                                       ->getDownloadAttributesValues($download['download_id']);
+                    ->getDownloadAttributesValues($download['download_id']);
 
                 Registry::download()->addProductDownloadToOrder($order_product_id, $order_id, $download);
             }
@@ -612,7 +621,7 @@ class AOrder extends ALibBase
                 $im_data =
                     [
                         'uri'    => $uri,
-                        'status' => $settings->get('config_im_guest_'.$row->name.'_status'),
+                        'status' => $settings->get('config_im_guest_' . $row->name . '_status'),
                     ];
                 OrderDatum::updateOrCreate(
                     [
@@ -624,6 +633,7 @@ class AOrder extends ALibBase
 
             }
         }
+        return true;
     }
 
     /**
@@ -631,7 +641,7 @@ class AOrder extends ALibBase
      * @param int $order_status_id
      * @param string $comment
      *
-     * @throws \abc\core\lib\AException
+     * @throws AException
      */
     public function confirm($order_id, $order_status_id, $comment = '')
     {
@@ -648,8 +658,9 @@ class AOrder extends ALibBase
      * @param string $comment
      *
      * @return bool
-     * @throws \abc\core\lib\AException
-     * @throws \ReflectionException
+     * @throws AException
+     * @throws ReflectionException
+     * @throws InvalidArgumentException
      */
     public function _confirm($order_id, $order_status_id, $comment = '')
     {
@@ -679,7 +690,7 @@ class AOrder extends ALibBase
             ]
         );
         $orderHistory->save();
-        $orderData['comment'] = $orderData['comment'].' '.$comment;
+        $orderData['comment'] = $orderData['comment'] . ' ' . $comment;
 
         // load language for IM
         $language = new ALanguage($this->registry, $orderData['code']);
@@ -738,7 +749,7 @@ class AOrder extends ALibBase
 
                 //check quantity and send notification when 0 or less
                 if ($stockProduct->get('quantity') <= 0) {
-                    //notify admin with out of stock
+                    //notify admin with "out of stock"
                     $message_arr = [
                         1 => [
                             'message' => sprintf($language->get('im_product_out_of_stock_admin_text'),
@@ -751,7 +762,7 @@ class AOrder extends ALibBase
         }
 
         //clean product cache as stock might have changed.
-        Registry::cache()->remove('product');
+        Registry::cache()->flush('product');
 
         H::event('storefront\sendOrderConfirmEmail', [new ABaseEvent($orderData)]);
         return true;
@@ -763,7 +774,7 @@ class AOrder extends ALibBase
      * @param string $comment
      * @param bool|false $notify
      *
-     * @throws \abc\core\lib\AException
+     * @throws AException
      */
     public function update($order_id, $order_status_id, $comment = '', $notify = false)
     {
@@ -780,7 +791,8 @@ class AOrder extends ALibBase
      *
      * @return bool
      * @throws AException
-     * @throws \ReflectionException
+     * @throws ReflectionException
+     * @throws InvalidArgumentException
      */
     public function _update($order_id, $order_status_id, $comment = '', $notify = false)
     {

@@ -26,27 +26,27 @@ $wrapper_id = \H::randomWord(6);
 		    <?php } ?>
 	
 			<?php if ($multilingual){ ?>
-			    <span class="multilingual"><i class="fa fa-flag"></i></span>
-			<?php } ?>
+                <span class="multilingual"><i class="fa fa-flag"></i></span>
+            <?php } ?>
 	
 	        </span>
-			<?php } ?>
-		
-			<a title="<?php abc_js_echo($button_add_media); ?>"
-				data-original-title="<?php abc_js_echo($button_add_media); ?>"
-                href="#"
-                class="btn btn-primary tooltips add_media">
-				<i class="fa fa-file-picture-o fa-fw"></i> <?php echo $button_add_media; ?>
-			</a>
-		</div>
+            <?php } ?>
 
-	</div>
-	<!-- Tab panes -->
-	<div class="tab-content">
-		<div role="tabpanel" class="tab-pane active" id="text_<?php echo $wrapper_id; ?>">
-			<div class="zennable">
-			
-			<div class="toolbar text-editor-toolbar">
+            <a title="<?php abc_js_echo($button_add_media); ?>"
+               data-original-title="<?php abc_js_echo($button_add_media); ?>"
+               href="#"
+               class="btn btn-primary tooltips add_media">
+                <i class="fa fa-image fa-fw"></i> <?php echo $button_add_media; ?>
+            </a>
+        </div>
+
+    </div>
+    <!-- Tab panes -->
+    <div class="tab-content">
+        <div role="tabpanel" class="tab-pane active" id="text_<?php echo $wrapper_id; ?>">
+            <div class="zennable">
+
+                <div class="toolbar text-editor-toolbar">
 				<div class="primary_content_actions">
 					<div class="btn-group">
 						<a href="#" class="btn btn-default btn-xs tooltips qt_cnt qt_cnt_strong" data-original-title="Paragraph">p</a>
@@ -95,26 +95,29 @@ $wrapper_id = \H::randomWord(6);
 			    id="text_editor_<?php echo $id ?>"
 			    ><?php echo $value ?>
 	        </textarea>
-		</div>
+        </div>
 
-	</div>
+    </div>
 
 </div>
 
 
 <script type="application/javascript">
-	$(window).load(function () {
-		tinymce.remove();
-		//initiate editor
-		mcei.selector = 'textarea#text_editor_<?php echo $id ?>';
+    $(window).load(function () {
+        try {
+            tinymce.remove('textarea#text_editor_<?php echo $id ?>');
+        } catch (e) {
+        }
+        //initiate editor
+        mcei.selector = 'textarea#text_editor_<?php echo $id ?>';
 
-		//tinymce.baseURL = "<?php echo $this->templateResource('templates/assets/js/tinymce'); ?>";
-		tinymce.baseURL = 'templates/default_bs3/admin/assets/js/tinymce';
-		tinymce.init(mcei);
+        //tinymce.baseURL = "<?php echo $this->templateResource('templates/assets/js/tinymce'); ?>";
+        tinymce.baseURL = 'templates/default_bs3/admin/assets/js/tinymce';
+        tinymce.init(mcei);
 
-		//for modal mode
-		if($('#<?php echo $wrapper_id; ?>').parents('.modal-content').length>0){
-			$('#<?php echo $wrapper_id; ?> a.qt_cnt_expand').hide();
+        //for modal mode
+        if ($('#<?php echo $wrapper_id; ?>').parents('.modal-content').length > 0) {
+            $('#<?php echo $wrapper_id; ?> a.qt_cnt_expand').hide();
 		}
 	
 		//event for textarea buttons
@@ -177,27 +180,28 @@ $wrapper_id = \H::randomWord(6);
 			var editor, cursorPosition;
 			editor = $('#<?php echo $id ?>');
 			textareaInsert(editor, '<!-- comment -->');
-			return false;
-		});
-		$('#<?php echo $wrapper_id; ?> a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-			var newtab_id = $(e.target).attr('aria-controls'), // newly activated tab
-		        prevtab_id = $(e.relatedTarget).attr('aria-controls'); // previous active tab
+            return false;
+        });
+        $('#<?php echo $wrapper_id; ?> a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+            var newtab_id = $(e.target).attr('aria-controls'), // newly activated tab
+                prevtab_id = $(e.relatedTarget).attr('aria-controls'); // previous active tab
 
-			var textarea, value;
-			textarea = $('#'+prevtab_id+ ' textarea');
-			
-			if(prevtab_id == 'visual_<?php echo $wrapper_id?>'){
-				value = tinyMCE.activeEditor.getContent();
-				value = visual2html(value);
-				$('#'+newtab_id+ ' textarea')
-						.val( value )
-						.removeAttr('disabled');
-			} else {
-				$('#'+newtab_id+ ' textarea')
-						.val(textarea.val())
-						.removeAttr('disabled');
-				if(tinyMCE.activeEditor != null) {
-					value = textarea.val();
+            var textarea, value;
+            textarea = $('#' + prevtab_id + ' textarea');
+
+            if (prevtab_id == 'visual_<?php echo $wrapper_id?>') {
+                value = tinyMCE.get('text_editor_<?php echo $id ?>').getContent();
+                ;
+                value = visual2html(value);
+                $('#' + newtab_id + ' textarea')
+                    .val(value)
+                    .removeAttr('disabled');
+            } else {
+                $('#' + newtab_id + ' textarea')
+                    .val(textarea.val())
+                    .removeAttr('disabled');
+                if (tinyMCE.activeEditor != null) {
+                    value = textarea.val();
 					value = html2visual(value);
 					tinyMCE.activeEditor.setContent( value );
 				}

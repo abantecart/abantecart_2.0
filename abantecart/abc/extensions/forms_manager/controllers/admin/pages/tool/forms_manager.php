@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2018 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -26,6 +26,7 @@ use abc\core\engine\HtmlElementFactory;
 use abc\core\lib\ALayoutManager;
 use abc\core\lib\AListingManager;
 use abc\extensions\forms_manager\models\admin\tool\ModelToolFormsManager;
+use abc\modules\traits\BlockTabsTrait;
 
 /**
  * Class ControllerPagesToolFormsManager
@@ -34,8 +35,7 @@ use abc\extensions\forms_manager\models\admin\tool\ModelToolFormsManager;
  */
 class ControllerPagesToolFormsManager extends AController
 {
-
-    public $data = [];
+    use BlockTabsTrait;
     public $controllers = [];
     public $error = [];
 
@@ -222,9 +222,7 @@ class ControllerPagesToolFormsManager extends AController
 
         $this->data['form_data'] = $this->model_tool_forms_manager->getFormById($this->request->get['form_id']);
 
-        $this->data['form_edit_title'] = isset($this->data['form_data']['description'])
-            ? $this->data['form_data']['description']
-            : $this->language->get('entry_add_new_form');
+        $this->data['form_edit_title'] = $this->data['form_data']['description'] ?? $this->language->get('entry_add_new_form');
 
         $this->data['cancel'] = $this->html->getSecureURL('tool/forms_manager');
         $this->data['heading_title'] = $this->language->get('forms_manager_name');
@@ -301,7 +299,7 @@ class ControllerPagesToolFormsManager extends AController
         $this->data['head_form']['fields']['form_status'] = $head_form->getFieldHtml([
             'type'     => 'checkbox',
             'name'     => 'form_status',
-            'value'    => isset($this->data['form_data']['status']) ? $this->data['form_data']['status'] : '',
+            'value'    => $this->data['form_data']['status'] ?? '',
             'required' => true,
             'style'    => 'btn_switch status_switch',
         ]);
@@ -310,7 +308,7 @@ class ControllerPagesToolFormsManager extends AController
         $this->data['head_form']['fields']['form_name'] = $head_form->getFieldHtml([
             'type'     => 'input',
             'name'     => 'form_name',
-            'value'    => isset($this->data['form_data']['form_name']) ? $this->data['form_data']['form_name'] : '',
+            'value'    => $this->data['form_data']['form_name'] ?? '',
             'required' => true,
             'attr'     => ($this->request->get['form_id'] ? 'readonly' : ''),
             'style'    => 'large-field',
@@ -319,9 +317,7 @@ class ControllerPagesToolFormsManager extends AController
         $this->data['head_form']['fields']['form_description'] = $head_form->getFieldHtml([
             'type'         => 'input',
             'name'         => 'form_description',
-            'value'        => isset($this->data['form_data']['description'])
-                ? $this->data['form_data']['description']
-                : '',
+            'value'        => $this->data['form_data']['description'] ?? '',
             'required'     => true,
             'style'        => 'large-field',
             'multilingual' => true,
@@ -331,9 +327,7 @@ class ControllerPagesToolFormsManager extends AController
             'type'     => 'selectbox',
             'name'     => 'controller_path',
             'options'  => $this->controllers,
-            'value'    => isset($this->data['form_data']['controller'])
-                ? $this->data['form_data']['controller']
-                : 'forms_manager/default_email',
+            'value'    => $this->data['form_data']['controller'] ?? 'forms_manager/default_email',
             'required' => true,
             'style'    => 'large-field',
         ]);
@@ -341,9 +335,7 @@ class ControllerPagesToolFormsManager extends AController
         $this->data['head_form']['fields']['success_page'] = $head_form->getFieldHtml([
             'type'  => 'input',
             'name'  => 'success_page',
-            'value' => isset($this->data['form_data']['success_page'])
-                ? $this->data['form_data']['success_page']
-                : 'forms_manager/default_email/success',
+            'value' => $this->data['form_data']['success_page'] ?? 'forms_manager/default_email/success',
             'style' => 'large-field',
         ]);
 
@@ -503,13 +495,9 @@ class ControllerPagesToolFormsManager extends AController
             $this->error['form_description'] = $this->language->get('error_form_description');
         }
 
-        $this->extensions->hk_ValidateData($this);
+        $this->extensions->hk_ValidateData($this, __FUNCTION__, $data);
 
-        if (!$this->error) {
-            return true;
-        } else {
-            return false;
-        }
+        return (!$this->error);
     }
 
     public function insert_block()
@@ -524,14 +512,14 @@ class ControllerPagesToolFormsManager extends AController
 
         $lm = new ALayoutManager();
         $block = $lm->getBlockByTxtId('custom_form_block');
-        $this->data['block_id'] = $block['block_id'];
+        $this->data['block_id'] = (int)$block['block_id'];
 
-        if ($this->request->is_POST() && $this->validateBlockForm()) {
+        if ($this->request->is_POST() && $this->validateBlockForm($this->request->post)) {
             if (isset($this->session->data['layout_params'])) {
                 $layout = new ALayoutManager(
-                    $this->session->data['layout_params']['tmpl_id'],
-                    $this->session->data['layout_params']['page_id'],
-                    $this->session->data['layout_params']['layout_id']
+                    $this->session->data['layout_params']['tmpl_id'] ?: null,
+                    $this->session->data['layout_params']['page_id'] ?: null,
+                    $this->session->data['layout_params']['layout_id'] ?: null
                 );
                 $blocks = $layout->getLayoutBlocks();
                 $parent_instance_id = '';
@@ -543,7 +531,7 @@ class ControllerPagesToolFormsManager extends AController
                             $position = 10;
                             if ($block['children']) {
                                 foreach ($block['children'] as $child) {
-                                    $position = $position > $child['position'] ? $child['position'] : $position;
+                                    $position = min($position, $child['position']);
                                 }
                             }
                             break;
@@ -552,21 +540,21 @@ class ControllerPagesToolFormsManager extends AController
                 } else {
                     $position = 0;
                 }
-                $savedata = $this->session->data['layout_params'];
-                $savedata['parent_instance_id'] = $parent_instance_id;
-                $savedata['position'] = $position + 10;
-                $savedata['status'] = 1;
+                $saveData = $this->session->data['layout_params'];
+                $saveData['parent_instance_id'] = $parent_instance_id;
+                $saveData['position'] = $position + 10;
+                $saveData['status'] = 1;
             } else {
                 $layout = new ALayoutManager();
             }
 
             $content = isset($this->request->post['form_id'])
                 ? serialize(['form_id' => $this->request->post['form_id']])
-                : [];
+                : null;
 
             $custom_block_id = $layout->saveBlockDescription(
                 $this->data['block_id'],
-                0,
+                null,
                 [
                     'name'          => $this->request->post['block_name'],
                     'title'         => $this->request->post['block_title'],
@@ -578,19 +566,24 @@ class ControllerPagesToolFormsManager extends AController
                 ]
             );
 
-            $layout->editBlockStatus((int)$this->request->post['block_status'], $this->data['block_id'],
-                $custom_block_id);
+            $layout->editBlockStatus(
+                (int)$this->request->post['block_status'],
+                $this->data['block_id'],
+                $custom_block_id
+            );
 
             // save custom_block in layout
             if (isset($this->session->data['layout_params'])) {
-                $savedata['custom_block_id'] = $custom_block_id;
-                $savedata['block_id'] = $this->data['block_id'];
-                $layout->saveLayoutBlocks($savedata);
+                $saveData['custom_block_id'] = $custom_block_id;
+                $saveData['block_id'] = $this->data['block_id'];
+                $layout->saveLayoutBlocks($saveData);
                 unset($this->session->data['layout_params']);
             }
             // save list if it is custom
-            $this->request->post['selected'] =
-                json_decode(html_entity_decode($this->request->post['selected'][0]), true);
+            $this->request->post['selected'] = json_decode(
+                html_entity_decode($this->request->post['selected'][0]),
+                true
+            );
             if ($this->request->post['selected']) {
                 $listing_manager = new AListingManager($custom_block_id);
 
@@ -619,7 +612,7 @@ class ControllerPagesToolFormsManager extends AController
 
             $this->session->data ['success'] = $this->language->get('text_success');
             abc_redirect(
-                $this->html->getSecureURL('tool/forms_manager/edit_block', '&custom_block_id='.$custom_block_id)
+                $this->html->getSecureURL('tool/forms_manager/edit_block', '&custom_block_id=' . $custom_block_id)
             );
         }
 
@@ -627,7 +620,8 @@ class ControllerPagesToolFormsManager extends AController
             $this->data[$k] = $v;
         }
 
-        $this->initTabs();
+        $this->getTabs();
+
         $this->getBlockForm();
 
         //update controller data
@@ -645,7 +639,7 @@ class ControllerPagesToolFormsManager extends AController
 
         $lm = new ALayoutManager();
         $block = $lm->getBlockByTxtId('custom_form_block');
-        $this->data['block_id'] = $block['block_id'];
+        $this->data['block_id'] = (int)$block['block_id'];
         $custom_block_id = (int)$this->request->get['custom_block_id'];
         if (!$custom_block_id) {
             abc_redirect($this->html->getSecureURL('tool/forms_manager/insert_block'));
@@ -660,17 +654,10 @@ class ControllerPagesToolFormsManager extends AController
                 'sort_order' => 0,
             ],
         ];
-        $obj = $this->dispatch('responses/common/tabs',
-            [
-                'tool/forms_manager/edit_block',
-                //parent controller. Use customer group to use for other extensions that will add tabs via their hooks
-                ['tabs' => $tabs],
-            ]
-        );
 
-        $this->data['tabs'] = $obj->dispatchGetOutput();
+        $this->data['tabs'] = $this->getTabs($tabs);
 
-        if ($this->request->is_POST() && $this->validateBlockForm()) {
+        if ($this->request->is_POST() && $this->validateBlockForm($this->request->post)) {
 
             // get form html
             $content = [];
@@ -790,7 +777,7 @@ class ControllerPagesToolFormsManager extends AController
 
             $this->data['form_id'] = $content['form_id'];
             $lm = new AListingManager($this->request->get ['custom_block_id']);
-            $list = $lm->getCustomList();
+            $list = $lm->getCustomList((int)$this->config->get('current_store_id'));
             if ($list) {
                 foreach ($list as $row) {
                     $listing_data[$row['id']] = [
@@ -960,7 +947,7 @@ class ControllerPagesToolFormsManager extends AController
         $this->processTemplate('pages/tool/forms_manager_block_form.tpl');
     }
 
-    protected function validateBlockForm()
+    protected function validateBlockForm($data)
     {
         $required = [];
         if (!$this->user->canModify('tool/forms_manager')) {
@@ -989,54 +976,7 @@ class ControllerPagesToolFormsManager extends AController
             }
         }
 
-        $this->extensions->hk_ValidateData($this);
-
-        if (!$this->error) {
-            return true;
-        } else {
-            return false;
-        }
+        $this->extensions->hk_ValidateData($this, __FUNCTION__, $data);
+        return (!$this->error);
     }
-
-    protected function initTabs()
-    {
-        $blocks = [];
-        $lm = new ALayoutManager();
-        $default_block_type = '';
-        foreach (['html_block', 'listing_block'] as $txt_id) {
-            $block = $lm->getBlockByTxtId($txt_id);
-            if ($block['block_id']) {
-                $blocks[$block['block_id']] = $this->language->get('text_'.$txt_id);
-            }
-            if ($txt_id == 'html_block') {
-                $default_block_type = $block['block_id'];
-            }
-        }
-
-        $this->data['block_id'] =
-            !(int)$this->request->get['block_id'] ? $default_block_type : $this->request->get['block_id'];
-        $i = 0;
-        $tabs = [];
-        foreach ($blocks as $block_id => $block_text) {
-            $tabs[] = [
-                'name'       => $block_id,
-                'text'       => $block_text,
-                'href'       => $this->html->getSecureURL('design/blocks/insert', '&block_id='.$block_id),
-                'active'     => ($block_id == $this->data['block_id'] ? true : false),
-                'sort_order' => $i,
-            ];
-            $i++;
-        }
-
-        $obj = $this->dispatch(
-            'responses/common/tabs',
-            [
-                'design/blocks',
-                //parent controller. Use customer group to use for other extensions that will add tabs via their hooks
-                ['tabs' => $tabs],
-            ]
-        );
-        $this->data['tabs'] = $obj->dispatchGetOutput();
-    }
-
 }

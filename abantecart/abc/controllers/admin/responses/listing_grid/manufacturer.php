@@ -111,7 +111,7 @@ class ControllerResponsesListingGridManufacturer extends AController
         if ( ! $this->user->canModify('listing_grid/manufacturer')) {
             $error = new AError('');
 
-            return $error->toJSONResponse('NO_PERMISSIONS_402',
+            return $error->toJSONResponse('NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf(
                         $this->language->get('error_permission_modify'),
@@ -181,6 +181,8 @@ class ControllerResponsesListingGridManufacturer extends AController
      * update only one field
      *
      * @return void
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \ReflectionException
      * @throws \abc\core\lib\AException
      */
     public function update_field()
@@ -192,7 +194,7 @@ class ControllerResponsesListingGridManufacturer extends AController
         if ( ! $this->user->canModify('listing_grid/manufacturer')) {
             $error = new AError('');
 
-            return $error->toJSONResponse('NO_PERMISSIONS_402',
+            return $error->toJSONResponse('NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/manufacturer'),
                     'reset_value' => true,

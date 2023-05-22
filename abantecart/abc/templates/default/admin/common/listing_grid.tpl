@@ -1,13 +1,14 @@
 <?php
 use abc\core\ABC;
-if (!file_exists(ABC::env('DIR_PUBLIC') . 'vendor/components/jqGrid/js/i18n/grid.locale-' . $locale . '.js')) {
+
+if (!file_exists(ABC::env('DIR_PUBLIC').'vendor/components/jqgrid/js/i18n/grid.locale-'.$locale.'.js')) {
 	$locale = 'en';
 }
 
-$this->document->addScript('vendor/components/jqGrid/js/i18n/grid.locale-' . $locale . '.js');
-$jss = glob(ABC::env('DIR_PUBLIC') . 'vendor/components/jqGrid/js/minified/*.js');
+$this->document->addScript('vendor/components/jqgrid/js/i18n/grid.locale-'.$locale.'.js');
+$jss = glob(ABC::env('DIR_PUBLIC').'vendor/components/jqgrid/js/minified/*.js');
 foreach($jss as $js){
-	$this->document->addScript('vendor/components/jqGrid/js/minified/'.basename($js));
+    $this->document->addScript('vendor/components/jqgrid/js/minified/'.basename($js));
 }
 
 ?>
@@ -51,7 +52,7 @@ foreach($jss as $js){
 	);
 ?>
 
-<script type="text/javascript" src="vendor/components/jqGrid/plugins/jquery.tablednd.js"></script>
+<script type="text/javascript" src="vendor/components/jqgrid/plugins/jquery.tablednd.js"></script>
 <script type="text/javascript">
 
 var initGrid_<?php echo $data['table_id'] ?> = function ($) {
@@ -275,7 +276,7 @@ var initGrid_<?php echo $data['table_id'] ?> = function ($) {
 		if (!empty($data['actions'])) {
 			foreach ($data['actions'] as $type => $action) {
 				$html_string = '';
-				$href = 'href="'.(\abc\core\helper\AHelperUtils::has_value($action['href']) ? $action['href'] : '#').'"';
+				$href = 'href="'.(H::has_value($action['href']) ? $action['href'] : '#').'"';
 
 				$html_string .= "actions_urls['".$type."'] = '".$href."';\n";
 				$html_string .= ' actions += \'';
@@ -342,7 +343,7 @@ var initGrid_<?php echo $data['table_id'] ?> = function ($) {
 					$html_children = '<div class="dropdown-menu dropdown-menu-sm dropdown-menu-right" role="menu"><h5 class="title">'.htmlentities($text_select_from_list,ENT_QUOTES,ABC::env('APP_CHARSET')).'</h5><ul class="dropdown-list grid-dropdown">';
 					foreach($action['children'] as $id => $child){
 						$li_class = '';
-						$href = \abc\core\helper\AHelperUtils::has_value($child['href']) ? $child['href'] : '#';
+						$href = H::has_value($child['href']) ? $child['href'] : '#';
 						//for viewport mode
 						if($child['vhref']){
 							$href = 'data-toggle="modal" data-target="#viewport_modal" href="'.$child['vhref'].'" data-fullmode-href="'.$href.'"';

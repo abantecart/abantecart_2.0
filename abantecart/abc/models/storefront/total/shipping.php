@@ -3,7 +3,7 @@
  * AbanteCart, Ideal Open Source Ecommerce Solution
  * http://www.abantecart.com
  *
- * Copyright 2011-2018 Belavier Commerce LLC
+ * Copyright 2011-2022 Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
@@ -29,10 +29,10 @@ class ModelTotalShipping extends Model
             $total_data[] = [
                 'id'         => 'shipping',
                 'key'        => 'shipping',
-                'title'      => $ship_data['title'].':',
+                'title'      => $ship_data['title'] . ':',
                 'text'       => $this->currency->format($ship_data['cost']),
                 'value'      => $ship_data['cost'],
-                'sort_order' => $this->config->get('shipping_sort_order'),
+                'sort_order' => (int)$this->config->get('shipping_sort_order'),
                 'total_type' => $this->config->get('shipping_total_type'),
             ];
 

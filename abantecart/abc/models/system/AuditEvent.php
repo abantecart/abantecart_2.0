@@ -1,8 +1,25 @@
 <?php
-
+/**
+ * AbanteCart, Ideal Open Source Ecommerce Solution
+ * http://www.abantecart.com
+ *
+ * Copyright 2011-2022 Belavier Commerce LLC
+ *
+ * This source file is subject to Open Software License (OSL 3.0)
+ * License details is bundled with this package in the file LICENSE.txt.
+ * It is also available at this URL:
+ * <http://www.opensource.org/licenses/OSL-3.0>
+ *
+ * UPGRADE NOTE:
+ * Do not edit or add to this file if you wish to upgrade AbanteCart to newer
+ * versions in the future. If you wish to customize AbanteCart for your
+ * needs please refer to http://www.abantecart.com for more information.
+ */
 namespace abc\models\system;
 
+use abc\core\engine\Registry;
 use abc\models\BaseModel;
+use Illuminate\Database\Eloquent\Collection;
 
 class AuditEvent extends BaseModel
 {
@@ -21,9 +38,15 @@ class AuditEvent extends BaseModel
         'saved'                  => 12,
         'restoring'              => 13,
         'restored'               => 14,
-        'forceDeleting'              => 15,
-        'forceDeleted'               => 16,
+        //Note: forceDeleting event not fired from softDelete trait!
+        //Name is just reserved!
+        //'forceDeleting'              => 15,
+        'forceDeleted'           => 16,
     ];
+
+    static $auditModels = null;
+    static $auditUsers = null;
+    static $currentEvents = null;
 
     /**
      * @param int $id
@@ -38,5 +61,79 @@ class AuditEvent extends BaseModel
             }
         }
         return false;
+    }
+
+    /**
+     * @param string $modelName
+     *
+     * @return mixed
+     */
+    public static function getModelIdByName(string $modelName)
+    {
+        if (static::$auditModels === null) {
+            static::$auditModels = Registry::db()
+                                           ->table('audit_models')
+                                           ->pluck('id', 'name')
+                                           ->toArray();
+        }
+
+        if (!isset(static::$auditModels[$modelName])) {
+            $id = Registry::db()
+                          ->table('audit_models')
+                          ->insertGetId(
+                              [
+                                  'name' => $modelName,
+                              ]
+                          );
+            static::$auditModels[$modelName] = $id;
+        }
+
+        return static::$auditModels[$modelName];
+    }
+
+    /**
+     * @param string $user_type_id
+     * @param int $user_id
+     * @param string $name
+     *
+     * @return mixed
+     */
+    public static function getUserId(string $user_type_id, int $user_id, string $name)
+    {
+        $userData = compact('user_type_id', 'user_id', 'name');
+        $uKey = implode("_", $userData);
+
+        if (static::$auditUsers === null) {
+            $users = Registry::db()->table('audit_users')->get();
+            foreach ($users as $u) {
+                static::$auditUsers[$u->user_type_id."_".(int)$u->user_id."_".$u->name] = (int)$u->id;
+            }
+        }
+
+        if (!static::$auditUsers[$uKey]) {
+            $id = Registry::db()->table('audit_users')->insertGetId($userData);
+            static::$auditUsers[$uKey] = $id;
+        }
+        return static::$auditUsers[$uKey];
+    }
+
+    public static function getEventIdByParams(array $eventInfo)
+    {
+        $key = implode("_", $eventInfo);
+        if (!isset(static::$currentEvents[$key])) {
+            /** @var \stdClass $auditEvent */
+            $auditEvent = Registry::db()
+                                  ->table('audit_events')
+                                  ->where($eventInfo)
+                                  ->first();
+            if ($auditEvent) {
+                static::$currentEvents[$key] = $auditEvent->id;
+            } else {
+                static::$currentEvents[$key] = Registry::db()
+                                                       ->table('audit_events')
+                                                       ->insertGetId($eventInfo);
+            }
+        }
+        return static::$currentEvents[$key];
     }
 }

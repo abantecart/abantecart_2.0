@@ -13,8 +13,9 @@ if ($logged){ ?>
                     echo $this->getHookVar('logoimage_hookvar');
                 } else{
                     ?>
-                    <img class="logo_image" src="<?php echo $this->templateResource('assets/images/logo.png'); ?>" width="190"
-                         title="<?php echo $heading_title; ?>"/>
+                    <img class="logo_image"
+                         src="<?php echo $this->getHookVar('logo_url') ?: $this->templateResource('assets/images/logo.png'); ?>"
+                         width="190" title="<?php echo $heading_title; ?>"/>
                     <?php
                 }
                 ?>
@@ -173,7 +174,6 @@ if ($logged){ ?>
                 <li>
                     <div class="btn-group">
                         <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                            <img src="<?php echo $avatar; ?>" alt="<?php echo $username; ?>"/>
                             <span class="hidden-xs"><?php echo $username; ?></span>
                             <span class="caret"></span>
                         </button>
@@ -385,9 +385,10 @@ echo $this->html->buildElement(
                 <?php
                 if ($this->getHookVar('logoimage_hookvar')){
                     echo $this->getHookVar('logoimage_hookvar');
-                } else{
+                } else {
                     ?>
-                    <img class="logo_image" src="<?php echo $this->templateResource('assets/images/logo.png'); ?>"
+                    <img class="logo_image"
+                         src="<?php echo $this->getHookVar('logo_url') ?: $this->templateResource('assets/images/logo.png'); ?>"
                          title="<?php echo $heading_title; ?>"/>
                     <?php
                 }

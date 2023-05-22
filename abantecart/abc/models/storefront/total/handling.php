@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -76,7 +76,7 @@ class ModelTotalHandling extends Model
                     'title'      => $language->get('text_handling'),
                     'text'       => $this->currency->format($conf_hndl_fee),
                     'value'      => $conf_hndl_fee,
-                    'sort_order' => $this->config->get('handling_sort_order'),
+                    'sort_order' => (int)$this->config->get('handling_sort_order'),
                     'total_type' => $this->config->get('handling_fee_total_type'),
                 ];
                 if ($conf_hndl_tax_id) {

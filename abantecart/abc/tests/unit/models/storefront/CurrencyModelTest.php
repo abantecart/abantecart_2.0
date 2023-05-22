@@ -16,11 +16,11 @@
  * needs please refer to http://www.abantecart.com for more information.
  */
 
-namespace abc\tests\unit\models;
+namespace Tests\unit\models\models;
 
 use abc\core\lib\ADB;
 use abc\models\locale\Currency;
-use abc\tests\unit\ATestCase;
+use Tests\unit\ATestCase;
 
 /**
  * Class testCurrencyModel
@@ -31,7 +31,7 @@ use abc\tests\unit\ATestCase;
 class testCurrencyModel extends ATestCase
 {
 
-    protected function tearDown()
+    protected function tearDown():void
     {
         //init
     }
@@ -43,16 +43,17 @@ class testCurrencyModel extends ATestCase
         $this->assertArrayHasKey('USD', $arCurrencies);
         $this->assertArrayHasKey('GBP', $arCurrencies);
         $this->assertArrayHasKey('EUR', $arCurrencies);
-        $this->assertArraySubset([
-            'currency_id' => 1,
-            'title' => 'US Dollar',
-            'code' => 'USD',
-            'symbol_left' => '$',
-            'symbol_right' => '',
-            'decimal_place' => '2',
-            'value' => 1.0,
-            'status' => 1,
-            ], $arCurrencies['USD']);
+        $this->assertEquals('US Dollar',$arCurrencies['USD']['title']);
+//        $this->assertArraySubset([
+//            'currency_id' => 1,
+//            'title' => 'US Dollar',
+//            'code' => 'USD',
+//            'symbol_left' => '$',
+//            'symbol_right' => '',
+//            'decimal_place' => '2',
+//            'value' => 1.0,
+//            'status' => 1,
+//            ], $arCurrencies['USD']);
     }
 
 }

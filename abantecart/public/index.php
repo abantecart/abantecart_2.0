@@ -1,9 +1,11 @@
 <?php
+
+namespace abc;
 /**
  * AbanteCart, Ideal Open Source Ecommerce Solution
  * http://www.abantecart.com
  *
- * Copyright 2011-2018 Belavier Commerce LLC
+ * Copyright 2011-2023 Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
@@ -16,14 +18,13 @@
  * needs please refer to http://www.abantecart.com for more information.
  */
 
-namespace abc;
-
 use abc\core\ABC;
 
 ob_start();
 
 define('DS', DIRECTORY_SEPARATOR);
-require dirname(__DIR__).DS.'abc'.DS.'core'.DS.'abc.php';
+require dirname(__DIR__) . DS . 'abc' . DS . 'core' . DS . 'ABC.php';
+
 // Windows IIS Compatibility
 if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
     ABC::env('IS_WINDOWS', true);

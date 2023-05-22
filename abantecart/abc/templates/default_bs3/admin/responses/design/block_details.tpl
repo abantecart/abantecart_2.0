@@ -9,7 +9,7 @@
 	
 		<div class="form-group">
 		<?php
-		$layouts = array();
+		$layouts = [];
 		if ($block_info) {
 			$tmp = '';
 			foreach ($block_info as $row) {
@@ -19,16 +19,15 @@
 				} else {
 					$tmp = $row['template_id'] . '-' . $row['page_id'] . '-' . $row['layout_id'];
 				}
-				$row['templates'] = explode(',', $row['templates']);
 				unset($row['layout_id'], $row['layout_name'], $row['page_id'], $row['template_id'], $row['store_id']);
 				$info = $row;
 			}	
 
 			foreach($blocks_layouts as $row){
-				$info['layouts'][] = '<a target="_blank" href="' . $this->html->getSecureURL('design/layout', '&tmpl_id=' . $row['template_id'] . '&page_id=' . $row['page_id'] . '&layout_id=' . $row['layout_id']) . '">' . $row['layout_name'] . '</a>';
+                $info['layouts'][] = '<a target="_blank" href="' . $this->html->getSecureURL('design/layout', '&tmpl_id=' . $row['template_id'] . '&page_id=' . $row['page_id'] . '&layout_id=' . $row['layout_id']) . '">' . $row['layout_name'] . ' - ' . $row['template_id'] . '</a>';
 			}
 			if(!$info['layouts']){
-				$layouts = array($text_none);
+                $layouts = [$text_none];
 			}
 
 			foreach ($info as $key => $item) {
@@ -45,29 +44,35 @@
 									echo '<dl class="dl-horizontal"><dt></dt><dd>' . $v . '</dd></dl>';
 								}
 
-							}
-						}
-					}
-				}
-			}
+                            }
+                        }
+                    }
+                }
+            }
 
-		}
+        }
 
-		?>
-		</div>
-		<div class="form-group">
-		   <?php echo $description; ?>
-		</div>
-		
-  	</div>
-  	
-	<div class="panel-footer col-xs-12">
-		<div class="center">
-		<?php if($allow_edit) { ?>
-			<a class="btn btn-primary lock-on-click" href="<?php echo $block_edit; ?>" target="_new">
-			<i class="fa fa-edit fa-fw"></i> <?php echo $text_edit; ?>
-			</a>
-		<?php } ?>
+        ?>
+        </div>
+        <?php
+        if ($description) { ?>
+            <div class="form-group">
+                <dl class="dl-horizontal">
+                    <dt><?php echo $this->language->t('text_description', 'Description'); ?></dt>
+                    <dd><?php echo $description; ?></dd>
+                </dl>
+            </div>
+        <?php } ?>
+
+    </div>
+
+      <div class="panel-footer col-xs-12">
+          <div class="center">
+              <?php if ($allow_edit) { ?>
+                  <a class="btn btn-primary lock-on-click" href="<?php echo $block_edit; ?>" target="_new">
+                      <i class="fa fa-edit fa-fw"></i> <?php echo $text_edit; ?>
+                  </a>
+              <?php } ?>
 
 			<button class="btn btn-default" data-dismiss="modal">
 				<i class="fa fa-times fa-fw"></i> <?php echo $text_close; ?>

@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2018 Belavier Commerce LLC
+  Copyright © 2011-2022 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -26,12 +26,11 @@ class ControllerApiCommonAccess extends AControllerAPI
 {
     public function main()
     {
+        $headers = $this->request->getHeaders();
         //validate if API enabled and KEY matches.
         if ($this->config->get('config_storefront_api_status')) {
             if ($this->config->get('config_storefront_api_key')
-                && ($this->config->get('config_storefront_api_key') == $this->request->post['api_key']
-                    || $this->config->get('config_storefront_api_key') == $this->request->get['api_key'])
-            ) {
+                && $this->config->get('config_storefront_api_key') === $headers['X-App-Api-Key']) {
                 return null;
             } else {
                 if (!$this->config->get('config_storefront_api_key')) {
