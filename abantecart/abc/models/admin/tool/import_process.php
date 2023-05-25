@@ -37,6 +37,7 @@ use abc\models\catalog\ProductOptionValue;
 use abc\models\catalog\ProductOption;
 use abc\models\locale\WeightClassDescription;
 use abc\modules\events\ABaseEvent;
+use Error;
 use Exception;
 use H;
 use Illuminate\Database\Query\JoinClause;
@@ -256,7 +257,12 @@ class ModelToolImportProcess extends Model
         if ($log_classname) {
             $this->imp_log = new $log_classname(['app' => "categories_import_" . $task_id . ".txt"]);
         }
-        return $this->addUpdateCategory($data, $settings, $language_id, $store_id);
+        try {
+            return $this->addUpdateCategory($data, $settings, $language_id, $store_id);
+        } catch (Exception $e) {
+            Registry::log()->critical(__METHOD__ . ": " . $e->getMessage());
+            throw $e;
+        }
     }
 
     /**
@@ -282,7 +288,12 @@ class ModelToolImportProcess extends Model
                 ]
             );
         }
-        return $this->addUpdateManufacturer($data, $settings, $language_id, $store_id);
+        try {
+            return $this->addUpdateManufacturer($data, $settings, $language_id, $store_id);
+        } catch (Exception $e) {
+            Registry::log()->critical(__METHOD__ . ": " . $e->getMessage());
+            throw $e;
+        }
     }
 
     /**
@@ -322,7 +333,11 @@ class ModelToolImportProcess extends Model
         // import brand if needed
         $product_data['manufacturer_id'] = 0;
         if ($manufacturers['manufacturer']) {
-            $product_data['manufacturer_id'] = $this->processManufacturer($manufacturers['manufacturer'], 0, $store_id);
+            try {
+                $product_data['manufacturer_id'] = $this->processManufacturer($manufacturers['manufacturer'], 0, $store_id);
+            } catch (Exception|Error $e) {
+                Registry::log()->critical(__METHOD__ . ": " . $e->getMessage());
+            }
         }
 
         //check if row is complete and uniform
