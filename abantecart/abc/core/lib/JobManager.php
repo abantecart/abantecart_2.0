@@ -226,14 +226,20 @@ class JobManager implements JobManagerInterface
                 `last_result`,
                 `date_added`,
                 `date_modified`)
-                VALUES ('".$this->db->escape($data['name'])."',
-                        '".(int)$user_type."',
-                        '".(int)$user_id."',
-                        '".$this->db->escape($user_name)."',
-                        '".(int)$data['status']."',
-                        '".$this->db->escape($configuration)."',
-                        '".$this->db->escape($data['start_time'])."',
-                        '".$this->db->escape($data['last_time_run'])."',
+                VALUES ('" . $this->db->escape($data['name']) . "',
+                        '" . (int)$user_type . "',
+                        '" . (int)$user_id . "',
+                        '" . $this->db->escape($user_name) . "',
+                        '" . (int)$data['status'] . "',
+                        '" . $this->db->escape($configuration) . "',
+                        " . ($data['start_time']
+                ?
+                "'" . $this->db->escape($data['start_time']) . "'"
+                : 'NULL') . ",
+                        " . ($data['start_time']
+                ?
+                "'" . $this->db->escape($data['last_time_run']) . "'"
+                : 'NULL') . ",
                         '".(int)$data['last_result']."',
                         NOW(),
                         NOW())";
