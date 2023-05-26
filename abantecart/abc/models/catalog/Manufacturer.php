@@ -87,7 +87,8 @@ class Manufacturer extends BaseModel
     public static function addManufacturer($data)
     {
         $db = Registry::db();
-        $manufacturer = new Manufacturer($data);
+        $manufacturer = new Manufacturer();
+        $manufacturer->fillAndCast($data);
         $manufacturer->save();
 
         $manufacturerId = $manufacturer->getKey();

@@ -37,7 +37,7 @@ class Json implements CastsAttributes
      */
     public function get($model, $key, $value, $attributes)
     {
-        return json_decode($value, true);
+        return is_string($value) ? json_decode($value, true) : $value;
     }
 
     /**

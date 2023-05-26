@@ -863,7 +863,8 @@ class Category extends BaseModel
         $db->beginTransaction();
 
         try {
-            $category = new Category($data);
+            $category = new Category();
+            $category->fillAndCast($data);
             $category->save();
 
             if (!$category) {
