@@ -22,6 +22,7 @@ use abc\core\ABC;
 use abc\core\engine\Registry;
 use abc\core\lib\Abac;
 use abc\core\lib\AException;
+use abc\models\catalog\Product;
 use abc\modules\injections\models\ModelSearch;
 use Carbon\Carbon;
 use Chelout\RelationshipEvents\Concerns\HasBelongsToEvents;
@@ -827,5 +828,19 @@ abstract class BaseModel extends OrmModel
     public function _extendQuery($query)
     {
         return $query;
+    }
+
+    public function fillAndCast(array $data, ?array $defaultData = [])
+    {
+        foreach ($this->getFillable() as $key) {
+            $data[$key] = $data[$key] ?? $defaultData[$key];
+            if (is_null($data[$key])) {
+                //set values as string for type casting before save.
+                //some columns of database table does not have a default value
+                $data[$key] = in_array($this->getCastType($key), static::$primitiveCastTypes) ? "" : null;
+            }
+            $data[$key] = $this->castAttribute($key, $data[$key]);
+        }
+        $this->fill($data);
     }
 }
