@@ -2109,17 +2109,17 @@ class Product extends BaseModel
 
         $update = [];
         foreach ($fillable as $field_name) {
-            if (isset($product_data[$field_name])) {
-                $update[$field_name] = $product_data[$field_name];
+            if (isset($product_data['product_description'][$field_name])) {
+                $update[$field_name] = $product_data['product_description'][$field_name];
             }
         }
 
         if (count($update)) {
             $language->replaceDescriptions('product_descriptions',
                 ['product_id' => $product_id],
-                [$languageId => $update]);
+                [$languageId => $update]
+            );
         }
-
 
         if (trim($product_data['keyword'])) {
             UrlAlias::setProductKeyword(
