@@ -40,6 +40,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Collection;
 use Psr\SimpleCache\InvalidArgumentException;
+use Ramsey\Uuid\Uuid;
 use ReflectionException;
 
 /**
@@ -80,6 +81,7 @@ class Category extends BaseModel
         'parent_id'             => 'int',
         'sort_order'            => 'int',
         'status'                => 'int',
+        'path'                  => 'string',
         'total_products_count'  => 'int',
         'active_products_count' => 'int',
         'children_count'        => 'int',
@@ -859,12 +861,11 @@ class Category extends BaseModel
     public static function addCategory($data)
     {
         $db = Registry::db();
-        $data['parent_id'] = (int)$data['parent_id'] > 0 ? (int)$data['parent_id'] : null;
         $db->beginTransaction();
-
         try {
             $category = new Category();
             $category->fillAndCast($data);
+            $category->parent_id = (int)$category->parent_id > 0 ? $category->parent_id : null;
             $category->save();
 
             if (!$category) {
@@ -875,7 +876,7 @@ class Category extends BaseModel
                 foreach ($data['category_description'] as $languageId => $value) {
                     $value['language_id'] = $languageId;
                     $description = new CategoryDescription();
-                    $category->fillAndCast($value);
+                    $description->fillAndCast($value);
                     $category->descriptions()->save($description);
                 }
             }
