@@ -873,14 +873,9 @@ class Category extends BaseModel
             $categoryId = $category->getKey();
             if ($data['category_description']) {
                 foreach ($data['category_description'] as $languageId => $value) {
-                    $arDescription = [
-                        'language_id'      => $languageId,
-                        'name'             => $value['name'] ?: '',
-                        'meta_keywords'    => $value['meta_keywords'] ?: '',
-                        'meta_description' => $value['meta_description'] ?: '',
-                        'description'      => $value['description'] ?: '',
-                    ];
-                    $description = new CategoryDescription($arDescription);
+                    $value['language_id'] = $languageId;
+                    $description = new CategoryDescription();
+                    $category->fillAndCast($value);
                     $category->descriptions()->save($description);
                 }
             }
