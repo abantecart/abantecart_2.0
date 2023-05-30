@@ -950,11 +950,16 @@ class Category extends BaseModel
 
             if (!empty($data['category_description'])) {
                 foreach ($data['category_description'] as $language_id => $value) {
-                    if (!$value) {
+                    if (!$value || !$language_id) {
                         continue;
                     }
-                    $value['language_id'] = $language_id;
-                    $category->descriptions()->update($value);
+                    Registry::language()->replaceDescriptions(
+                        'category_descriptions',
+                        ['category_id' => (int)$categoryId],
+                        [
+                            (int)$language_id => $value,
+                        ]
+                    );
                 }
             }
 
