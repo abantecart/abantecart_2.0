@@ -157,7 +157,7 @@ class ControllerApiCatalogManufacturer extends AControllerAPI
                     $this->rest->sendResponse(406);
                     return;
                 }
-
+                unset($request['manufacturer_id']);
                 $result = Manufacturer::editManufacturer($manufacturer->manufacturer_id, $request);
                 if (!$result) {
                     $this->rest->setResponseData(
