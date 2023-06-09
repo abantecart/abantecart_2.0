@@ -78,7 +78,7 @@ class ModelCategoryListener
         $db = Registry::db();
         $category::setCurrentLanguageID(1);
         $calc = $category::getCategoryBranchInfo($category->category_id);
-        $path = $calc['path'];
+        $path = (string)$calc['path'];
 
         $db->table('categories')
             ->where('category_id', '=', $category->category_id)
@@ -101,7 +101,7 @@ class ModelCategoryListener
                     ->where('category_id', '=', $parentId)
                     ->update(
                         [
-                            'path'                  => $calc['path'],
+                            'path'                  => (string)$calc['path'],
                             'total_products_count'  => $calc['total_products_count'],
                             'active_products_count' => $calc['active_products_count'],
                             'children_count'        => count((array)$calc['children'])

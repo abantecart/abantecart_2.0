@@ -37,6 +37,7 @@ use abc\models\catalog\ProductOptionValue;
 use abc\models\catalog\ProductOption;
 use abc\models\locale\WeightClassDescription;
 use abc\modules\events\ABaseEvent;
+use Error;
 use Exception;
 use H;
 use Illuminate\Database\Query\JoinClause;
@@ -232,7 +233,7 @@ class ModelToolImportProcess extends Model
             return $result;
         } catch (Exception $e) {
             $db->rollback();
-            $this->toLog($e->getMessage());
+            $this->toLog($e->getMessage() . "\n" . $e->getTraceAsString());
             return false;
         }
     }
@@ -256,7 +257,12 @@ class ModelToolImportProcess extends Model
         if ($log_classname) {
             $this->imp_log = new $log_classname(['app' => "categories_import_" . $task_id . ".txt"]);
         }
-        return $this->addUpdateCategory($data, $settings, $language_id, $store_id);
+        try {
+            return $this->addUpdateCategory($data, $settings, $language_id, $store_id);
+        } catch (Exception $e) {
+            $this->toLog(__METHOD__ . ": " . $e->getMessage());
+            throw $e;
+        }
     }
 
     /**
@@ -282,7 +288,12 @@ class ModelToolImportProcess extends Model
                 ]
             );
         }
-        return $this->addUpdateManufacturer($data, $settings, $language_id, $store_id);
+        try {
+            return $this->addUpdateManufacturer($data, $settings, $language_id, $store_id);
+        } catch (Exception $e) {
+            $this->toLog(__METHOD__ . ": " . $e->getMessage());
+            throw $e;
+        }
     }
 
     /**
@@ -313,25 +324,27 @@ class ModelToolImportProcess extends Model
             $this->toLog("Error: Unable to build products import data map.");
             return false;
         }
-        $product = $this->filterArray($data['products']);
+        $productData = $this->filterArray($data['products']);
         $product_desc = $this->filterArray($data['product_descriptions']);
         $manufacturers = $this->filterArray($data['manufacturers']);
 
-        $product_data = $product;
-
         // import brand if needed
-        $product_data['manufacturer_id'] = 0;
+        $productData['manufacturer_id'] = 0;
         if ($manufacturers['manufacturer']) {
-            $product_data['manufacturer_id'] = $this->processManufacturer($manufacturers['manufacturer'], 0, $store_id);
+            try {
+                $productData['manufacturer_id'] = $this->processManufacturer($manufacturers['manufacturer'], 0, $store_id);
+            } catch (Exception|Error $e) {
+                $this->toLog(__METHOD__ . ": " . $e->getMessage());
+            }
         }
 
         //check if row is complete and uniform
-        if (!$product_desc['name'] && !$product['sku'] && !$product['model']) {
+        if (!$product_desc['name'] && !$productData['sku'] && !$productData['model']) {
             $this->toLog('Error: Record is not complete or missing required data. Skipping!');
             return false;
         }
 
-        $this->toLog("Processing record for product " . $product_desc['name'] . " " . $product['sku'] . " " . $product['model']);
+        $this->toLog("Processing record for product " . $product_desc['name'] . " " . $productData['sku'] . " " . $productData['model']);
 
         //detect if we update or create new product based on update settings
         $new_product = true;
@@ -355,9 +368,9 @@ class ModelToolImportProcess extends Model
         }
 
         if ($new_product) {
-            $product_data['product_description'] = array_merge($product_desc, ['language_id' => $language_id]);
+            $productData['product_description'] = array_merge($product_desc, ['language_id' => $language_id]);
             //apply default settings for new products only
-            $default_arr = [
+            $defaultData = [
                 'status'          => 1,
                 'subtract'        => 1,
                 'free_shipping'   => 0,
@@ -367,11 +380,10 @@ class ModelToolImportProcess extends Model
                 'weight_class_id' => 5,
                 'length_class_id' => 3,
             ];
-            foreach ($default_arr as $key => $val) {
-                $product_data[$key] = $product_data[$key] ?? $val;
-            }
 
-            $productModel = Product::createProduct($product_data);
+            $productMdl = new Product();
+            $productMdl->fillAndCast($productData, $defaultData);
+            $productModel = $productMdl::createProduct($productData);
             $product_id = $productModel->product_id;
             if ($product_id) {
                 $this->toLog("Created product '" . $product_desc['name'] . "' with ID " . $product_id);
@@ -382,9 +394,9 @@ class ModelToolImportProcess extends Model
 
         } else {
             //flat array for description (specific for update)
-            $product_data['product_description'] = $product_desc;
+            $productData['product_description'] = $product_desc;
             Product::setCurrentLanguageID($language_id);
-            Product::updateProduct($product_id, $product_data);
+            Product::updateProduct($product_id, $productData);
             $this->toLog("Updated product '" . $product_desc['name'] . "' with ID " . $product_id . ".");
             $status = true;
         }
@@ -412,7 +424,7 @@ class ModelToolImportProcess extends Model
         $this->addUpdateOptions(
             $product_id,
             $data['product_options'],
-            $product_data['weight_class_id']
+            $productData['weight_class_id']
         );
 
         $this->data['product_data']['product_id'] = $product_id;

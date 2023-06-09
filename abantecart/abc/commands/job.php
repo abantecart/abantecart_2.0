@@ -125,6 +125,7 @@ class Job extends BaseCommand
                     [
                         'status'        => $handler::STATUS_RUNNING,
                         'last_time_run' => date("Y-m-d H:i:s", time()),
+                        'start_time' => date("Y-m-d H:i:s", time())
                     ]
                 );
                 $this->write(

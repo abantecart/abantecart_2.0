@@ -1903,12 +1903,14 @@ class Product extends BaseModel
             $product_data['date_available'] = date("Y-m-d");
         }
 
-        $product = new Product($product_data);
+        $product = new Product();
+        $product->fillAndCast($product_data);
         $product->save();
         $productId = $product->product_id;
         if ($productId) {
             if ($product_data['product_description']) {
-                $description = new ProductDescription($product_data['product_description']);
+                $description = new ProductDescription();
+                $description->fillAndCast($product_data['product_description']);
                 $product->descriptions()->save($description);
             }
             if ($product_data['keyword'] || $product_data['product_description']['name']) {
@@ -2107,17 +2109,17 @@ class Product extends BaseModel
 
         $update = [];
         foreach ($fillable as $field_name) {
-            if (isset($product_data[$field_name])) {
-                $update[$field_name] = $product_data[$field_name];
+            if (isset($product_data['product_description'][$field_name])) {
+                $update[$field_name] = $product_data['product_description'][$field_name];
             }
         }
 
         if (count($update)) {
             $language->replaceDescriptions('product_descriptions',
                 ['product_id' => $product_id],
-                [$languageId => $update]);
+                [$languageId => $update]
+            );
         }
-
 
         if (trim($product_data['keyword'])) {
             UrlAlias::setProductKeyword(

@@ -40,6 +40,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Collection;
 use Psr\SimpleCache\InvalidArgumentException;
+use Ramsey\Uuid\Uuid;
 use ReflectionException;
 
 /**
@@ -80,6 +81,7 @@ class Category extends BaseModel
         'parent_id'             => 'int',
         'sort_order'            => 'int',
         'status'                => 'int',
+        'path'                  => 'string',
         'total_products_count'  => 'int',
         'active_products_count' => 'int',
         'children_count'        => 'int',
@@ -859,11 +861,11 @@ class Category extends BaseModel
     public static function addCategory($data)
     {
         $db = Registry::db();
-        $data['parent_id'] = (int)$data['parent_id'] > 0 ? (int)$data['parent_id'] : null;
         $db->beginTransaction();
-
         try {
-            $category = new Category($data);
+            $category = new Category();
+            $category->fillAndCast($data);
+            $category->parent_id = (int)$category->parent_id > 0 ? $category->parent_id : null;
             $category->save();
 
             if (!$category) {
@@ -872,14 +874,9 @@ class Category extends BaseModel
             $categoryId = $category->getKey();
             if ($data['category_description']) {
                 foreach ($data['category_description'] as $languageId => $value) {
-                    $arDescription = [
-                        'language_id'      => $languageId,
-                        'name'             => $value['name'] ?: '',
-                        'meta_keywords'    => $value['meta_keywords'] ?: '',
-                        'meta_description' => $value['meta_description'] ?: '',
-                        'description'      => $value['description'] ?: '',
-                    ];
-                    $description = new CategoryDescription($arDescription);
+                    $value['language_id'] = $languageId;
+                    $description = new CategoryDescription();
+                    $description->fillAndCast($value);
                     $category->descriptions()->save($description);
                 }
             }
@@ -953,11 +950,16 @@ class Category extends BaseModel
 
             if (!empty($data['category_description'])) {
                 foreach ($data['category_description'] as $language_id => $value) {
-                    if (!$value) {
+                    if (!$value || !$language_id) {
                         continue;
                     }
-                    $value['language_id'] = $language_id;
-                    $category->descriptions()->update($value);
+                    Registry::language()->replaceDescriptions(
+                        'category_descriptions',
+                        ['category_id' => (int)$categoryId],
+                        [
+                            (int)$language_id => $value,
+                        ]
+                    );
                 }
             }
 

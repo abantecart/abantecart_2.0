@@ -222,9 +222,9 @@ class AOrder extends ALibBase
                 $order_info['shipping_city'] = '';
                 $order_info['shipping_postcode'] = '';
                 $order_info['shipping_zone'] = '';
-                $order_info['shipping_zone_id'] = '';
+                $order_info['shipping_zone_id'] = null;
                 $order_info['shipping_country'] = '';
-                $order_info['shipping_country_id'] = '';
+                $order_info['shipping_country_id'] = null;
                 $order_info['shipping_address_format'] = '';
                 $order_info['shipping_method'] = '';
             }
