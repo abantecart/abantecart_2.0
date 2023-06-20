@@ -304,6 +304,7 @@ class ControllerPagesCheckoutSuccess extends AController
                 'total'          => $this->currency->format_number($order_total),
                 'tax'            => $this->currency->format_number($order_tax),
                 'shipping'       => $this->currency->format_number($order_shipping),
+                'coupon' => $this->session->data['coupon']
             ], $addr);
 
         if ($order_data['order_products']) {
@@ -326,11 +327,11 @@ class ControllerPagesCheckoutSuccess extends AController
                 }
 
                 $ga_data['items'][] = [
-                    'id'       => (int)$order_data['order_id'],
-                    'name'     => $product['name'],
-                    'sku'      => $sku,
-                    'price'    => $product['price'],
-                    'quantity' => $product['quantity'],
+                    'item_id'   => (int)$order_data['order_id'],
+                    'item_name' => $product['name'],
+                    'sku'       => $sku,
+                    'price'     => $product['price'],
+                    'quantity'  => $product['quantity'],
                 ];
             }
         }

@@ -78,7 +78,7 @@ class ControllerCommonPage extends AController {
         $this->view->assign('rnk_text',base64_decode('UG93ZXJlZCBieSBBYmFudGVjYXJ0IGVDb21tZXJjZSBTb2x1dGlvbg=='));
 
         if ($this->config->get('config_google_tag_manager_id')) {
-            $this->view->assign( 'google_tag_manager', $this->config->get('config_google_tag_manager_id'));
+            $this->view->assign('google_tag_manager', trim($this->config->get('config_google_tag_manager_id')));
         }
 
         if($this->config->get('config_maintenance') && isset($this->session->data['merchant'])){
@@ -86,9 +86,6 @@ class ControllerCommonPage extends AController {
         }
 
         $this->view->assign('scripts_bottom', $this->document->getScriptsBottom());
-        if ($this->config->get('config_google_analytics_code')) {
-            $this->view->assign('google_analytics',  $this->config->get('config_google_analytics_code'));
-        }
 
         $this->extensions->hk_UpdateData($this,__FUNCTION__);
 
