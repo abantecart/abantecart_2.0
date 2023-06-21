@@ -445,25 +445,43 @@ if ($error){ ?>
 					</div>
 				<?php } ?>
 
-				<?php echo $this->getHookVar('product_features'); ?>
+                <?php echo $this->getHookVar('product_features'); ?>
 
-			</div>
-		</div>
-	</div>
+            </div>
+        </div>
+    </div>
 </div>
 </div>
 
 <script type="text/javascript">
+    <?php if($this->config->get('config_google_tag_manager_id')){ ?>
+    try {
+        dataLayer.push({ecommerce: null});
+        dataLayer.push({
+            event: "view_item",
+            ecommerce: {
+                items: [{
+                    item_name: <?php abc_js_echo($heading_title);?>,
+                    item_id: <?php echo (int)$product_info['product_id']; ?>,
+                    price: <?php echo $display_price ? $product_info['price'] : 0; ?>,
+                    item_brand: <?php abc_js_echo($manufacturer);?>,
+                    quantity: <?php echo (int)$form['minimum']->value;?>
+                }]
+            }
+        });
+    } catch (e) {
+    }
+    <?php } ?>
 
-	var orig_imgs = $('div.bigimage').html();
-	var orig_thumbs = $('ul.smallimage').html();
+    var orig_imgs = $('div.bigimage').html();
+    var orig_thumbs = $('ul.smallimage').html();
 
-	$(window).load(function () {
+    $(window).load(function () {
 
-		start_easyzoom();
-		display_total_price();
+        start_easyzoom();
+        display_total_price();
 
-		$('#current_reviews .pagination a').on('click', function () {
+        $('#current_reviews .pagination a').on('click', function () {
 			$('#current_reviews').slideUp('slow');
 			$('#current_reviews').load(this.href);
 			$('#current_reviews').slideDown('slow');

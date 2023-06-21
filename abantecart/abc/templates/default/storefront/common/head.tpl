@@ -32,7 +32,7 @@ if ($google_tag_manager) { ?>
         }
 
         gtag('js', new Date());
-        gtag('config', <?php abc_js_echo($google_tag_manager); ?>');
+        gtag('config', <?php abc_js_echo($google_tag_manager); ?>);
     </script>
     <?php
 }
