@@ -58,11 +58,6 @@ class ControllerCommonFooter extends AController
 
         //backwards compatibility for templates prior 1.2.10
         $this->view->assign('scripts_bottom', $this->document->getScriptsBottom());
-        if ($this->config->get('config_google_analytics_code')) {
-            $this->data['google_analytics'] = $this->config->get('config_google_analytics_code');
-        } else {
-            $this->data['google_analytics'] = '';
-        }
         //Eof backwards compatibility
 
         $this->view->batchAssign($this->data);
