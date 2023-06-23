@@ -251,4 +251,23 @@ trait IncentiveTrait
         }
         return $result;
     }
+
+    /**
+     * @param array|stdClass $incentive
+     * @return void
+     */
+    protected function replaceCodes(&$incentive)
+    {
+        $customerId = $this->customer->getId();
+        $incentive['description'] = str_replace(
+            '{{customer_id}}',
+            $customerId,
+            $incentive['description']
+        );
+        $incentive['description_short'] = str_replace(
+            '{{customer_id}}',
+            $customerId,
+            $incentive['description_short']
+        );
+    }
 }
