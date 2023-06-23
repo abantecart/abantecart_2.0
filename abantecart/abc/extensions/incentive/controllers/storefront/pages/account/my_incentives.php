@@ -96,6 +96,7 @@ class ControllerPagesAccountMyIncentives extends AController
         $incentives = Incentive::getCustomerIncentives($this->checkout, $params);
         foreach ($incentives as &$incentive) {
             $this->getIncentiveResource($incentive);
+            $this->replaceCodes($incentive);
             $output[$incentive['incentive_id']] = $incentive;
         }
 

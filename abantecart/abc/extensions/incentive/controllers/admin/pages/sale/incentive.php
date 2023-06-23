@@ -528,9 +528,13 @@ class ControllerPagesSaleIncentive extends AController
 
         $this->data['form']['fields']['description_short']['field'] = $form->getFieldHtml(
             [
-                'type'  => 'textarea',
-                'name'  => 'description_short',
-                'value' => $this->data['description_short'],
+                'type'        => 'textarea',
+                'name'        => 'description_short',
+                'value'       => $this->data['description_short'],
+                'placeholder' => $this->language->t(
+                    'entry_incentive_description_codes_placeholder',
+                    'you can use {{customer}} code in the text'
+                )
             ]
         );
         $this->data['form']['fields']['description_short']['text'] = $this->language->get(
@@ -544,6 +548,10 @@ class ControllerPagesSaleIncentive extends AController
                 'name'         => 'description',
                 'value'        => $this->data['description'],
                 'multilingual' => true,
+                'placeholder'  => $this->language->t(
+                    'entry_incentive_description_codes_placeholder',
+                    'you can use {{customer}} code in the text'
+                )
             ]
         );
         $this->data['form']['fields']['description']['text'] = $this->language->get(

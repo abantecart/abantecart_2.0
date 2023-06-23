@@ -22,9 +22,12 @@ namespace abc\controllers\storefront;
 
 use abc\core\engine\AController;
 use abc\extensions\incentive\models\IncentiveDescription;
+use abc\extensions\incentive\modules\traits\IncentiveTrait;
 
 class ControllerResponsesAccountIncentive extends AController
 {
+    use IncentiveTrait;
+
     public function main()
     {
         $this->loadLanguage('incentive/incentive');
@@ -33,6 +36,7 @@ class ControllerResponsesAccountIncentive extends AController
         $inc = IncentiveDescription::where('incentive_id', '=', $incentiveId)
             ->where('language_id', '=', $this->language->getLanguageID())
             ->first();
+        $this->replaceCodes($inc);
         $this->response->setOutput($inc?->description);
     }
 }
