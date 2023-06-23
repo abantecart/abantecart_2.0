@@ -773,10 +773,6 @@
 		<value><![CDATA[Купон на странице корзины:<br /><span class="help">Позволить клиентам вводить код купона и получить скидку.</span>]]></value>
 	</definition>
 	<definition>
-		<key>entry_google_analytics</key>
-		<value><![CDATA[Google Analytics номер аккаунта:<br /><span class="help">Добавить ваш <a href="https://support.google.com/analytics/answer/1032385?hl=en&ref_topic=1008082" target="_blank">номер аккаунта Google Analytics</a>, чтобы включить отслеживание активности сайта. Это также позволяет отслеживать активность электронной коммерции. Вы должны включить отслеживание электронной коммерции в Google на странице настроек профиля для вашего сайта</span>]]></value>
-	</definition>
-	<definition>
 		<key>entry_ssl_url</key>
 		<value><![CDATA[Безопасный URL магазина:<br /><span class="help">используйте полный URL SSL (HTTPS) в вашем магазине. Убедитесь, что добавили &#39;/&#39; в конце. Например: https://www.yourdomain.com/path/ </span>]]></value>
 	</definition>
@@ -906,15 +902,20 @@
 		<value><![CDATA[HTML кеш:<br/><span class="help">Включение кеширования HTML страниц и блоков увеличивает скорость загрузки.</span>]]></value>
 	</definition>
 	<definition>
-		<key>entry_task_api_key</key>
-		<value><![CDATA[Ключ API Заданий:<br/><span class="help">Этот секретный ключ позволяет запускать запланированные задания из браузера через /task.php файл. Если не указан то задания не запустятся через браузер.<br/>Примечание: Этот ключ не требуется для запуска заданий из коммандной строки.</span>]]></value>
-	</definition>
-	<definition>
-		<key>entry_duplicate_contact_us</key>
-		<value><![CDATA[Дублировать запросы через Контакты-форму мгновенными уведомлениями]]></value>
-	</definition>
-	<definition>
-		<key>entry_mail_logo</key>
-		<value><![CDATA[Логотип в email-письме:]]></value>
-	</definition>
+        <key>entry_task_api_key</key>
+        <value>
+            <![CDATA[Ключ API Заданий:<br/><span class="help">Этот секретный ключ позволяет запускать запланированные задания из браузера через /task.php файл. Если не указан то задания не запустятся через браузер.<br/>Примечание: Этот ключ не требуется для запуска заданий из коммандной строки.</span>]]></value>
+    </definition>
+    <definition>
+        <key>entry_duplicate_contact_us</key>
+        <value><![CDATA[Дублировать запросы через Контакты-форму мгновенными уведомлениями]]></value>
+    </definition>
+    <definition>
+        <key>entry_mail_logo</key>
+        <value><![CDATA[Логотип в email-письме:]]></value>
+    </definition>
+    <definition>
+        <key>entry_google_tag_manager</key>
+        <value><![CDATA[Google Tag Manager ID:<br />]]></value>
+    </definition>
 </definitions>

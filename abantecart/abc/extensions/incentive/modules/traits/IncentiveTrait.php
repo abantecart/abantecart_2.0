@@ -251,4 +251,36 @@ trait IncentiveTrait
         }
         return $result;
     }
+
+    /**
+     * @param array|stdClass $incentive
+     * @return void
+     */
+    protected function replaceCodes(&$incentive)
+    {
+        $customerId = $this->customer->getId();
+        if (is_array($incentive['description'])) {
+            $incentive['description']['description'] = str_replace(
+                '{{customer_id}}',
+                $customerId,
+                $incentive['description']['description']
+            );
+            $incentive['description']['description_short'] = str_replace(
+                '{{customer_id}}',
+                $customerId,
+                html_entity_decode($incentive['description']['description_short'])
+            );
+        } else {
+            $incentive['description'] = str_replace(
+                '{{customer_id}}',
+                $customerId,
+                $incentive['description']
+            );
+            $incentive['description_short'] = str_replace(
+                '{{customer_id}}',
+                $customerId,
+                html_entity_decode($incentive['description_short'])
+            );
+        }
+    }
 }

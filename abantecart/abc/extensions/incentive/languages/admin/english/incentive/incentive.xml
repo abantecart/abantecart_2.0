@@ -90,6 +90,10 @@
         <value><![CDATA[ Detailed Description: ]]></value>
     </definition>
     <definition>
+        <key>entry_incentive_description_codes_placeholder</key>
+        <value><![CDATA[ You can use {{customer}} code in the text ]]></value>
+    </definition>
+    <definition>
         <key>entry_incentive_stop</key>
         <value><![CDATA[ Stop other rules: ]]></value>
     </definition>

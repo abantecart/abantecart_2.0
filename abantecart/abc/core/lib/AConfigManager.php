@@ -721,13 +721,6 @@ class AConfigManager
             'style' => 'medium-field',
         ]);
 
-        $fields['google_analytics'] = $form->getFieldHtml($props[] = [
-            'type'  => 'input',
-            'name'  => 'config_google_analytics_code',
-            'value' => $data['config_google_analytics_code'],
-            'style' => 'medium-field',
-        ]);
-
         $fields['google_tag_manager'] = $form->getFieldHtml($props[] = [
             'type'  => 'input',
             'name'  => 'config_google_tag_manager_id',

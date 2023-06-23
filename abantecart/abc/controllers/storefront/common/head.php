@@ -83,7 +83,7 @@ class ControllerCommonHead extends AController
         }
 
         if ($this->config->get('config_google_tag_manager_id')) {
-            $this->view->assign( 'google_tag_manager', $this->config->get('config_google_tag_manager_id'));
+            $this->view->assign('google_tag_manager', trim($this->config->get('config_google_tag_manager_id')));
         }
 
         $this->view->assign( 'icon', $icon_rl );
