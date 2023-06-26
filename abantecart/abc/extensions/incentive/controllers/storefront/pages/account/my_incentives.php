@@ -80,29 +80,4 @@ class ControllerPagesAccountMyIncentives extends AController
 
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
     }
-
-    /**
-     * @param array $params
-     * @return array
-     * @throws InvalidArgumentException
-     * @throws ReflectionException
-     * @throws AException
-     */
-    protected function getMyIncentives($params): array
-    {
-        $output = [];
-        $params['language_id'] = $params['language_id'] ?: $this->language->getLanguageID();
-        Incentive::setCurrentLanguageID($params['language_id']);
-        $incentives = Incentive::getCustomerIncentives($this->checkout, $params);
-        foreach ($incentives as &$incentive) {
-            $this->getIncentiveResource($incentive);
-            $this->replaceCodes($incentive);
-            $output[$incentive['incentive_id']] = $incentive;
-        }
-
-        return [
-            'total'      => count($output),
-            'incentives' => $output
-        ];
-    }
 }
