@@ -25,6 +25,7 @@ use abc\core\engine\AResource;
 use abc\core\engine\Registry;
 use abc\core\lib\AException;
 use abc\core\lib\BaseIncentiveCondition;
+use abc\extensions\incentive\models\Incentive;
 use abc\extensions\incentive\models\IncentiveApplied;
 use abc\models\customer\Address;
 use abc\models\customer\Customer;
@@ -282,5 +283,30 @@ trait IncentiveTrait
                 html_entity_decode($incentive['description_short'])
             );
         }
+    }
+
+    /**
+     * @param array $params
+     * @return array
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
+     * @throws AException
+     */
+    protected function getMyIncentives($params): array
+    {
+        $output = [];
+        $params['language_id'] = $params['language_id'] ?: $this->language->getLanguageID();
+        Incentive::setCurrentLanguageID($params['language_id']);
+        $incentives = Incentive::getCustomerIncentives($this->checkout, $params);
+        foreach ($incentives as &$incentive) {
+            $this->getIncentiveResource($incentive);
+            $this->replaceCodes($incentive);
+            $output[$incentive['incentive_id']] = $incentive;
+        }
+
+        return [
+            'total'      => count($output),
+            'incentives' => $output
+        ];
     }
 }
