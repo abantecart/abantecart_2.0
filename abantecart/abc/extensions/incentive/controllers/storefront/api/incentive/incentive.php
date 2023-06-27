@@ -44,6 +44,7 @@ class ControllerApiIncentiveIncentive extends ASecureControllerAPI
                 return;
             }
 
+            $this->replaceCodes($incentive);
             $this->data['incentive'] = $this->mapIncentiveDataToApiResponse($incentive);
         } catch (Exception $e) {
             $this->log->error($e->getMessage());
