@@ -292,14 +292,18 @@ trait IncentiveTrait
      * @throws ReflectionException
      * @throws AException
      */
-    protected function getMyIncentives($params): array
+    protected function getMyIncentives($params, ?bool $api = false): array
     {
         $output = [];
         $params['language_id'] = $params['language_id'] ?: $this->language->getLanguageID();
         Incentive::setCurrentLanguageID($params['language_id']);
         $incentives = Incentive::getCustomerIncentives($this->checkout, $params);
         foreach ($incentives as &$incentive) {
-            $this->getIncentiveResource($incentive);
+            if ($api) {
+                $incentive = $this->mapIncentiveDataToApiResponse($incentive);
+            } else {
+                $this->getIncentiveResource($incentive);
+            }
             $this->replaceCodes($incentive);
             $output[$incentive['incentive_id']] = $incentive;
         }
