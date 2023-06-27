@@ -305,7 +305,7 @@ trait IncentiveTrait
                 $this->getIncentiveResource($incentive);
             }
             $this->replaceCodes($incentive);
-            $output[$incentive['incentive_id']] = $incentive;
+            $output[] = $incentive;
         }
 
         return [
