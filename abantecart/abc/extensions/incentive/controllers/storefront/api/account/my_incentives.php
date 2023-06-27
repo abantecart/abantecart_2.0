@@ -90,7 +90,7 @@ class ControllerApiAccountMyIncentives extends ASecureControllerAPI
         $request = $this->rest->getRequestParams();
 
         try {
-            $this->data['incentives'] = $this->getMyIncentives($request);
+            $this->data['incentives'] = $this->getMyIncentives($request, true);
         } catch (Exception $e) {
             $this->log->error($e->getMessage());
             $this->rest->setResponseData([
