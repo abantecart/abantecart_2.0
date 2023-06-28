@@ -85,7 +85,12 @@
             dataType: 'json',
             jsonTermKey: "term",
             data: {
-                'exclude': <?php echo (int)$extra['exclude'] ?: '$("#' . $id . '").chosen().val()' ?>,
+                'exclude': <?php
+                if ($extra['max_selected_options'] == 1) {
+                    echo 'null';
+                } else {
+                    echo (int)$extra['exclude'] ?: '$("#' . $id . '").chosen().val()';
+                } ?>,
                 'filter': '<?php echo $filter_params; ?>'
             },
             keepTypingMsg: <?php abc_js_echo('<span class="green">' . $text_continue_typing . '</span>'); ?>,
