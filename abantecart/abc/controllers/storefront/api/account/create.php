@@ -24,6 +24,8 @@ use abc\core\ABC;
 use abc\core\engine\AControllerAPI;
 use abc\core\lib\AMail;
 use abc\models\content\Content;
+use abc\modules\events\ABaseEvent;
+use H;
 
 
 /**
@@ -101,33 +103,18 @@ class ControllerApiAccountCreate extends AControllerAPI
 
             $this->customer->login($request_data['email'], $request_data['password']);
 
-            $this->loadLanguage('mail/account_create');
-
-            $subject = sprintf($this->language->get('text_subject'), $this->config->get('store_name'));
-
-            $message = sprintf($this->language->get('text_welcome'), $this->config->get('store_name'))."\n\n";
-
-            if (!$this->config->get('config_customer_approval')) {
-                $message .= $this->language->get('text_login')."\n";
-            } else {
-                $message .= $this->language->get('text_approval')."\n";
-            }
-
-            $message .= $this->html->getSecureURL('account/login')."\n\n";
-            $message .= $this->language->get('text_services')."\n\n";
-            $message .= $this->language->get('text_thanks')."\n";
-            $message .= $this->config->get('store_name');
-
-            $mail = new AMail($this->config);
-            $mail->setTo($request_data['email']);
-            $mail->setFrom($this->config->get('store_main_email'));
-            $mail->setSender($this->config->get('store_name'));
-            $mail->setSubject($subject);
-            $mail->setText(html_entity_decode($message, ENT_QUOTES, ABC::env('APP_CHARSET')));
-            $mail->send();
-
             $this->data['status'] = 1;
             if (!$this->config->get('config_customer_approval')) {
+                //add and send account activation link if required
+                if (!$this->config->get('config_customer_email_activation')) {
+                    $customer_data['activated'] = true;
+                    //send welcome email
+                    H::event('storefront\sendWelcomeEmail', [new ABaseEvent($customer_data, $request_data)]);
+                } else {
+                    //send activation email request and wait for confirmation
+                    H::event('storefront\sendActivationLinkEmail', [new ABaseEvent($customer_data, $request_data)]);
+                }
+
                 $this->data['text_message'] = sprintf($this->language->get('text_message'), '');
             } else {
                 $this->data['text_message'] = sprintf(
@@ -135,6 +122,8 @@ class ControllerApiAccountCreate extends AControllerAPI
                     $this->config->get('store_name'),
                     ''
                 );
+                //send welcome email, but need manual approval
+                H::event('storefront\sendWelcomeEmail', [new ABaseEvent($customer_data, $request_data)]);
             }
 
             //Update controller data
