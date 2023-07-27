@@ -8816,7 +8816,7 @@ VALUES
 CREATE TABLE `ac_addresses`(
                                `address_id`    INT(11)                              NOT NULL AUTO_INCREMENT,
                                `customer_id`   INT(11)                              NOT NULL,
-                               `company`       VARCHAR(64) COLLATE utf8_general_ci  NOT NULL,
+                               `company`       VARCHAR(255) COLLATE utf8_general_ci NOT NULL,
                                `firstname`     VARCHAR(32) COLLATE utf8_general_ci  NOT NULL DEFAULT '',
                                `lastname`      VARCHAR(32) COLLATE utf8_general_ci  NOT NULL DEFAULT '',
                                `address_1`     VARCHAR(128) COLLATE utf8_general_ci NOT NULL,
