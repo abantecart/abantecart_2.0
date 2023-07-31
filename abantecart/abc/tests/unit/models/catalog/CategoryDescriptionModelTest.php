@@ -18,6 +18,7 @@ class CategoryDescriptionModelTest extends ATestCase
     {
         $categoryDescription = new CategoryDescription(
             [
+                'language_id'=>'',
                 'name'             => '',
                 'description'      => 'Test description category'
             ]
@@ -35,6 +36,7 @@ class CategoryDescriptionModelTest extends ATestCase
 
         $categoryDescription = new CategoryDescription(
             [
+                'language_id'=>1,
                 'name'             => 'Correct name',
                 'description'      => 'Test description category'
             ]

@@ -83,9 +83,13 @@ class CategoryDescription extends BaseModel
         'language_id'      => [
             'checks'   => [
                 'integer',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => ['default_text' => 'Language ID is not Integer!'],
+                'integer' => ['default_text' => 'Language ID is not Integer!'],
+                'min'=>['default_text' =>'Language ID value must be greater than zero'],
+                'max'=>['default_text' =>'Language ID must be less than 2147483647']
             ],
         ],
         'name'             => [

@@ -116,9 +116,13 @@ class Category extends BaseModel
                 'integer',
                 'sometimes',
                 'required',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => ['default_text' => 'Category ID is not integer!'],
+                'integer' => ['default_text' => 'Category ID is not integer!'],
+                'min'=>['default_text' => 'Category ID must be greater than zero'],
+                'max'=>['default_text'=>'Category ID must be less than 2147483647']
             ],
         ],
         'parent_id'   => [
@@ -126,9 +130,14 @@ class Category extends BaseModel
                 'integer',
                 'nullable',
                 'exists:categories,category_id',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => ['default_text' => 'Parent ID is not integer or absent in categories table!'],
+                'integer' => ['default_text' => 'Parent ID is not integer!'],
+                'min'=>['default_text' => 'Parent ID must be greater than zero'],
+                'max'=>['default_text'=>'Parent ID must be less than 2147483647'],
+                'exists'=>['default_text'=> 'Parent ID not absent in categories table']
             ],
         ],
         'uuid'        => [
@@ -155,44 +164,53 @@ class Category extends BaseModel
         'total_products_count' => [
             'checks'   => [
                 'integer',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => ':attribute is not integer!',
-                ],
+                'integer' => ['default_text' => ':attribute is not integer!'],
+                'min'=>['default_text' =>':attribute value must be greater than zero'],
+                'max'=>['default_text' =>':attribute must be less than 2147483647']
             ],
         ],
 
         'active_products_count' => [
             'checks'   => [
                 'integer',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => ':attribute is not integer!',
-                ],
+                'integer' => ['default_text' => ':attribute is not integer!'],
+                'min'=>['default_text' =>':attribute value must be greater than zero'],
+                'max'=>['default_text' =>':attribute must be less than 2147483647']
             ],
         ],
 
         'children_count' => [
             'checks'   => [
                 'integer',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => ':attribute is not integer!',
-                ],
+                'integer' => ['default_text' => ':attribute is not integer!'],
+                'min'=>['default_text' =>':attribute value must be greater than zero'],
+                'max'=>['default_text' =>':attribute must be less than 2147483647']
             ],
         ],
 
         'sort_order' => [
             'checks'   => [
                 'integer',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => ':attribute is not integer!',
-                ],
+                'integer' => ['default_text' => ':attribute is not integer!'],
+                'min'=>['default_text' =>':attribute value must be greater than zero'],
+                'max'=>['default_text' =>':attribute must be less than 2147483647']
+
             ],
         ],
 

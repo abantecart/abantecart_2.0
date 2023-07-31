@@ -41,6 +41,34 @@ class DownloadAttributeValue extends BaseModel
         'download_id'  => 'int',
     ];
 
+    protected $rules = [
+        /** @see validate() */
+        'attribute_id'      => [
+            'checks'   => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Attribute ID is not Integer!'],
+                'min'=>['default_text' =>'Attribute ID value must be greater than zero'],
+                'max'=>['default_text' =>'Attribute ID must be less than 2147483647']
+            ],
+        ],
+        'download_id'      => [
+            'checks'   => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Download ID is not Integer!'],
+                'min'=>['default_text' =>'Download ID value must be greater than zero'],
+                'max'=>['default_text' =>'Download ID must be less than 2147483647']
+            ],
+        ]
+    ];
+
     protected $fillable = [
         'attribute_id',
         'download_id',
