@@ -256,7 +256,7 @@ class ControllerApiProductFilter extends AControllerAPI
 
         $products = Product::getProducts($this->data['search_parameters']);
 
-        $total = $products->total;
+        $total = $products::getFoundRowsCount();
 
         //get total
         $total_pages = $total ? ceil($total / $products->count()) : 0;
