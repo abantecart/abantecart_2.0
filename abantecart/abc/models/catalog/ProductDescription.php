@@ -84,19 +84,29 @@ class ProductDescription extends BaseModel
                 'integer',
                 'required',
                 'exists:products',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => ['default_text' => 'Product ID is not Integer or absent in products table!'],
+                'exists'=>['default_text' =>'Product ID absent in products table!'],
+                'integer' => ['default_text' => 'Product ID is not Integer!'],
+                'min'=>['default_text'=> 'Product ID value must be greater than zero'],
+                'max'=>['default_text'=>'Product ID must be less than 2147483647'],
             ],
         ],
         'language_id'      => [
             'checks'   => [
                 'integer',
                 'required',
-                'exists:languages'
+                'exists:languages',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => ['default_text' => 'Language ID is not Integer or not presents in languages table!'],
+                'exist' => ['default_text' => 'Language ID is not presents in languages table!'],
+                'integer' => ['default_text' => 'Language ID is not Integer!'],
+                'min'=>['default_text' =>'Language ID value must be greater than zero'],
+                'max'=>['default_text' =>'Language ID must be less than 2147483647']
             ],
         ],
         'name'             => [

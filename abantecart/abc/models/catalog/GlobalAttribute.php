@@ -70,6 +70,80 @@ class GlobalAttribute extends BaseModel
         'regexp_pattern',
     ];
 
+    protected $rules = [
+        'attribute_parent_id'=>[
+            'checks' => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => ':value is not Integer!'],
+                'min'=>['default_text'=> ':value value must be greater than zero'],
+                'max'=>['default_text'=>':value must be less than 2147483647']
+            ],
+        ],
+        'attribute_group_id'=>[
+            'checks' => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => ':value is not Integer!'],
+                'min'=>['default_text'=> ':value value must be greater than zero'],
+                'max'=>['default_text'=>':value must be less than 2147483647']
+            ],
+        ],
+        'attribute_type_id'=>[
+            'checks' => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => ':value is not Integer!'],
+                'min'=>['default_text'=> ':value value must be greater than zero'],
+                'max'=>['default_text'=>':value must be less than 2147483647']
+            ],
+        ],
+        'sort_order'=>[
+            'checks' => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => ':value is not Integer!'],
+                'min'=>['default_text'=> ':value value must be greater than zero'],
+                'max'=>['default_text'=>':value must be less than 2147483647']
+            ],
+        ],
+        'required'=>[
+            'checks' => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => ':value is not Integer!'],
+                'min'=>['default_text'=> ':value value must be greater than zero'],
+                'max'=>['default_text'=>':value must be less than 2147483647']
+            ],
+        ],
+        'status'=>[
+            'checks' => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => ':value is not Integer!'],
+                'min'=>['default_text'=> ':value value must be greater than zero'],
+                'max'=>['default_text'=>':value must be less than 2147483647']
+            ],
+        ]
+    ];
     public function description()
     {
         return $this->hasOne(GlobalAttributesDescription::class, 'attribute_id')
