@@ -244,9 +244,9 @@ class ControllerResponsesListingGridBannerManager extends AController
             case 'del':
                 $ids = explode(',', $this->request->post['id']);
                 if ($ids) {
-                    Banner::whereIn('banner_id', $ids)?->delete();
                     BannerDescription::whereIn('banner_id', $ids)?->delete();
                     BannerStat::whereIn('banner_id', $ids)?->delete();
+                    Banner::whereIn('banner_id', $ids)?->delete();
                 }
                 break;
             case 'save':
@@ -264,6 +264,7 @@ class ControllerResponsesListingGridBannerManager extends AController
                 break;
             default:
         }
+        $this->cache->flush('banner');
 
         //update controller data
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
