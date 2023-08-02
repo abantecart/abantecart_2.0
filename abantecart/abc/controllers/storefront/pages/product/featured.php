@@ -97,7 +97,7 @@ class ControllerPagesProductFeatured extends AController
         ]);
 
         $results = Product::getFeaturedProducts($this->data['search_parameters']);
-        $productTotal = $results->total;
+        $productTotal = $results::getFoundRowsCount();
 
         if ($productTotal) {
             $this->data['button_add_to_cart'] = $this->language->get('button_add_to_cart');

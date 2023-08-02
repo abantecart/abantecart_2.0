@@ -446,9 +446,7 @@ class Banner extends BaseModel
 
         //allow to extend this method from extensions
         Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $params);
-        $output = $query->useCache('banner')->get();
-        $output->total = $db->sql_get_row_count();
-        return $output;
+        return $query->useCache('banner')->get();
     }
 
     public static function getBanner(int $bannerId)

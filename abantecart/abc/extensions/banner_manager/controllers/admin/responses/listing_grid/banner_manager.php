@@ -84,7 +84,7 @@ class ControllerResponsesListingGridBannerManager extends AController
         //put into public property to have access from hooks
         $this->data['results'] = $results;
 
-        $total = $results->total;
+        $total = $results::getFoundRowsCount();;
         $total_pages = $total > 0 ? ceil($total / $limit) : 0;
 
         $response = new stdClass();
@@ -291,7 +291,7 @@ class ControllerResponsesListingGridBannerManager extends AController
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
         $results = Banner::getBanners($this->data['banner_search_parameters']);
-        $total = $results->total;
+        $total = $results::getFoundRowsCount();
         $total_pages = $total > 0 ? ceil($total / $limit) : 0;
 
 
