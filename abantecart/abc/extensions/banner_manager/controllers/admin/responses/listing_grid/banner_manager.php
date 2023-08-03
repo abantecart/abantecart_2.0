@@ -257,6 +257,7 @@ class ControllerResponsesListingGridBannerManager extends AController
                         foreach ($this->data['allowed_fields'] as $field) {
                             $data[$field] = $this->request->post[$field][$id];
                         }
+                        $this->log->debug('Banner quicksave debug: BANNER ID '.$id.' data: '.var_export($data, true));
                         Banner::editBanner($id, $data);
                     }
                     break;
