@@ -239,32 +239,31 @@ class ControllerResponsesListingGridBannerManager extends AController
             );
             return;
         }
-
-        switch ($this->request->post['oper']) {
-            case 'del':
-                $ids = explode(',', $this->request->post['id']);
-                if ($ids) {
+        $ids = explode(',', $this->request->post['id']);
+        if ($ids) {
+            $ids = array_unique($ids);
+            switch ($this->request->post['oper']) {
+                case 'del':
                     BannerDescription::whereIn('banner_id', $ids)?->delete();
                     BannerStat::whereIn('banner_id', $ids)?->delete();
                     Banner::whereIn('banner_id', $ids)?->delete();
-                }
-                break;
-            case 'save':
-                $ids = explode(',', $this->request->post['id']);
-                if (!empty($ids)) {
+                    break;
+                case 'save':
                     foreach ($ids as $id) {
                         if (!isset($this->request->post['status'][$id])) {
                             $this->request->post['status'][$id] = 0;
                         }
+                        $data = [];
                         foreach ($this->data['allowed_fields'] as $field) {
-                            Banner::editBanner($id, [$field => $this->request->post[$field][$id]]);
+                            $data[$field] = $this->request->post[$field][$id];
                         }
+                        Banner::editBanner($id, $data);
                     }
-                }
-                break;
-            default:
+                    break;
+            }
+
+            $this->cache->flush('banner');
         }
-        $this->cache->flush('banner');
 
         //update controller data
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
