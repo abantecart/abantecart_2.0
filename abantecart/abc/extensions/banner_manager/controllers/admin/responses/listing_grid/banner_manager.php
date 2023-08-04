@@ -128,7 +128,7 @@ class ControllerResponsesListingGridBannerManager extends AController
                     ? $this->language->get('text_graphic_banner')
                     : $this->language->get('text_text_banner')
                 ),
-                $result['status'] != $textOutOfRange
+                $result['status'] !== $textOutOfRange
                     ?
                     $this->html->buildCheckbox(
                         [
