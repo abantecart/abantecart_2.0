@@ -173,4 +173,8 @@
 		<key>text_delete_statistic</key>
 		<value><![CDATA[ Удалить Статистику ]]></value>
 	</definition>
+    <definition>
+        <key>banner_manager_text_out_of_date_range</key>
+        <value><![CDATA[ вне диапазона дат ]]></value>
+    </definition>
 </definitions>
