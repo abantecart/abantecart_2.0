@@ -84,7 +84,7 @@ class ControllerResponsesListingGridBannerManager extends AController
         //put into public property to have access from hooks
         $this->data['results'] = $results;
 
-        $total = $results->total;
+        $total = $results::getFoundRowsCount();;
         $total_pages = $total > 0 ? ceil($total / $limit) : 0;
 
         $response = new stdClass();
@@ -102,17 +102,20 @@ class ControllerResponsesListingGridBannerManager extends AController
             $this->config->get('config_image_grid_height')
         );
 
+        $textOutOfRange = $this->language->t('banner_manager_text_out_of_date_range', 'Out of Date Range');
+
         foreach ($results->toArray() as $i => $result) {
             $response->rows[$i]['id'] = $result['banner_id'];
             $thumbnail = $thumbnails[$result['banner_id']]['thumb_html'];
             //check if banner is active based on dates and update status
             $now = time();
             if (H::dateISO2Int($result['start_date']) > $now) {
-                $result['status'] = 0;
+                $result['status'] = $textOutOfRange;
+
             }
             $stop = H::dateISO2Int($result['end_date']);
             if ($stop > 0 && $stop < $now) {
-                $result['status'] = 0;
+                $result['status'] = $textOutOfRange;
             }
 
             $response->rows[$i]['cell'] = [
@@ -125,13 +128,16 @@ class ControllerResponsesListingGridBannerManager extends AController
                     ? $this->language->get('text_graphic_banner')
                     : $this->language->get('text_text_banner')
                 ),
-                $this->html->buildCheckbox(
-                    [
-                        'name'  => 'status[' . $result['banner_id'] . ']',
-                        'value' => $result['status'],
-                        'style' => 'btn_switch',
-                    ]
-                ),
+                $result['status'] !== $textOutOfRange
+                    ?
+                    $this->html->buildCheckbox(
+                        [
+                            'name'  => 'status[' . $result['banner_id'] . ']',
+                            'value' => $result['status'],
+                            'style' => 'btn_switch',
+                        ]
+                    )
+                    : $result['status'],
                 $result['date_modified'],
             ];
         }
@@ -239,30 +245,30 @@ class ControllerResponsesListingGridBannerManager extends AController
             );
             return;
         }
-
-        switch ($this->request->post['oper']) {
-            case 'del':
-                $ids = explode(',', $this->request->post['id']);
-                if ($ids) {
-                    Banner::whereIn('banner_id', $ids)?->delete();
+        $ids = explode(',', $this->request->post['id']);
+        if ($ids) {
+            $ids = array_unique($ids);
+            switch ($this->request->post['oper']) {
+                case 'del':
                     BannerDescription::whereIn('banner_id', $ids)?->delete();
                     BannerStat::whereIn('banner_id', $ids)?->delete();
-                }
-                break;
-            case 'save':
-                $ids = explode(',', $this->request->post['id']);
-                if (!empty($ids)) {
+                    Banner::whereIn('banner_id', $ids)?->delete();
+                    break;
+                case 'save':
                     foreach ($ids as $id) {
                         if (!isset($this->request->post['status'][$id])) {
                             $this->request->post['status'][$id] = 0;
                         }
+                        $data = [];
                         foreach ($this->data['allowed_fields'] as $field) {
-                            Banner::editBanner($id, [$field => $this->request->post[$field][$id]]);
+                            $data[$field] = $this->request->post[$field][$id];
                         }
+                        Banner::editBanner($id, $data);
                     }
-                }
-                break;
-            default:
+                    break;
+            }
+
+            $this->cache->flush('banner');
         }
 
         //update controller data
@@ -291,7 +297,7 @@ class ControllerResponsesListingGridBannerManager extends AController
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
         $results = Banner::getBanners($this->data['banner_search_parameters']);
-        $total = $results->total;
+        $total = $results::getFoundRowsCount();
         $total_pages = $total > 0 ? ceil($total / $limit) : 0;
 
 

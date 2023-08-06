@@ -75,7 +75,7 @@ class ControllerResponsesListingGridIncentiveApplied extends AController
 
         $results = IncentiveApplied::getItems($this->data['search_parameters']);
 
-        $total = $results->total;
+        $total = $results::getFoundRowsCount();;
         $total_pages = $total > 0 ? ceil($total / $limit) : 0;
 
         $response = new stdClass();

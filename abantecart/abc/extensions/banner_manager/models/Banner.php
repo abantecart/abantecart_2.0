@@ -23,6 +23,7 @@ use abc\core\engine\Registry;
 use abc\models\BaseModel;
 use abc\models\catalog\ResourceMap;
 use Carbon\Carbon;
+use Error;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -251,7 +252,7 @@ class Banner extends BaseModel
             Registry::db()->commit();
             Registry::cache()->flush('banner');
             return $bannerId;
-        } catch (Exception $e) {
+        } catch (Exception|Error $e) {
             Registry::log()->error($e->getMessage());
             Registry::db()->rollback();
             return false;
@@ -306,7 +307,7 @@ class Banner extends BaseModel
                     [$language->getContentLanguageID() => $update]);
             }
             Registry::db()->commit();
-        } catch (Exception $e) {
+        } catch (Exception|Error $e) {
             Registry::db()->rollback();
             Registry::log()->error($e->getMessage());
             return false;
@@ -446,9 +447,7 @@ class Banner extends BaseModel
 
         //allow to extend this method from extensions
         Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $params);
-        $output = $query->useCache('banner')->get();
-        $output->total = $db->sql_get_row_count();
-        return $output;
+        return $query->useCache('banner')->get();
     }
 
     public static function getBanner(int $bannerId)

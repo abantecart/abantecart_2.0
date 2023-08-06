@@ -174,4 +174,8 @@
 		<key>text_delete_statistic</key>
 		<value><![CDATA[ Eliminar Estadística ]]></value>
 	</definition>
+    <definition>
+        <key>banner_manager_text_out_of_date_range</key>
+        <value><![CDATA[ rango fuera de fecha ]]></value>
+    </definition>
 </definitions>

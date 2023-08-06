@@ -83,6 +83,9 @@ class ControllerPagesSaleIncentiveApplied extends AController
                     'href' => $this->html->getSecureURL('listing_grid/incentive_applied/details', '&id=%ID%'),
                 ],
             ],
+            'update_field' => '',
+            'editurl'      => '',
+            'multiselect'  => 'false',
         ];
 
         $grid_settings['colNames'] = [

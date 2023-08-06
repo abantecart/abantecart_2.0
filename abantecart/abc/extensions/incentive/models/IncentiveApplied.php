@@ -264,11 +264,6 @@ class IncentiveApplied extends BaseModel
         //allow to extend this method from extensions
         Registry::extensions()->hk_extendQuery(new static, __FUNCTION__, $query, $params);
 
-        $output = $query->get();
-        //add total number of rows into each row
-        $totalNumRows = $db->sql_get_row_count();
-        $output->total = $totalNumRows;
-
-        return $output;
+        return $query->get();
     }
 }

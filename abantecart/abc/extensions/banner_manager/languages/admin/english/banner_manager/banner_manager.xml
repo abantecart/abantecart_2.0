@@ -189,4 +189,8 @@
         <key>please_select_option</key>
         <value><![CDATA[ -- Please select -- ]]></value>
     </definition>
+    <definition>
+        <key>banner_manager_text_out_of_date_range</key>
+        <value><![CDATA[ out of Date Range ]]></value>
+    </definition>
 </definitions>
