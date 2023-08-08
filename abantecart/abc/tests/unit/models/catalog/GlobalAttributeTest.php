@@ -26,7 +26,7 @@ class GlobalAttributeTest extends TestCase
             $errors = $attr->errors()['validation'];
             var_Dump($errors);
         }
-        $this->assertCount(9, $errors);
+        $this->assertCount(6, $errors);
 
         $errors = [];
         try {

@@ -2,37 +2,39 @@
 
 namespace Tests\unit\models\catalog;
 
-use abc\models\catalog\GlobalAttributesGroupsDescription;
+use abc\models\catalog\GlobalAttributesValueDescription;
 use Illuminate\Validation\ValidationException;
 use PHPUnit\Framework\TestCase;
 
-class GlobalAttributesGroupsDescriptionTest extends TestCase
+class GlobalAttributesValueDescriptionTest extends TestCase
 {
     public function testValidator()
     {
-        $attr = new  GlobalAttributesGroupsDescription();
+        $attr = new GlobalAttributesValueDescription();
         $errors = [];
         try {
             $data = [
-                'attribute_group_id' => false,
-                'language_id'  => false,
+                'attribute_value_id'           => false,
+                'attribute_id'                  => false,
+                'language_id'             => false,
+            ];
+            $attr->validate($data);
+        } catch (ValidationException $e) {
+            $errors = $attr->errors()['validation'];
+        }
+        $this->assertCount(3, $errors);
+
+        $errors = [];
+        try {
+            $data = [
+                'attribute_value_id'           => 1,
+                'attribute_id'             => 36,
+                'language_id'                  => 1,
             ];
             $attr->validate($data);
         } catch (ValidationException $e) {
             $errors = $attr->errors()['validation'];
             var_Dump($errors);
-        }
-        $this->assertCount(2, $errors);
-
-        $errors = [];
-        try {
-            $data = [
-                'attribute_group_id' => 1,
-                'language_id'  => 1,
-            ];
-            $attr->validate($data);
-        } catch (ValidationException $e) {
-            $errors = $attr->errors()['validation'];
         }
         $this->assertCount(0, $errors);
     }

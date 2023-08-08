@@ -101,9 +101,14 @@ class ProductOption extends BaseModel
                 'integer',
                 'required',
                 'exists:products',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => ['default_text' => 'Product ID is not Integer or absent in the products table!'],
+                'integer' => ['default_text' => 'Product ID is not Integer!'],
+                'exists'=>['default_text' =>'Product ID absent in products table!'],
+                'min'=>['default_text'=> 'Product ID value must be greater than zero'],
+                'max'=>['default_text'=>'Product ID must be less than 2147483647'],
             ],
         ],
         'attribute_id' => [
@@ -111,28 +116,35 @@ class ProductOption extends BaseModel
                 'integer',
                 'nullable',
                 'exists:global_attributes',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => ['default_text' => 'Attribute ID is not Integer or not presents in global_attributes table!'],
+                'integer' => ['default_text' => 'Attribute ID is not Integer'],
+                'exists'=>['default_text' =>'Attribute ID not presents in global_attributes table!'],
+                'max'=>['default_text' =>'Attribute ID must be less than 2147483647']
             ],
         ],
         'group_id'     => [
             'checks'   => [
                 'integer',
                 'nullable',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => ['default_text' => 'Group ID is not integer!'],
+                'integer' => ['default_text' => 'Group ID is not integer!'],
+                'max'=>['default_text' =>'Group ID must be less than 2147483647']
             ],
         ],
         'sort_order'   => [
             'checks'   => [
                 'integer',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => ':attribute is not integer!',
-                ],
+                'integer' => ['default_text' => ':attribute is not integer!'],
+                'min'=>['default_text'=> ':attribute value must be greater than zero'],
+                'max'=>['default_text'=>':attribute must be less than 2147483647'],
             ],
         ],
         'status'       => [

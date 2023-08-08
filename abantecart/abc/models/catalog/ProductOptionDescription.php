@@ -78,9 +78,12 @@ class ProductOptionDescription extends BaseModel
                 'integer',
                 'required',
                 'exists:product_options',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
                 '*' => ['default_text' => 'Product Option ID is not Integer or absent in product_options table!'],
+
             ],
         ],
 
@@ -89,9 +92,14 @@ class ProductOptionDescription extends BaseModel
                 'integer',
                 'required',
                 'exists:products',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => ['default_text' => 'Product ID is not Integer or absent in products table!'],
+                'integer' => ['default_text' => 'Product ID is not Integer!'],
+                'exists'=>['default_text' =>'Product ID absent in products table!'],
+                'min'=>['default_text'=> 'Product ID value must be greater than zero'],
+                'max'=>['default_text'=>'Product ID must be less than 2147483647'],
             ],
         ],
 
@@ -100,9 +108,14 @@ class ProductOptionDescription extends BaseModel
                 'integer',
                 'required',
                 'exists:languages',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => ['default_text' => 'Language ID is not Integer or absent in languages table!'],
+                'integer' => ['default_text' => 'Language ID is not Integer'],
+                'min'=>['default_text'=> 'Product ID value must be greater than zero'],
+                'max'=>['default_text'=>'Product ID must be less than 2147483647'],
+                'exists'=>['default_text'=>'Language ID absent in languages table'],
             ],
         ],
 

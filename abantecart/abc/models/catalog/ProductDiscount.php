@@ -80,7 +80,9 @@ class ProductDiscount extends BaseModel
                 'exists:products',
             ],
             'messages' => [
-                '*' => ['default_text' => 'Product ID is not Integer or absent in the products table!'],
+                'integer' => ['default_text' => 'Product ID is not Integer!'],
+                'exists'=>['default_text' =>'Product ID absent in products table!'],
+                'max'=>['default_text'=>'Product ID must be less than 2147483647'],
             ],
         ],
 
@@ -92,31 +94,34 @@ class ProductDiscount extends BaseModel
                 'exists:customer_groups',
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => 'Customer Group ID must be an integer or NULL or presents in the customer_groups table!',
-                ],
+                'integer' => ['default_text' => 'Customer Group ID must be an integer '],
+                'exists'=>['default_text'=>'Customer Group ID not presents in the customer_groups table!'],
             ],
         ],
 
         'quantity' => [
             'checks'   => [
                 'integer',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => 'Product Discount Quantity must be an integer!',
-                ],
+                'integer' => ['default_text' => 'Product Discount Quantity must be an integer!'],
+                'min'=>['default_text' =>'Product Discount Quantity must be greater than zero'],
+                'max'=>['default_text'=>'Product Discount Quantity must be less than 2147483647'],
             ],
         ],
 
         'priority' => [
             'checks'   => [
                 'integer',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => 'Priority must be an integer!',
-                ],
+                'integer' => ['default_text' => 'Priority must be an integer!'],
+                'min'=>['default_text' =>'Priority must be greater than zero'],
+                'max'=>['default_text'=>'Priority must be less than 2147483647'],
             ],
         ],
 

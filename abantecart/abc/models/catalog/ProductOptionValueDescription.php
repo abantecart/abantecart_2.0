@@ -80,10 +80,14 @@ class ProductOptionValueDescription extends BaseModel
                 'integer',
                 'required',
                 'exists:product_option_values',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => ['default_text' => 'Product Option Value ID is not Integer or absent in product_option_values table!'],
-            ],
+                'integer' => ['default_text' => 'Product Option Value ID is not Integer']],
+                'min'=>['default_text'=> 'Product Option Value ID value must be greater than zero'],
+                'max'=>['default_text'=>'Product Option Value ID must be less than 2147483647'],
+                'exist'=>['default_text'=>'Product Option Value ID absent in product_option_values table!']
         ],
 
         'product_id' => [
@@ -91,9 +95,14 @@ class ProductOptionValueDescription extends BaseModel
                 'integer',
                 'required',
                 'exists:products',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => ['default_text' => 'Product ID is not Integer or absent in products table!'],
+                'integer' => ['default_text' => 'Product ID is not Integer or absent in products table!'],
+                'min'=>['default_text'=> 'Product Option Value ID value must be greater than zero'],
+                'max'=>['default_text'=>'Product Option Value ID must be less than 2147483647'],
+                'exist'=>['default_text'=>'Product Option Value ID absent in product_option_values table!']
             ],
         ],
 
@@ -102,9 +111,14 @@ class ProductOptionValueDescription extends BaseModel
                 'integer',
                 'required',
                 'exists:languages',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => ['default_text' => 'Language ID is not Integer or absent in languages table!'],
+                'integer' => ['default_text' => 'Language ID is not Integer or absent in languages table!'],
+                'min'=>['default_text'=> 'Language ID value must be greater than zero'],
+                'max'=>['default_text'=>'Language ID must be less than 2147483647'],
+                'exist'=>['default_text'=>'Language ID absent in languages table!']
             ],
         ],
 
