@@ -75,19 +75,27 @@ class ContentDescription extends BaseModel
             'checks'   => [
                 'integer',
                 'required',
-                'sometimes'
+                'sometimes',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => ['default_text' => 'Content ID is not Integer!'],
+                'integer' => ['default_text' => 'Content ID is not Integer!'],
+                'max'=>['default_text'=>'Content ID must be less than 2147483647']
+
             ],
         ],
         'language_id'      => [
             'checks'   => [
                 'integer',
-                'required'
+                'required',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => ['default_text' => 'Language ID is not Integer!'],
+                'integer' => ['default_text' => 'Language ID is not Integer!'],
+                'min'=>['default_text' => 'Category ID must be greater than zero'],
+                'max'=>['default_text'=>'Category ID must be less than 2147483647']
+
             ],
         ],
         'name'             => [

@@ -83,9 +83,24 @@ class Content extends BaseModel
                 'integer',
                 'nullable',
                 'exists:contents,content_id',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => ['default_text' => 'Parent ID is not integer or absent in contents table!'],
+                'integer' => ['default_text' => 'Parent ID is not integer'],
+                'exists' =>['default_text' => 'Parent ID absent in contents table!'],
+                'max'=>['default_text'=>'Category ID must be less than 2147483647']
+            ],
+        ],
+        'content_id'  => [
+            'checks'   => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Parent ID is not integer'],
+                'min'=>['default_text' => 'Category ID must be greater than zero'],
+                'max'=>['default_text'=>'Category ID must be less than 2147483647']
             ],
         ],
         'hide_title' => [
@@ -101,11 +116,13 @@ class Content extends BaseModel
         'sort_order' => [
             'checks'   => [
                 'integer',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => 'Sort Order is not integer!',
-                ],
+                'integer' => ['default_text' => 'Sort Order is not integer!'],
+                'min'=>['default_text' => 'Category ID must be greater than zero'],
+                'max'=>['default_text'=>'Category ID must be less than 2147483647']
             ],
         ]
     ];
