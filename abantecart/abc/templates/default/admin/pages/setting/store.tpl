@@ -20,7 +20,7 @@
 				   title="<?php echo $delete_store_button->title; ?>"
 				   href="<?php echo $delete_store_button->href; ?>"
 				   data-confirmation="delete"
-					><i class="fa fa-trash-alt fa-fw"></i></a>
+                ><i class="fa fa-trash fa-fw"></i></a>
 			</div>
 			<?php } ?>
 		</div>			
@@ -46,7 +46,9 @@
 				}
 				$widthcasses .= " col-xs-12";
 			?>
-		<div class="form-group row align-items-start <?php if (!empty($error[$name])) { echo "has-error"; } ?>">
+                <div class="form-group <?php if (!empty($error[$name])) {
+                    echo "has-error";
+                } ?>">
 			<label class="control-label col-sm-4 col-xs-12" for="<?php echo $field->element_id; ?>"><?php echo ${'entry_' . $name}; ?></label>
 			<div class="input-group afield <?php echo $widthcasses; ?> <?php echo ($name == 'description' ? 'ml_ckeditor' : '')?>">
 				<?php echo $field;	?>

@@ -22,7 +22,7 @@
 			$my_ext_style = 'btn-default';
 			if($my_extensions_shown) {
 				$my_ext_style = 'btn-primary';
-			}  
+            }
 		?>
 		<div class="btn-group">
 			<a href="<?php echo $my_extensions; ?>" class="btn <?php echo $my_ext_style; ?>" id="btn_my_exts">
@@ -55,7 +55,7 @@
 			<?php } ?>
 		  </ul>
 		</div>
-		
+
 		<div class="btn-group form-inline">
 			<?php echo $form['form_open']; ?>
 			<div class="form-group">
@@ -73,7 +73,7 @@
 				<i class="fa fa-external-link-alt fa-lg"></i>
 			</a>
 		</div>
-		<div class="btn-group pull-right"> 
+        <div class="btn-group pull-right">
 			<a href="<?php echo $my_account; ?>" target="_blank" class="btn btn-default" id="btn_my_account">
 			<i class="fa fa-user fa-fw"></i>
 			<?php echo $text_my_account; ?>
@@ -89,8 +89,8 @@
 		<?php } ?>
 	</div>
 	<div class="panel-body panel-body-nopadding">
-	<?php 
-		if(!$mp_connected && $my_extensions_shown) { 
+        <?php
+        if (!$mp_connected && $my_extensions_shown) {
 			echo $text_connection_required;
 		}
 	if($content){ ?>
@@ -175,7 +175,7 @@
 								?>
 								<div class="ext_icons">
 									<a href="<?php echo $item['install_url']; ?>" class="productinstall tooltips" data-original-title="<?php echo $text_install; ?>">
-									<i class="fa fa-cloud-download-alt"></i>
+                                        <i class="fa fa-cloud-download"></i>
 									</a>
 								</div>
 								<?php
@@ -184,7 +184,7 @@
 								?>
 								<div class="ext_icons">
 									<span class="grey_out">
-									<i class="fa fa-cloud-download-alt"></i>
+									<i class="fa fa-cloud-download"></i>
 									</span>
 								</div>
 								<?php
@@ -250,7 +250,7 @@
 </div>
 
 <?php
-	if(!$mp_connected) { 
+if (!$mp_connected) {
 	echo $this->html->buildElement(
 		array('type' => 'modal',
 				'id' => 'amp_modal',
@@ -344,9 +344,9 @@
 
 	var reload_page = function(){
 		location.reload();
-		//important to clean up the modal 
+        //important to clean up the modal
 		$('#amp_modal').modal('hide');
-		$("#amp_modal").find(".modal-body").empty(); 
+        $("#amp_modal").find(".modal-body").empty();
 	}
 
 	/* Product modal */
@@ -364,8 +364,8 @@
 	$('#amp_product_frame').on('load', function() {
 		$('#iframe_product_loading').hide();
 	});
-	
-	/* Order modal */
+
+    /* Order modal */
 	$('#amp_order_modal').on('shown.bs.modal', function (e) {
 		var $invoker = $(e.relatedTarget);
 		var d = new Date();

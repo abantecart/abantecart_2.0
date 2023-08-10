@@ -69,7 +69,6 @@
 	</div>
 </div>
 
-
 <?php
 	//load quick view port modal
 	echo $this->html->buildElement(

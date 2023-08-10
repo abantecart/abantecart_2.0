@@ -1,5 +1,5 @@
 /*
-Custom css layer for bootstrap v 4.1.x
+Custom layer for bootstrap v 3.1.0
 */
 
 label {
@@ -106,9 +106,6 @@ label.h4 {
 .form-inline .checkbox {
    margin-right: 20px;
 }
-.input-group {
-   max-width: none;
-}
 .input-group input[type="checkbox"], 
 .input-group input[type="radio"] {
     float: left;
@@ -123,6 +120,10 @@ label.h4 {
 .input-lg {
    font-size: 18px;
    padding: 12px 10px;
+}
+
+.btn {
+    padding: 6px 10px;
 }
 
 .btn-default:hover,
@@ -387,12 +388,6 @@ label.h4 {
    -webkit-border-radius: 2px;
    border-radius: 2px;
 }
-.nav-stacked {
-   display: block;
-}
-.nav-stacked > li {
-   float: none;
-}
 
 .nav-tabs > li > a {
    -moz-border-radius: 2px 2px 0 0;
@@ -401,8 +396,6 @@ label.h4 {
 }
 
 .panel {
-   margin-bottom: 20px;
-   background-color: #fff;
    -moz-border-radius: 2px;
    -webkit-border-radius: 2px;
    border-radius: 2px;
@@ -643,8 +636,6 @@ label.h4 {
 
 .form-horizontal .control-label {
    font-weight: normal;
-   text-align: right;
-   line-height: 28px;
 }
 
 .has-success .form-control,
@@ -653,7 +644,6 @@ label.h4 {
    -moz-box-shadow: none;
    -webkit-box-shadow: none;
    box-shadow: none;
-   border-color: darkred;
 }
 
 .form-control:focus {
@@ -775,13 +765,11 @@ label.h4 {
 @media (min-width: 992px) {
 	.modal-xlg {
     	width: 980px;
-       max-width: none;
 	}
 }
 @media (min-width: 1200px) {
   .modal-xlg {
     width: 1150px;
-     max-width: none;
   }
 }
 
@@ -808,7 +796,7 @@ label.h4 {
 }
 
 .modal-header .close {
-/*   margin-top: 4px; */
+    margin-top: 4px;
 }
 .modal-header a.btn {
 	float: right;
@@ -1230,9 +1218,16 @@ small.media-desc {
 dl {
     margin-bottom: 0;
     margin-top: 0;
-   word-wrap: break-word;
 }
 
 .modal-body div.alert-success, .modal-body div.alert-danger {
    overflow: auto;
+}
+
+.modal-xl {
+    width: 90%;
+}
+
+.table > tbody > tr > td {
+    vertical-align: middle;
 }

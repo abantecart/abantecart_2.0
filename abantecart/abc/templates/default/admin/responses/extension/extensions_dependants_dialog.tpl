@@ -1,6 +1,6 @@
 <div class="modal-header">
-	<h4 class="modal-title"><?php echo $text_confirmation; ?></h4>
 	<button aria-hidden="true" data-dismiss="modal" class="close" type="button">&times;</button>
+    <h4 class="modal-title"><?php echo $text_confirmation; ?></h4>
 </div>
 <div class="tab-content">
 	<div class="panel-body panel-body-nopadding">
@@ -28,7 +28,7 @@
 			</a>
 			&nbsp;
 			<a class="btn btn-default" data-dismiss="modal" href="#">
-				<i class="fa fa-sync"></i> <?php echo $button_cancel; ?>
+                <i class="fa fa-sync"></i> <?php echo $button_cancel; ?>
 			</a>
 		</div>
 	</div>

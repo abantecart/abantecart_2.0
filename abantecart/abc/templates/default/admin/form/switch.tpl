@@ -1,11 +1,11 @@
 <?php if(is_int(strpos($attr,'readonly')) || is_int(strpos($attr,'disable')) ){ ?>
-<div id="<?php echo $id ?>_layer" class="btn-group btn-group-toggle <?php echo $style; ?>" <?php echo $attr ?> data-toggle="buttons">
+    <div id="<?php echo $id ?>_layer" class="btn-group btn-toggle <?php echo $style; ?>" <?php echo $attr ?>>
     <button class="btn btn-<?php echo ($checked ? 'primary' : 'default'); ?> active" <?php echo $attr ?>>
         <?php echo ($checked ? $text_on : $text_off); ?>
     </button>
 </div>
 <?php }else{ ?>
-<div id="<?php echo $id ?>_layer" class="btn-group btn-group-toggle <?php echo $style; ?>" <?php echo $attr ?> data-toggle="buttons">
+    <div id="<?php echo $id ?>_layer" class="btn-group btn-toggle <?php echo $style; ?>" <?php echo $attr ?>>
 	<?php if ($checked) { ?>
     <button class="btn btn-primary active" <?php echo $attr ?>><?php echo $text_on?></button>
     <button class="btn btn-default" <?php echo $attr ?>><?php echo $text_off?></button>

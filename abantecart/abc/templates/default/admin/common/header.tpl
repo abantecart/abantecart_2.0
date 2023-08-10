@@ -13,8 +13,9 @@ if ($logged){ ?>
                     echo $this->getHookVar('logoimage_hookvar');
                 } else{
                     ?>
-                    <img class="logo_image" src="<?php echo $this->templateResource('assets/images/logo.png'); ?>" width="190"
-                         title="<?php echo $heading_title; ?>"/>
+                    <img class="logo_image"
+                         src="<?php echo $this->getHookVar('logo_url') ?: $this->templateResource('assets/images/logo.png'); ?>"
+                         width="190" title="<?php echo $heading_title; ?>"/>
                     <?php
                 }
                 ?>
@@ -53,7 +54,8 @@ if ($logged){ ?>
     <div class="mainpanel">
     <div class="headerbar">
         <a class="menutoggle"><i class="fa fa-bars"></i></a>
-        <select id="global_search" name="search" data-placeholder="<?php echo $search_everywhere; ?>" class="chosen-select form-control aselect ">
+        <select id="global_search" name="search" data-placeholder="<?php echo $search_everywhere; ?>"
+                class="chosen-select form-control aselect ">
             <option></option>
         </select>
         <div id="suggest_popup_dialog"></div>
@@ -81,9 +83,8 @@ if ($logged){ ?>
                 </li>
                 <li class="hidden-xs">
                     <div class="btn-group">
-                        <a href="<?php echo $rl_manager_url; ?>" class="btn btn-default tp-icon">
-                            <i class="fa fa-images fa-lg"></i>
-                        </a>
+                        <a href="<?php echo $rl_manager_url; ?>" class="btn btn-default tp-icon"><i
+                                    class="fa fa-image"></i></a>
                     </div>
                 </li>
                 <?php if ($ant){ ?>
@@ -143,7 +144,7 @@ if ($logged){ ?>
                         </button>
                         <div class="dropdown-menu dropdown-menu-head pull-right switcher">
                             <h5 class="title"><?php echo $cur_lang['name']; ?>
-                                <a href="<?php echo $language_settings; ?>"><i class="fa fa-cogs"></i></a>
+                                <a href="<?php echo $language_settings; ?>"><i class="fa fa-gears"></i></a>
                             </h5>
                             <form action="<?php echo str_replace('&', '&amp;', $action); ?>" method="post"
                                   enctype="multipart/form-data" id="language_form">
@@ -173,7 +174,6 @@ if ($logged){ ?>
                 <li>
                     <div class="btn-group">
                         <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                            <img src="<?php echo $avatar; ?>" alt="<?php echo $username; ?>"/>
                             <span class="hidden-xs"><?php echo $username; ?></span>
                             <span class="caret"></span>
                         </button>
@@ -181,7 +181,7 @@ if ($logged){ ?>
                         <div class="dropdown-menu dropdown-menu-head pull-right">
                             <h5 class="title">
                                 <?php echo $last_login; ?>
-                                <a href="<?php echo $account_edit; ?>"><i class="fa fa-cogs"></i></a>
+                                <a href="<?php echo $account_edit; ?>"><i class="fa fa-gears"></i></a>
                             </h5>
                             <ul class="dropdown-list gen-list">
                                 <li><a href="<?php echo $account_edit; ?>"><i
@@ -385,9 +385,10 @@ echo $this->html->buildElement(
                 <?php
                 if ($this->getHookVar('logoimage_hookvar')){
                     echo $this->getHookVar('logoimage_hookvar');
-                } else{
+                } else {
                     ?>
-                    <img class="logo_image" src="<?php echo $this->templateResource('assets/images/logo.png'); ?>"
+                    <img class="logo_image"
+                         src="<?php echo $this->getHookVar('logo_url') ?: $this->templateResource('assets/images/logo.png'); ?>"
                          title="<?php echo $heading_title; ?>"/>
                     <?php
                 }
@@ -400,9 +401,9 @@ echo $this->html->buildElement(
     <script type="text/javascript">
         //remove cookies if logged out
         $(document).ready(function () {
-			Cookies.remove("sticky-header");
-			Cookies.remove("sticky-leftpanel");
-			Cookies.remove("leftpanel-collapsed");
+            $.removeCookie("sticky-header");
+            $.removeCookie("sticky-leftpanel");
+            $.removeCookie("leftpanel-collapsed");
         });
     </script>
 

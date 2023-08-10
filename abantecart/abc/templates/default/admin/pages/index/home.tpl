@@ -10,7 +10,7 @@
 								<img class="img-circle"
 								     src="<?php echo $this->templateResource('assets/images/icons/' . $item['icon']); ?>"
 								     alt="<?php echo $item['text'] ?>"/>
-								<h6><?php echo $item['text'] ?></h6>
+                                <h5><?php echo $item['text'] ?></h5>
 							</a>
 						</div>
 					<?php } ?>
@@ -24,7 +24,7 @@
 	<div class="col-sm-6 col-lg-6">
 		<div class="panel panel-default">
 			<div class="panel-body">
-				<h5 class="title"><i class="fa fa-money-bill-alt fa-lg fa-fw"></i> <?php echo $text_latest_10_orders; ?>
+                <h5 class="title"><i class="fa fa-money fa-lg fa-fw"></i> <?php echo $text_latest_10_orders; ?>
 					<span class="pull-right"><a
 								href="<?php echo $orders_url; ?>"><?php echo $orders_text_all; ?></a></span>
 				</h5>
@@ -130,7 +130,7 @@
 	<div class="col-sm-5 col-lg-5">
 		<div class="panel panel-default">
 			<div class="panel-body">
-				<h5 class="title"><i class="fa fa-tachometer-alt fa-lg fa-fw"></i>&nbsp;&nbsp;<?php echo $text_overview; ?>
+                <h5 class="title"><i class="fa fa-tachometer fa-lg fa-fw"></i>&nbsp;&nbsp;<?php echo $text_overview; ?>
 				</h5>
 
 				<div class="table-responsive">
@@ -188,7 +188,7 @@
 		<div class="panel panel-default">
 			<div class="panel-body">
 				<h5 class="title"><i
-							class="fa fa-chart-bar fa-lg fa-fw"></i>&nbsp;&nbsp;<?php echo $text_statistics; ?>
+                            class="fa fa-bar-chart-o fa-lg fa-fw"></i>&nbsp;&nbsp;<?php echo $text_statistics; ?>
 					<span class="pull-right">
 			<?php echo $entry_range; ?>
 						<select id="range" onchange="loadPerformanceChart(this.value)">
@@ -200,9 +200,7 @@
 		</span>
 				</h5>
 
-				<div id="report_flot">
-
-				</div>
+                <div id="report_flot"></div>
 
 			</div>
 		</div>
@@ -228,7 +226,11 @@ if ($quick_start_url){
 }
 ?>
 
-<script type="text/javascript" src="vendor/components/chart/Chart.min.js"></script>
+<!--[if IE]>
+<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/jquery/flot/excanvas.js'); ?>"></script>
+<![endif]-->
+<script type="text/javascript"
+        src="<?php echo $this->templateResource('assets/js/jquery/flot/jquery.flot.js'); ?>"></script>
 <script type="text/javascript">
 
 	<?php
@@ -242,10 +244,6 @@ if ($quick_start_url){
 			$('#quick_start').modal('show');
 		}
 	});
-		$('#quick_start').on('show.bs.modal', function (e) {
-			var modal = $(this);
-			modal.find('.modal-content').load('<?php echo $quick_start_url; ?>');
-		});
 	<?php
 	}
 	?>
@@ -267,67 +265,70 @@ if ($quick_start_url){
 	}
 
 	function showChart(orders, customers, xaxis) {
-
-		var orders_labels = [];
-		var orders_values = [];
-		const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
-			"Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-		];
-		const weekdayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri",
-			"Sat"
-		];
+        var y_max = 0;
 		for (var k in orders.data) {
-			if (orders.data.length == 12) {
-				orders_labels.push(monthNames[k]);
-			} else if (orders.data.length == 7) {
-				orders_labels.push(weekdayNames[k]);
-			} else {
-				orders_labels.push(orders.data[k][0]);
-				}
-			orders_values.push(orders.data[k][1]);
+            if (orders.data[k][1] > y_max) {
+                y_max = orders.data[k][1];
+            }
 		}
-		var customer_labels = [];
-		var customer_values = [];
-
 		for (var k in customers.data) {
-			if (customers.data.length == 12) {
-				customer_labels.push(monthNames[k]);
-			} else if (customers.data.length == 7) {
-				customer_labels.push(weekdayNames[k]);
-			} else {
-				customer_labels.push(customers.data[k][0]);
+            if (customers.data[k][1] > y_max) {
+                y_max = customers.data[k][1];
 			}
-			customer_labels.push(customers.data[k][0]);
-			customer_values.push(customers.data[k][1]);
 		}
+        y_max = y_max == 0 ? 15 : y_max;
 
-
-		$("#report_flot").html('<canvas id="statisticsChart"></canvas>');
-
-
-		var ctx = document.getElementById('statisticsChart').getContext('2d');
-		var chart = new Chart(ctx, {
-			// The type of chart we want to create
-			type: 'line',
-
-			// The data for our dataset
-			data: {
-				labels: orders_labels,
-				datasets: [{
-					label: orders.label,
-					backgroundColor: '#1CAF9A',
-					borderColor: '#1CAF9A',
-					data: orders_values,
+        var plot = jQuery.plot(jQuery("#report_flot"),
+            [{
+                data: orders.data,
+                label: "&nbsp;" + orders.label,
+                color: "#1CAF9A"
 				},
-				{
-						label: customers.label,
-						backgroundColor: '#428BCA',
-						borderColor: '#428BCA',
-						data: customer_values,
-				},
-				]
-			},
-		});
+                {
+                    data: customers.data,
+                    label: "&nbsp;" + customers.label,
+                    color: "#428BCA"
+                }
+            ],
+            {
+                series: {
+                    lines: {
+                        show: true,
+                        fill: true,
+                        lineWidth: 1,
+                        fillColor: {
+                            colors: [{opacity: 0.5},
+                                {opacity: 0.5}
+                            ]
+                        }
+                    },
+                    points: {
+                        show: true
+                    },
+                    shadowSize: 0
+                },
+                legend: {
+                    position: 'nw'
+                },
+                grid: {
+                    hoverable: true,
+                    clickable: true,
+                    borderColor: '#ddd',
+                    borderWidth: 1,
+                    labelMargin: 10,
+                    backgroundColor: '#fff'
+                },
+                yaxis: {
+                    min: 0,
+                    max: y_max,
+                    color: '#eee'
+                },
+                xaxis: {
+                    ticks: xaxis,
+                    color: '#eee'
+                }
+            });
+
 		var previousPoint = null;
 		jQuery("#report_flot").bind("plothover", function (event, pos, item) {
 			jQuery("#x").text(pos.x.toFixed(2));

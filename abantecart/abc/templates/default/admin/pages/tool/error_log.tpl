@@ -16,7 +16,8 @@
             }
             if($button_clear){ ?>
             <div class="btn-group">
-			    <a href="<?php echo $clear_url; ?>" class="btn btn-primary lock-on-click" id="clear"><i class="fa fa-trash-alt"></i> <?php echo $button_clear;?></a>
+                <a href="<?php echo $clear_url; ?>" class="btn btn-primary lock-on-click" id="clear"><i
+                            class="fa fa-trash"></i> <?php echo $button_clear; ?></a>
             </div>
             <?php } ?>
 		</div>

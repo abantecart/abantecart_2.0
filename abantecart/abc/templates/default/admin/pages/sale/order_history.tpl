@@ -55,10 +55,11 @@
 		<?php } ?>
 
 		<?php foreach ($form['fields'] as $name => $field) {
-            if($field->type == 'hidden'){
+            if ($field->type == 'hidden') {
                 echo $field;
                 continue;
             }
+
 		//Logic to calculate fields width
 		$widthcasses = "col-sm-7";
 		if (is_int(stripos($field->style, 'large-field'))) {
@@ -72,10 +73,10 @@
 		}
 		$widthcasses .= " col-xs-12";
 		?>
-		<div class="form-group row align-items-start <?php if (!empty($error[$name])) {
+            <div class="form-group <?php if (!empty($error[$name])) {
 			echo "has-error";
 		} ?>">
-			<label class="control-label offset-sm-1 col-sm-3 col-xs-12"
+                <label class="control-label col-sm-3 col-xs-12"
 				   for="<?php echo $field->element_id; ?>"><?php echo ${'entry_' . $name}; ?></label>
 
 			<div class="input-group afield <?php echo $widthcasses; ?> <?php echo($name == 'description' ? 'ml_ckeditor' : '') ?>">
@@ -99,7 +100,7 @@
 			<i class="fa fa-save fa-fw"></i> <?php echo $form['submit']->text; ?>
 			</button>
 			<button class="btn btn-default" type="reset">
-			<i class="fa fa-sync fa-fw"></i> <?php echo $button_reset; ?>
+                <i class="fa fa-sync fa-fw"></i> <?php echo $button_reset; ?>
 			</button>
 			<a class="btn btn-default" href="<?php echo $cancel; ?>">
 			<i class="fa fa-arrow-left fa-fw"></i> <?php echo $form['cancel']->text; ?>

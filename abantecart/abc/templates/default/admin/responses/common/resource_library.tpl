@@ -83,7 +83,7 @@ if ($action == 'list_object') {
 				   data-confirmation="delete"
 				   data-confirmation-text="<?php echo $text_confirm_delete; ?>"
 				   data-original-title="<?php echo $button_delete; ?>">
-					<i class="fa fa-trash-alt"></i></a>
+                    <i class="fa fa-trash"></i></a>
 			</li>
 			<?php
 			if ($form_language_switch) { ?>

@@ -7,13 +7,14 @@
 		   name="<?php echo $name ?>_confirmation" id="<?php echo $id ?>_confirmation"
            value="" <?php echo $attr; ?> autocomplete="off" />
 
-    <div class="input-group-append">
+    <span class="input-group-addon">
 	<?php if ( $required == 'Y') { ?>
-		<span class="input-group-text required">*</span>
+        <span class="required">*</span>
 	<?php } ?>
 	<?php if ( !empty ($help_url) ) { ?>
-		<span class="input-group-text help_element"><a href="<?php echo $help_url; ?>" target="new"><i class="fa fa-question-circle fa-lg"></i></a></span>
+        <span class="help_element"><a href="<?php echo $help_url; ?>" target="new"><i
+                        class="fa fa-question-circle fa-lg"></i></a></span>
 	<?php } ?>
 	<span id="<?php echo $id ?>_strength" class="password_strength"></span>
-	</div>
+	</span>
 

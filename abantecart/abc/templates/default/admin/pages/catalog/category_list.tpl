@@ -7,7 +7,7 @@
 			<div class="btn-group mr10 toolbar">
                 <?php if($insert){?>
 				<a class="btn btn-primary tooltips" href="<?php echo $insert; ?>" title="<?php echo $button_add; ?>">
-				<i class="fa fa-plus"></i>
+                    <i class="fa fa-plus"></i>
 				</a>
                 <?php } ?>
 			</div>
@@ -33,7 +33,7 @@
 			    			<?php echo $search_form['submit']->text ?>
 			    		</button>
 			    		<button type="reset" class="btn btn-xs btn-default tooltips" title="<?php echo $button_reset; ?>">
-			    			<i class="fa fa-sync"></i>
+                            <i class="fa fa-sync"></i>
 			    		</button>
 			    	</div>
 			    </form>
@@ -51,7 +51,7 @@
     $('#category_grid_wrapper a.grid_action_expand').click(function(){
         var new_url = '<?php echo $grid_url; ?>&'+$(this).attr('rel');
         $('#category_grid')
-            .jqGrid('setGridParam',{url:new_url})
+            .jqGridHistory('setGridParam', {url: new_url})
             .trigger("reloadGrid");
         return false;
     });

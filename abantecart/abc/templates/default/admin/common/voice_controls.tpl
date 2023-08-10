@@ -12,8 +12,8 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-	        <h4 class="modal-title"><?php echo $text_voice_command_prompt; ?></h4>
           <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title"><?php echo $text_voice_command_prompt; ?></h4>
         </div>
         <div class="modal-body">
 	      <div class="compact marquee">
@@ -67,7 +67,7 @@
 			</div>
 			<div class="col-sm-3">
 				<a class="try_again_now try_again" style="display:none" title="Retry" onclick="startButton(event)">
-				  <i class="fa fa-sync fa-2x"></i>
+                    <i class="fa fa-sync fa-2x"></i>
 				</a>
 				<a class="voice-close" data-dismiss="modal"><i class="fa fa-remove fa-2x"></i></a>
 			</div>
