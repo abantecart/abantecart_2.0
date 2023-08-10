@@ -7,6 +7,7 @@
 	<div class="panel-heading col-xs-12">
 		<div class="primary_content_actions pull-left">
 			<div class="btn-group mr10 toolbar">
+                <?php echo $this->getHookVar('toolbar_pre'); ?>
 			    <a class="btn btn-white disabled"><?php echo $balance; ?></a>
 			    <?php if($button_orders_count){ ?>
 			    <a target="_blank"
@@ -35,13 +36,15 @@
                     data-confirmation-text="<?php echo $warning_actonbehalf;?>"
                 <?php } ?>
 			       data-original-title="<?php echo $actas->text; ?>"><i class="fa fa-male"></i></a>
+                <?php echo $this->getHookVar('toolbar_post'); ?>
 			</div>
-
+            <?php if ($insert_href) { ?>
 			<div class="btn-group mr10 toolbar">
 				<a class="btn btn-primary tooltips" title="<?php echo $button_add; ?>" href="<?php echo $insert_href; ?>" data-toggle="modal" data-target="#transaction_modal">
 				<i class="fa fa-plus"></i>
 				</a>
 			</div>
+            <?php } ?>
 			<div class="btn-group mr10 toolbar">
 			<?php if (!empty($search_form)) { ?>
 			    <form id="<?php echo $search_form['form_open']->name; ?>"
@@ -64,7 +67,7 @@
 			    			<?php echo $search_form['submit']->text ?>
 			    		</button>
 			    		<button type="reset" class="btn btn-xs btn-default tooltips" title="<?php echo $button_reset; ?>">
-			    			<i class="fa fa-sync"></i>
+                            <i class="fa fa-sync"></i>
 			    		</button>
 
 			    	</div>

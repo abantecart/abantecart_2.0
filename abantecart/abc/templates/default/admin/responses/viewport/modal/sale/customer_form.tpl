@@ -1,8 +1,8 @@
 <div class="modal-header">
-	<h4 class="modal-title"><?php echo $heading_title; ?></h4>
+    <button aria-hidden="true" data-dismiss="modal" class="close" type="button">&times;</button>
 	<a aria-hidden="true" class="btn btn-default" type="button" href="" target="_new"><i class="fa fa-arrow-right fa-fw"></i><?php echo $text_more_new; ?></a>
 	<a aria-hidden="true" class="btn btn-default" type="button" href=""><i class="fa fa-arrow-down fa-fw"></i><?php echo $text_more_current; ?></a>
-	<button aria-hidden="true" data-dismiss="modal" class="close" type="button">&times;</button>
+    <h4 class="modal-title"><?php echo $heading_title; ?></h4>
 </div>
 
 <div id="content" class="panel panel-default">
@@ -96,15 +96,15 @@
 		}
 		$widthcasses .= " col-xs-12";
 		?>
-		<div class="form-group row align-items-start <?php if (!empty($error[$name])) {
+            <div class="form-group <?php if (!empty($error[$name])) {
 			echo "has-error";
 		} ?>">
-			<label class="control-label offset-sm-1 col-sm-3 col-xs-12"
+                <label class="control-label col-sm-3 col-xs-12"
 				   for="<?php echo $field->element_id; ?>"><?php echo ${'entry_' . $name}; ?></label>
 
 			<div class="input-group afield <?php echo $widthcasses; ?> <?php echo($name == 'description' ? 'ml_ckeditor' : '') ?>">
 				<?php if($name == 'email') { ?>
-				<span class="input-group-prepend">
+                    <span class="input-group-btn">
 					<a type="button" title="mailto" class="btn btn-info" href="mailto:<?php echo $field->value; ?>">
 					<i class="fa fa-envelope fa-fw"></i>
 					</a>
@@ -126,7 +126,7 @@
 				<i class="fa fa-save"></i> <?php echo $button_save_and_close; ?>
 			</a>&nbsp;
 			<a class="btn btn-default" data-dismiss="modal" href="<?php echo $cancel; ?>">
-				<i class="fa fa-times"></i> <?php echo $button_close; ?>
+                <i class="fa fa-close"></i> <?php echo $button_close; ?>
 			</a>
 		</div>
 	</div>

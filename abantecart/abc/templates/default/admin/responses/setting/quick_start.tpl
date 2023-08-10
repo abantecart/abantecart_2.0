@@ -1,8 +1,8 @@
 <?php include($tpl_common_dir . 'action_confirm.tpl'); ?>
 
 <div class="modal-header">
-	<h4 class="modal-title"><?php  echo $title; ?></h4>
 	<button aria-hidden="true" data-dismiss="modal" class="close" type="button">&times;</button>
+    <h4 class="modal-title"><?php echo $title; ?></h4>
 </div>
 
 <div id="setting_form" class="tab-content">
@@ -27,7 +27,9 @@
 				}
 				$widthcasses .= " col-xs-12";
 			?>
-		<div class="form-group row align-items-start <?php if (!empty($error[$name])) { echo "has-error"; } ?>">
+                <div class="form-group <?php if (!empty($error[$name])) {
+                    echo "has-error";
+                } ?>">
 			<label class="control-label col-sm-4 col-xs-12" for="<?php echo $field->element_id; ?>"><?php echo ${'entry_' . $name}; ?></label>
 			<div class="input-group afield <?php echo $widthcasses; ?> <?php echo (is_int(strpos($name, 'description')) ? 'ml_ckeditor' : '')?>">
 				<?php echo $field; ?>
@@ -54,7 +56,7 @@
 	  	<br /><br />
 		<div class="form-group text-center">
 			<label><?php echo $quick_start_last_footer; ?></label>
-		</div>		
+        </div>
 	  	<?php } ?>
 	</div>
 	<div class="panel-footer">
@@ -67,13 +69,13 @@
 			    </a>
 			</div>
 		    <?php } ?>
-			
+
 		    <?php if ($back) { ?>
 			<div class="btn-group">
 			    <a class="btn btn-white step_back" href="<?php echo $back; ?>">
 			        <i class="fa fa-arrow-left"></i> <?php echo $button_back; ?>
 			    </a>
-			</div>		    
+            </div>
 		    <?php } ?>
 		    <?php if ($competed) { ?>
 		    <button class="btn btn-default" type="button" data-dismiss="modal" aria-hidden="true">
@@ -81,7 +83,7 @@
 		    </button>
 		    <?php } else { ?>
 			<button class="btn btn-default" type="reset">
-				<i class="fa fa-sync fa-fw"></i> <?php echo $button_reset; ?>
+                <i class="fa fa-sync fa-fw"></i> <?php echo $button_reset; ?>
 			</button>&nbsp;
 			<button class="btn btn-primary">
 				<i class="fa fa-save"></i> <?php echo $text_next; ?> <i class="fa fa-arrow-right"></i>

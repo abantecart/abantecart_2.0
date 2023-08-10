@@ -20,8 +20,8 @@
 <?php } ?>
 </div>
 <?php if($required == 'Y'){ ?>
-<div class="input-group-append">
-	<span class="input-group-text required">*</span>
-</div>
+    <span class="input-group-addon">
+	<span class="required">*</span>
+</span>
 <?php } ?>
 

@@ -10,8 +10,8 @@
                 $classname = '';
             }
             ?>
-            <li class="nav-item"><a class="nav-link <?php echo $classname; ?>" <?php echo($tab['href'] ? 'href="'
-                    .$tab['href'].'" ' : ''); ?>><strong><?php echo $tab['text']; ?></strong></a>
+            <li class="<?php echo $classname; ?>"><a <?php echo($tab['href'] ? 'href="' . $tab['href']
+                    . '" ' : ''); ?>><strong><?php echo $tab['text']; ?></strong></a>
             </li>
         <?php } ?>
 
@@ -34,12 +34,11 @@
         $name = 'location';
         $fld = $form['fields'][$name];
         ?>
-        <div id="container_<?php echo $name; ?>"
-             class="form-group row align-items-start <?php if (!empty($error[$name])) {
-                 echo "has-error";
-             } ?>">
-            <label class="control-label offset-sm-1 col-sm-3 col-xs-12"
-                   for="<?php echo $fld->element_id; ?>"><?php echo ${'entry_'.$name}; ?></label>
+        <div id="container_<?php echo $name; ?>" class="form-group <?php if (!empty($error[$name])) {
+            echo "has-error";
+        } ?>">
+            <label class="control-label col-sm-3 col-xs-12"
+                   for="<?php echo $fld->element_id; ?>"><?php echo ${'entry_' . $name}; ?></label>
             <div class="input-group afield col-sm-5">
                 <?php echo $fld; ?>
             </div>
@@ -52,15 +51,14 @@
         $name = 'zone';
         $fld = $form['fields'][$name];
         ?>
-        <div id="container_<?php echo $name; ?>"
-             class="form-group row align-items-start <?php if (!empty($error[$name])) {
-                 echo "has-error";
-             } ?>">
-            <label class="control-label offset-sm-1 col-sm-3 col-xs-12"
-                   for="<?php echo $fld->element_id; ?>"><?php echo ${'entry_'.$name}; ?></label>
+        <div id="container_<?php echo $name; ?>" class="form-group <?php if (!empty($error[$name])) {
+            echo "has-error";
+        } ?>">
+            <label class="control-label col-sm-3 col-xs-12" for="<?php echo $fld->element_id; ?>"><?php echo ${'entry_'
+                    . $name}; ?></label>
             <div class="input-group afield col-sm-5">
                 <div class="dl-horizontal checkbox">
-                    <label class="col-sm-12" for="cgFrm_all_zones"><?php echo $form['fields']['all_zones'] ?><?php echo $text_tax_all_zones; ?></label>
+                    <label for="cgFrm_all_zones"><?php echo $form['fields']['all_zones'] ?><?php echo $text_tax_all_zones; ?></label>
                 </div>
                 <?php echo $fld; ?>
             </div>
@@ -73,12 +71,11 @@
         $name = 'description';
         $fld = $form['fields'][$name];
         ?>
-        <div id="container_<?php echo $name; ?>"
-             class="form-group row align-items-start <?php if (!empty($error[$name])) {
-                 echo "has-error";
-             } ?>">
-            <label class="control-label offset-sm-1 col-sm-3 col-xs-12"
-                   for="<?php echo $fld->element_id; ?>"><?php echo ${'entry_'.$name}; ?></label>
+        <div id="container_<?php echo $name; ?>" class="form-group <?php if (!empty($error[$name])) {
+            echo "has-error";
+        } ?>">
+            <label class="control-label col-sm-3 col-xs-12" for="<?php echo $fld->element_id; ?>"><?php echo ${'entry_'
+                    . $name}; ?></label>
             <div class="input-group afield col-sm-7">
                 <?php echo $fld; ?>
             </div>
@@ -91,12 +88,11 @@
         $name = 'rate';
         $fld = $form['fields'][$name];
         ?>
-        <div id="container_<?php echo $name; ?>"
-             class="form-group row align-items-start <?php if (!empty($error[$name])) {
-                 echo "has-error";
-             } ?>">
-            <label class="control-label offset-sm-1 col-sm-3 col-xs-12"
-                   for="<?php echo $fld->element_id; ?>"><?php echo ${'entry_'.$name}; ?></label>
+        <div id="container_<?php echo $name; ?>" class="form-group <?php if (!empty($error[$name])) {
+            echo "has-error";
+        } ?>">
+            <label class="control-label col-sm-3 col-xs-12" for="<?php echo $fld->element_id; ?>"><?php echo ${'entry_'
+                    . $name}; ?></label>
             <div class="input-group afield col-sm-7">
                 <div class="row">
                     <div class="col-sm-3">
@@ -116,12 +112,11 @@
         $name = 'tax_rate_threshold';
         $fld = $form['fields'][$name];
         ?>
-        <div id="container_<?php echo $name; ?>"
-             class="form-group row align-items-start <?php if (!empty($error[$name])) {
-                 echo "has-error";
-             } ?>">
-            <label class="control-label offset-sm-1 col-sm-3 col-xs-12"
-                   for="<?php echo $fld->element_id; ?>"><?php echo ${'entry_'.$name}; ?></label>
+        <div id="container_<?php echo $name; ?>" class="form-group <?php if (!empty($error[$name])) {
+            echo "has-error";
+        } ?>">
+            <label class="control-label col-sm-3 col-xs-12" for="<?php echo $fld->element_id; ?>"><?php echo ${'entry_'
+                    . $name}; ?></label>
             <div class="input-group afield col-sm-7">
                 <div class="row">
                     <div class="col-sm-2">
@@ -141,12 +136,11 @@
         $name = 'tax_exempt_groups';
         $fld = $form['fields'][$name];
         ?>
-        <div id="container_<?php echo $name; ?>"
-             class="form-group row align-items-start <?php if (!empty($error[$name])) {
-                 echo "has-error";
-             } ?>">
-            <label class="control-label offset-sm-1 col-sm-3 col-xs-12"
-                   for="<?php echo $fld->element_id; ?>"><?php echo ${'entry_'.$name}; ?></label>
+        <div id="container_<?php echo $name; ?>" class="form-group <?php if (!empty($error[$name])) {
+            echo "has-error";
+        } ?>">
+            <label class="control-label col-sm-3 col-xs-12" for="<?php echo $fld->element_id; ?>"><?php echo ${'entry_'
+                    . $name}; ?></label>
             <div class="input-group afield col-sm-5">
                 <?php echo $fld; ?>
             </div>
@@ -159,12 +153,11 @@
         $name = 'priority';
         $fld = $form['fields'][$name];
         ?>
-        <div id="container_<?php echo $name; ?>"
-             class="form-group row align-items-start <?php if (!empty($error[$name])) {
-                 echo "has-error";
-             } ?>">
-            <label class="control-label offset-sm-1 col-sm-3 col-xs-12"
-                   for="<?php echo $fld->element_id; ?>"><?php echo ${'entry_'.$name}; ?></label>
+        <div id="container_<?php echo $name; ?>" class="form-group <?php if (!empty($error[$name])) {
+            echo "has-error";
+        } ?>">
+            <label class="control-label col-sm-3 col-xs-12" for="<?php echo $fld->element_id; ?>"><?php echo ${'entry_'
+                    . $name}; ?></label>
             <div class="input-group afield col-sm-2">
                 <?php echo $fld; ?>
             </div>
@@ -207,7 +200,9 @@
                 }
             };
             toggleZonesSelectbox();
+
             var getZones = function (id, location_id) {
+
                 $.ajax(
                     {
                         url: '<?php echo $common_zone; ?>&location_id=' + location_id + '&zone_id=' + zone_id,
@@ -245,7 +240,6 @@
             $('#cgFrm_all_zones').click(function () {
                 toggleZonesSelectbox();
             });
-
         });
     })(jQuery);
 </script>

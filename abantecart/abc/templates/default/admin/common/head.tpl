@@ -12,44 +12,33 @@ use abc\core\ABC; ?>
 <link href="<?php echo $link['href']; ?>" rel="<?php echo $link['rel']; ?>"/>
 <?php } ?>
 
-<?php if ( is_file( ABC::env('DIR_RESOURCES') . $icon ) ) {  ?>
-<link href="resources/<?php echo $icon; ?>" type="image/png" rel="icon" />
+<?php if (is_file(ABC::env('DIR_RESOURCES') . $icon)) { ?>
+    <link href="resources/<?php echo $icon; ?>" type="image/png" rel="icon"/>
 <?php } ?>
 
-<link rel="stylesheet" type="text/css" href="vendor/components/bootstrap/css/bootstrap.min.css" />
-<link rel="stylesheet" type="text/css" href="vendor/components/jqueryui/themes/ui-lightness/jquery-ui.min.css" />
-<script>
-	FontAwesomeConfig = { searchPseudoElements: true };
-</script>
-
-<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons" />
-<link rel="stylesheet" type="text/css" href="<?php echo $this->templateResource('assets/css/vuetify/vuetify.css'); ?>" />
+<link rel="stylesheet" type="text/css"
+      href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons"/>
+<link rel="stylesheet" type="text/css"
+      href="<?php echo $this->templateResource('assets/css/vuetify/v2/vuetify.css'); ?>"/>
+<link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
 
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
 
+<script type="text/javascript"
+        src="<?php echo $this->templateResource('assets/js/tinymce/tinymce.min.js'); ?>"></script>
 <script type="text/javascript" src="<?php echo $this->templateResource('assets/js/vue/vue.js'); ?>"></script>
-<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/tinymce-vue/tinymce-vue.js'); ?>"></script>
-<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/vuetify/vuetify.js'); ?>"></script>
-<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/vee-validate/vee-validate.js'); ?>"></script>
-<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/polyfill/polyfill.min.js'); ?>"></script>
+<script type="text/javascript"
+        src="<?php echo $this->templateResource('assets/js/tinymce-vue/tinymce-vue.js'); ?>"></script>
+<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/vuetify/v2/vuetify.js'); ?>"></script>
+<script type="text/javascript"
+        src="<?php echo $this->templateResource('assets/js/vee-validate/vee-validate.js'); ?>"></script>
+<script type="text/javascript"
+        src="<?php echo $this->templateResource('assets/js/polyfill/polyfill.min.js'); ?>"></script>
 <script type="text/javascript" src="<?php echo $this->templateResource('assets/js/axios/axios.min.js'); ?>"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lodash@4.13.1/lodash.min.js"></script>
 
-<style>
-	.ellipsis {
-		overflow: auto !important;
-	}
-	.v-dialog {
-		overflow: hidden;
-	}
-	.v-input {
-		margin-right: 15px;
-		margin-left: 15px;
-	}
-	.mi-12 {
-		font-size: 12px;
-	}
-</style>
+<link rel="stylesheet" type="text/css" href="<?php echo $this->templateResource('assets/css/stylesheet.css'); ?>"/>
+
 
 <?php if ($this->document->renderJsVars()) { ?>
 <script>
@@ -57,53 +46,39 @@ use abc\core\ABC; ?>
 </script>
 <?php } ?>
 
-<link rel="stylesheet" type="text/css" href="vendor/css/font-awesome/css/fontawesome-all.min.css"/>
-<link rel="stylesheet" type="text/css" href="vendor/components/jquery-file-upload/css/jquery.fileupload-ui.css" />
-<link rel="stylesheet" type="text/css" href="vendor/css/animate.css/animate.min.css" />
-<link rel="stylesheet" type="text/css" href="vendor/components/bootstrap-fileinput/css/fileinput.min.css" />
-<link rel="stylesheet" type="text/css" href="vendor/css/bootstrap4c-chosen/dist/css/component-chosen.min.css" />
-<link rel="stylesheet" type="text/css" href="vendor/components/intl-tel-input/build/css/intlTelInput.css" />
-
-<link rel="stylesheet" type="text/css" href="<?php echo $this->templateResource('assets/css/bootstrap.custom.css'); ?>" />
-<link rel="stylesheet" type="text/css" href="<?php echo $this->templateResource('assets/css/abantecart.jquery.ui.css'); ?>" />
-<link rel="stylesheet" type="text/css" href="<?php echo $this->templateResource('assets/css/form.css'); ?>" />
-
-<link rel="stylesheet" type="text/css" href="<?php echo $this->templateResource('assets/css/chosen.bootstrap.css'); ?>" />
-
-<link rel="stylesheet" type="text/css" href="<?php echo $this->templateResource('assets/css/stylesheet.css'); ?>" />
-
 <?php foreach ($styles as $style) { ?>
 <link rel="<?php echo $style['rel']; ?>" type="text/css" href="<?php echo $style['href']; ?>"
       media="<?php echo $style['media']; ?>"/>
 <?php } ?>
 
-
-<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script type="text/javascript"
+        src="<?php echo $ssl ? 'https' : 'http' ?>://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 <script type="text/javascript">
     if (typeof jQuery == 'undefined') {
-        document.write('<script type="text\/javascript" src="vendor\/components\/jquery\/jquery-3.3.1.min.js"><\/script>');
-        document.write('<script type="text\/javascript" src="vendor\/components\/jquery-migrate\/jquery-migrate-3.0.1.min.js"><\/script>');
-    }else{
-        document.write('<script src="\/\/code.jquery.com\/jquery-migrate-3.0.1.js"><\/script>')
+        var include = '<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/jquery/jquery-1.12.4.min.js'); ?>"><\/script>';
+        document.write(include);
     }
-
 <?php if($retina){?>
     if((window.devicePixelRatio===undefined?1:window.devicePixelRatio)>1) {
         document.cookie = 'HTTP_IS_RETINA=1;path=/';
     }
 <?php } ?>
-
 </script>
+<script type="text/javascript"
+        src="<?php echo $this->templateResource('assets/js/jquery/jquery-migrate-1.2.1.min.js'); ?>"></script>
+<script type="text/javascript"
+        src="<?php echo $this->templateResource('assets/js/jquery/jquery.cookies.js'); ?>"></script>
+<script type="text/javascript"
+        src="<?php echo $this->templateResource('assets/js/jquery/jquery-ui/jquery-ui-1.10.4.custom.min.js'); ?>"></script>
+<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/bootstrap.min.js'); ?>"></script>
+<link rel="stylesheet" type="text/css" href="vendor/css/font-awesome/css/fontawesome-all.min.css"/>
 
-<script type="text/javascript" src="vendor/components/jquery-cookie/js.cookie.min.js"></script>
-<script type="text/javascript" src="vendor/components/jqueryui/jquery-ui.min.js"></script>
-<script type="text/javascript" src="vendor/components/popper/popper.min.js"></script>
-<script type="text/javascript" src="vendor/components/bootstrap/js/bootstrap.min.js"></script>
 
 <?php
 if (strpos($this->request->get['rt'], 'catalog/product') === false) {
 ?>
-<script defer type="text/javascript" src="vendor/tinymce/tinymce/tinymce.min.js"></script>
+    <script defer type="text/javascript"
+            src="<?php echo $this->templateResource('assets/js/tinymce/tinymce.min.js'); ?>"></script>
 <?php
 }
 ?>
@@ -118,20 +93,17 @@ if (strpos($this->request->get['rt'], 'catalog/product') === false) {
 <?php
 	//Generic PHP processed Javascript section
 
-if(is_file(ABC::env('DIR_PUBLIC').'vendor/tinymce/tinymce/languages/'.$language_locale.'.js')){
+if (is_file(ABC::env('DIR_TEMPLATES') . 'default_bs3/js/tinymce/langs/' . $language_locale . '.js')) {
 	$mce_lang_code = $language_locale;
-} elseif(is_file(ABC::env('DIR_PUBLIC').'vendor/tinymce/tinymce/languages/'.substr($language_locale,0,2).'.js')){
+} elseif (is_file(ABC::env('DIR_TEMPLATES') . 'default_bs3/js/tinymce/langs/' . substr($language_locale, 0, 2) . '.js')) {
 	$mce_lang_code = substr($language_locale, 0, 2);
 }else{
 	$mce_lang_code = 'en';
 }
 ?>
 <script type="text/javascript">
-
 //define tinymce config
 var mcei = {
-	theme: "modern",
-	skin: "lightgray",
 	language: "<?php echo $mce_lang_code; ?>",
 	formats: {
 		alignleft: [{
@@ -170,12 +142,10 @@ var mcei = {
 	menubar: false,
 	autop: true,
 	indent: false,
-	toolbar_items_size : 'small',
-	toolbar1: "undo,redo,formatselect,fontselect,fontsizeselect,bold,italic,strikethrough,forecolor backcolor | numlist,bullist,blockquote,hr,alignleft,aligncenter,alignright,link,spellchecker,dfw,fullscreen,table",
-	toolbar2: "",
-	//toolbar2: "formatselect,underline,alignjustify,forecolor,pastetext,removeformat,charmap,outdent,indent",
-	toolbar3: "",
-	toolbar4: "",
+    toolbar: [
+        'undo | redo | formatselect | fontselect | fontsizeselect | bold | italic | strikethrough | forecolor | backcolor',
+        'numlist | bullist | blockquote | hr | alignleft | aligncenter | alignright | link | spellchecker | dfw | fullscreen | table'
+    ],
 	selector: '',
 	valid_elements : '*[*]',
 	valid_children : "+body[style]",
@@ -185,13 +155,11 @@ var mcei = {
 	body_class: "content post-type-post post-status-auto-draft post-format-standard locale-en-gb",
 	autoresize_on: true,
 	add_unload_trigger: false,
-	height: '242px'
+    height: 330,
 };
 
-
-
 $(document).ready(function () {
-	jQuery.migrateMute = true;
+
 	//system check warnings
 	<?php if($system_error) { ?>
 		error_alert(<?php abc_js_echo($system_error); ?>, false);
@@ -253,7 +221,9 @@ var wrapConfirmDelete = function(){
     var popover, href;
 
     $('a[data-confirmation="delete"]').each( function(){
-        if($(this).attr('data-toggle') === 'dropdown' ){ return;}
+        if ($(this).attr('data-toggle') == 'dropdown') {
+            return;
+        }
 
        	var action = $(this).attr('onclick');
         if ( action ) {
@@ -261,7 +231,9 @@ var wrapConfirmDelete = function(){
         } else {
 	        href = $(this).attr('href');
 			if(!href){ return;}
-    	    if(href.length === 0 || href === '#'){ return;}
+            if (href.length == 0 || href == '#') {
+                return;
+            }
     	    action = 'href="' + href +'"';
         }
 
@@ -272,9 +244,9 @@ var wrapConfirmDelete = function(){
 
         $(this).wrap(wrapper);
         popover = '<div class="confirm_popover dropdown-menu dropdown-menu-right alert alert-danger" role="menu">'+
-                    '<h6 class="center">'+ conf_text +'</h6>'+
+            '<h5 class="center">' + conf_text + '</h5>' +
                     '<div class="center">'+
-                    '<a class="btn btn-danger" '+action+' ><i class="fa fa-trash-alt"></i>&nbsp;<?php echo $text_yes;?></a>&nbsp;&nbsp;'+
+            '<a class="btn btn-danger" ' + action + ' ><i class="fa fa-trash"></i>&nbsp;<?php echo $text_yes;?></a>&nbsp;&nbsp;' +
                     '<a class="btn btn-default"><i class="fa fa-undo"></i>&nbsp;<?php echo $text_no;?></a>'+
                     '</div>'+
                     '</div>';
@@ -299,6 +271,9 @@ var notifier_updater = function () {
 		  // Schedule the next request when the current one's complete
 		  noticecount--;
 		  setTimeout(notifier_updater, 600000);
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            console.log('notifier_updater: ' + textStatus + ": " + errorThrown);
 		}
 	});
 }

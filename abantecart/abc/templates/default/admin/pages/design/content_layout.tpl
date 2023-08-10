@@ -1,25 +1,15 @@
 <?php include($tpl_common_dir . 'action_confirm.tpl'); ?>
 
-<?php if ($tabs) { ?>
-	<ul class="nav nav-tabs nav-justified nav-profile">
-		<?php
-		foreach($tabs as $tab){ ?>
-		<li class="nav-item">
-			<a class="nav-link <?php echo ($tab['active'] ? 'active' : '') ?>" href="<?php echo $tab['href'] ? $tab['href'] : 'Javascript:void(0);'; ?>"><span><?php echo $tab['text']; ?></span></a>
-		</li>
-		<?php } ?>
-		<?php echo $this->getHookVar('extension_tabs'); ?>
-	</ul>
-<?php } ?>
+<?php echo $tabs; ?>
 
 <?php
 $template_list = '';
 foreach ($templates as $template) {
-  $item_class = '';
-  if ($tmpl_id == $template) {
-    $item_class = ' class="disabled"';
-  }
-  $template_list .= '<li' . $item_class . '><a href="' . $page_url . '&tmpl_id=' . $template . '">' . $template . '</a></li>';    
+    $item_class = '';
+    if ($tmpl_id == $template) {
+        $item_class = ' class="disabled"';
+    }
+    $template_list .= '<li' . $item_class . '><a href="' . $page_url . '&tmpl_id=' . $template . '">' . $template . '</a></li>';
 }
 
 ?>
@@ -29,7 +19,7 @@ foreach ($templates as $template) {
 		<div class="primary_content_actions pull-left">
 			<div class="btn-group mr10 toolbar">
 			  <button class="btn btn-default dropdown-toggle tooltips" type="button" data-toggle="dropdown" title="<?php echo $text_select_template; ?>">
-			    <i class="fa fa-images"></i>
+                  <i class="fa fa-image"></i>
 			    <?php echo $tmpl_id; ?> <span class="caret"></span>
 			  </button>
 			  <ul class="dropdown-menu">
@@ -45,7 +35,7 @@ foreach ($templates as $template) {
 
 			<div class="btn-group mr10 toolbar">
 				<a class="actionitem btn btn-default lock-on-click tooltips" href="<?php echo $current_url; ?>" title="<?php echo $button_reset; ?>">
-					<i class="fa fa-sync fa-fw"></i>
+                    <i class="fa fa-sync fa-fw"></i>
 				</a>
 			</div>
 
@@ -66,10 +56,10 @@ foreach ($templates as $template) {
 				</div>
 			</form>
 			</div>
-			
+
 		</div>
 
-		<?php include($tpl_common_dir . 'content_buttons.tpl'); ?>	
+        <?php include($tpl_common_dir . 'content_buttons.tpl'); ?>
 	</div>
 
 	<?php echo $form_begin; ?>
@@ -84,7 +74,7 @@ foreach ($templates as $template) {
 			<i class="fa fa-save fa-fw"></i> <?php echo $button_save; ?>
 			</button>
 			<a class="btn btn-default" href="<?php echo $current_url; ?>">
-			<i class="fa fa-sync fa-fw"></i> <?php echo $button_reset; ?>
+                <i class="fa fa-sync fa-fw"></i> <?php echo $button_reset; ?>
 			</a>
 		</div>
 	</div>
