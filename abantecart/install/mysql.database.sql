@@ -12806,7 +12806,7 @@ VALUES
   ( 250,1,'Icon Settings checkout', '', '', '', '<i class="fa fa-shopping-cart"></i>&nbsp;', NOW() ),
   ( 251,1,'Icon Settings appearance', '', '', '', '<i class="fa fa-pen-square"></i>&nbsp;', NOW() ),
   ( 252,1,'Icon Settings mail', '', '', '', '<i class="fa fa-envelope-square"></i>&nbsp;', NOW() ),
-  ( 253,1,'Icon Settings api', '', '', '', '<i class="fa fa-slack"></i>&nbsp;', NOW() ),
+  (253, 1, 'Icon Settings api', '', '', '', '<i class="fa fa-project-diagram"></i>&nbsp;', NOW()),
   ( 254,1,'Icon Settings system', '', '', '', '<i class="fa fa-tasks"></i>&nbsp;', NOW() ),
   ( 255,1,'Icon Settings newstore', '', '', '', '<i class="fa fa-sitemap"></i>&nbsp;', NOW() ),
   ( 256,1,'Icon User', '', '', '', '<i class="fa fa-male"></i>&nbsp;', NOW() ),
