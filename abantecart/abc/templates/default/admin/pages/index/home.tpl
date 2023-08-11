@@ -24,7 +24,7 @@
 	<div class="col-sm-6 col-lg-6">
 		<div class="panel panel-default">
 			<div class="panel-body">
-                <h5 class="title"><i class="fa fa-money fa-lg fa-fw"></i> <?php echo $text_latest_10_orders; ?>
+                <h5 class="title"><i class="fa fa-money-bill fa-lg fa-fw"></i> <?php echo $text_latest_10_orders; ?>
 					<span class="pull-right"><a
 								href="<?php echo $orders_url; ?>"><?php echo $orders_text_all; ?></a></span>
 				</h5>
