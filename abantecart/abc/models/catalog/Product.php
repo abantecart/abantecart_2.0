@@ -2710,9 +2710,9 @@ class Product extends BaseModel
     public static function getProducts(array $params = [])
     {
         $finalPriceSql = '';
-        $params['sort'] = $params['sort'] ?: 'sort_order';
-        $params['order'] = $params['order'] ?? 'ASC';
-        $params['start'] = max($params['start'], 0);
+        $params['sort'] = (string)$params['sort'] ?: 'sort_order';
+        $params['order'] = (string)$params['order'] ?: 'ASC';
+        $params['start'] = max((int)$params['start'], 0);
         $params['limit'] = abs((int)$params['limit']) ?: 20;;
 
         $filter = (array)$params['filter'];
@@ -2720,6 +2720,7 @@ class Product extends BaseModel
         $filter['exclude'] = $filter['exclude'] ?? [];
         $filter['category_id'] = $filter['category_id'] ?? 0;
         $filter['manufacturer_id'] = $filter['manufacturer_id'] ?? 0;
+        $filter['related_to'] = $filter['related_to'] ?? [];
 
         $filter['only_enabled'] = (bool)$filter['only_enabled'];
         $filter['customer_group_id'] = $filter['customer_group_id']
@@ -2845,6 +2846,17 @@ class Product extends BaseModel
         }
         if ($filter['only_featured']) {
             $query->where('products.featured', '=', 1);
+        }
+
+        if ($filter['related_to']) {
+            $relatedIds = Registry::db()
+                ->table('products_related')
+                ->whereIn('product_id', (array)$filter['related_to'])
+                ->get()
+                ->pluck('related_id')?->toArray();
+            if ($relatedIds) {
+                $filter['include'] = array_merge((array)$filter['include'], $relatedIds);
+            }
         }
 
         if ($filter['keyword']) {
