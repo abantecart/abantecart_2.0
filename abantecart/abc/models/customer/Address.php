@@ -98,6 +98,8 @@ class Address extends BaseModel
         'address_id'  => [
             'checks'   => [
                 'integer',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
                 'integer' => [
@@ -106,12 +108,16 @@ class Address extends BaseModel
                     'default_text'   => 'Address ID must be an integer!',
                     'section'        => 'storefront',
                 ],
+                'min'=>['default_text'=> 'Address ID value must be greater than zero'],
+                'max'=>['default_text'=>'Address ID must be less than 2147483647']
             ],
         ],
         'customer_id' => [
             'checks'   => [
                 'integer',
                 'required_with:address_id',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
                 'integer'                  => [
@@ -126,6 +132,8 @@ class Address extends BaseModel
                     'default_text'   => 'Customer ID required.',
                     'section'        => 'storefront',
                 ],
+                'max'=>['default_text'=>'Customer ID must be less than 2147483647'],
+                'min'=>['default_text'=> 'Customer ID value must be greater than zero'],
             ],
         ],
         'company'     => [
@@ -247,14 +255,19 @@ class Address extends BaseModel
             'checks'   => [
                 'integer',
                 'required_without:customer_id',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
+                'integer' => [
                     'language_key'   => 'error_country',
                     'language_block' => 'account/address',
                     'default_text'   => 'Please select a country!',
                     'section'        => 'storefront',
                 ],
+                'max'=>['default_text'=>'Country ID must be less than 2147483647'],
+                'min'=>['default_text'=> 'Country ID value must be greater than zero'],
+                'required'=>['default_text'=>'Country ID required']
             ],
         ],
         'zone_id'    => [
@@ -262,14 +275,19 @@ class Address extends BaseModel
                 'integer',
                 'nullable',
                 'required_without:customer_id',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
+                'integer' => [
                     'language_key'   => 'error_zone',
                     'language_block' => 'account/address',
                     'default_text'   => 'Please select a region / state!',
                     'section'        => 'storefront',
                 ],
+                'max'=>['default_text'=>'Zone ID must be less than 2147483647'],
+                'min'=>['default_text'=> 'Zone ID  value must be greater than zero'],
+                'required'=>['default_text'=>'Zone ID required']
             ],
         ],
     ];

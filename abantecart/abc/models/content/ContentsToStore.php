@@ -66,8 +66,9 @@ class ContentsToStore extends BaseModel
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Content ID is not integer!'],
-                'min'=>['default_text' => 'Content ID must be greater than zero'],
-                'max'=>['default_text'=>'Content ID must be less than 2147483647']
+                'max'=>['default_text'=>'Content ID must be less than 2147483647'],
+                'min'=>['default_text'=> 'Content ID value must be greater than zero'],
+                'required'=>['default_text'=>'Content ID required']
             ],
         ],
         'store_id'=> [
@@ -80,8 +81,9 @@ class ContentsToStore extends BaseModel
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Store ID is not integer!'],
-                'min'=>['default_text' => 'Store ID must be greater than zero'],
-                'max'=>['default_text'=>'Store ID must be less than 2147483647']
+                'max'=>['default_text'=>'Store ID must be less than 2147483647'],
+                'min'=>['default_text'=> 'Store ID value must be greater than zero'],
+                'required'=>['default_text'=>'Store ID required']
             ],
         ],
     ];

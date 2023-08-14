@@ -101,14 +101,15 @@ class ProductOption extends BaseModel
                 'integer',
                 'required',
                 'exists:products',
+                'max:2147483647',
                 'min:0',
-                'max:2147483647'
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Product ID is not Integer!'],
                 'exists'=>['default_text' =>'Product ID absent in products table!'],
-                'min'=>['default_text'=> 'Product ID value must be greater than zero'],
                 'max'=>['default_text'=>'Product ID must be less than 2147483647'],
+                'min'=>['default_text'=> 'Product ID value must be greater than zero'],
+                'required'=>['default_text'=>'Product ID required']
             ],
         ],
         'attribute_id' => [
@@ -116,23 +117,28 @@ class ProductOption extends BaseModel
                 'integer',
                 'nullable',
                 'exists:global_attributes',
-                'max:2147483647'
+                'max:2147483647',
+                'min:0',
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Attribute ID is not Integer'],
                 'exists'=>['default_text' =>'Attribute ID not presents in global_attributes table!'],
-                'max'=>['default_text' =>'Attribute ID must be less than 2147483647']
+                'max'=>['default_text' =>'Attribute ID must be less than 2147483647'],
+                'min'=>['default_text'=> 'Attribute ID value must be greater than zero'],
+                'required'=>['default_text'=>'Attribute ID required']
             ],
         ],
         'group_id'     => [
             'checks'   => [
                 'integer',
                 'nullable',
+                'min:0',
                 'max:2147483647'
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Group ID is not integer!'],
-                'max'=>['default_text' =>'Group ID must be less than 2147483647']
+                'max'=>['default_text' =>'Group ID must be less than 2147483647'],
+                'min'=>['default_text'=> 'Group ID value must be greater than zero'],
             ],
         ],
         'sort_order'   => [

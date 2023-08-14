@@ -1,34 +1,34 @@
 <?php
 
-namespace Tests\unit\models\catalog;
+namespace Tests\unit\models\customer;
 
-use abc\models\catalog\CategoriesToStore;
+use abc\models\customer\CustomerNotification;
 use Illuminate\Validation\ValidationException;
 use PHPUnit\Framework\TestCase;
 
-class CategoriesToStoreTest extends TestCase
+class CustomerNotificationTest extends TestCase
 {
     public function testValidator()
     {
-        $categoryToStore = new CategoriesToStore(
+        $customer= new CustomerNotification(
             [
-                'category_id'=>-1,
-                'store_id'             => -1,
+                'customer_id'=>-1,
+                'status'             => -1,
 
             ]
         );
         $errors = [];
         try {
-            $categoryToStore->validate();
+            $customer->validate();
         } catch (ValidationException $e) {
-            $errors =  $categoryToStore->errors()['validation'];
+            $errors =  $customer->errors()['validation'];
             //var_dump($errors);
         }
 
         $this->assertCount(2, $errors);
 
 
-        $categoryToStore = new CategoriesToStore(
+        $customer = new CustomerNotification(
             [
                 'category_id'=>1,
                 'store_id'=> 1,
@@ -36,9 +36,9 @@ class CategoriesToStoreTest extends TestCase
         );
         $errors = [];
         try {
-            $categoryToStore->validate();
+            $customer->validate();
         } catch (ValidationException $e) {
-            $errors =  $categoryToStore->errors()['validation'];
+            $errors =  $customer->errors()['validation'];
             //var_dump($errors);
         }
         $this->assertCount(0, $errors);

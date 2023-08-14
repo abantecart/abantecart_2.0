@@ -88,12 +88,14 @@ class GlobalAttributesValueDescription extends BaseModel
                 'exists:languages',
                 'min:0',
                 'max:2147483647'
+
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Language ID is not Integer!'],
                 'exists'=>['default_text'=>'Language ID absent in languages table!'],
-                'min'=>['default_text'=> 'Language ID value must be greater than zero'],
                 'max'=>['default_text'=>'Language ID must be less than 2147483647'],
+                'min'=>['default_text'=> 'Language ID value must be greater than zero'],
+                'required'=>['default_text'=>'Language ID required']
             ],
         ],
     ];

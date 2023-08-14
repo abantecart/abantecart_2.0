@@ -118,13 +118,11 @@ class ProductOptionValue extends BaseModel
                 'integer',
                 'required',
                 'exists:product_options',
-                'min:0',
                 'max:2147483647'
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Product Option ID is not Integer'],
                 'exists'=>['default_text'=>'Product Option ID absent in product_options table!'],
-                'min'=>['default_text'=> 'Product Option ID value must be greater than zero'],
                 'max'=>['default_text'=>'Product Option ID must be less than 2147483647'],
             ],
         ],
@@ -139,9 +137,10 @@ class ProductOptionValue extends BaseModel
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Product ID is not Integer or absent in the products table!'],
-                'min'=>['default_text'=> 'Product ID value must be greater than zero'],
                 'max'=>['default_text'=>'Product ID must be less than 2147483647'],
-                'exists'=>['default_text'=>'Product ID absent in the products table!']
+                'exists'=>['default_text'=>'Product ID absent in the products table!'],
+                'min'=>['default_text'=> 'Product ID value must be greater than zero'],
+                'required'=>['default_text'=>'Product ID required']
             ],
         ],
 
@@ -149,11 +148,13 @@ class ProductOptionValue extends BaseModel
             'checks'   => [
                 'integer',
                 'nullable',
+                'min:0',
                 'max:2147483647'
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Group ID is not integer!'],
                 'max'=>['default_text'=>'Group ID must be less than 2147483647'],
+                'min'=>['default_text'=> 'Product ID value must be greater than zero'],
             ],
         ],
 
@@ -258,6 +259,7 @@ class ProductOptionValue extends BaseModel
             'checks'   => [
                 'integer',
                 'nullable',
+                'min:0',
                 'exists:global_attributes_values',
                 'max:2147483647'
             ],
@@ -265,6 +267,7 @@ class ProductOptionValue extends BaseModel
                 'integer' => ['default_text' => ':attribute is not integer'],
                 'max'=>['default_text'=>':attribute must be less than 2147483647'],
                 'exists'=>['default_text'=>':attribute absent in global_attribute_values table!'],
+                'min'=>['default_text'=> 'Category ID value must be greater than zero'],
             ],
         ],
 

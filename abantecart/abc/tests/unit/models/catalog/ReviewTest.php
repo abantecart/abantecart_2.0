@@ -36,7 +36,7 @@ class ReviewTest extends TestCase
             $review->validate($data);
         } catch (ValidationException $e) {
             $errors = $review->errors()['validation'];
-            var_Dump($errors);
+           // var_Dump($errors);
         }
         $this->assertCount(0, $errors);
     }

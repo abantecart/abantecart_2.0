@@ -31,8 +31,8 @@ class ResourceLibraryTest extends TestCase
             ];
             $resource->validate($data);
         } catch (ValidationException $e) {
-            $errors = $category->errors()['validation'];
-            var_Dump($errors);
+            $errors = $resource->errors()['validation'];
+            //var_Dump($errors);
         }
         $this->assertCount(0, $errors);
     }

@@ -32,7 +32,7 @@ class StockStatusTest extends TestCase
             $stock->validate($data);
         } catch (ValidationException $e) {
             $errors = $stock->errors()['validation'];
-            var_Dump($errors);
+            //var_Dump($errors);
         }
         $this->assertCount(0, $errors);
     }

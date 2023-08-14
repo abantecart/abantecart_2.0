@@ -20,7 +20,7 @@ class DownloadAttributeValueTest extends TestCase
             $download->validate($data);
         } catch (ValidationException $e) {
             $errors = $download->errors()['validation'];
-            var_Dump($errors);
+            //var_Dump($errors);
         }
         $this->assertCount(9, $errors);
 

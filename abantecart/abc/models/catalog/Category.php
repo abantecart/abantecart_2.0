@@ -121,8 +121,9 @@ class Category extends BaseModel
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Category ID is not integer!'],
-                'min'=>['default_text' => 'Category ID must be greater than zero'],
-                'max'=>['default_text'=>'Category ID must be less than 2147483647']
+                'max'=>['default_text'=>'Category ID must be less than 2147483647'],
+                'min'=>['default_text'=> 'Category ID value must be greater than zero'],
+                'required'=>['default_text'=>'Category ID required']
             ],
         ],
         'parent_id'   => [
@@ -130,12 +131,10 @@ class Category extends BaseModel
                 'integer',
                 'nullable',
                 'exists:categories,category_id',
-                'min:0',
                 'max:2147483647'
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Parent ID is not integer!'],
-                'min'=>['default_text' => 'Parent ID must be greater than zero'],
                 'max'=>['default_text'=>'Parent ID must be less than 2147483647'],
                 'exists'=>['default_text'=> 'Parent ID not absent in categories table']
             ],

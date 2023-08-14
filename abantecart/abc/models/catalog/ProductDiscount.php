@@ -78,6 +78,7 @@ class ProductDiscount extends BaseModel
                 'sometimes',
                 'required',
                 'exists:products',
+                'max:2147483647'
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Product ID is not Integer!'],
@@ -91,11 +92,16 @@ class ProductDiscount extends BaseModel
                 'integer',
                 'sometimes',
                 'required',
+                'min:0',
                 'exists:customer_groups',
+                'max:2147483647'
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Customer Group ID must be an integer '],
                 'exists'=>['default_text'=>'Customer Group ID not presents in the customer_groups table!'],
+                'max'=>['default_text'=>'Customer Group ID must be less than 2147483647'],
+                'min'=>['default_text'=> 'Customer Group ID value must be greater than zero'],
+                'required'=>['default_text'=>'Customer Group ID required']
             ],
         ],
 

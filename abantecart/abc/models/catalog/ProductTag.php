@@ -56,13 +56,11 @@ class ProductTag extends BaseModel
                 'integer',
                 'required',
                 'exists:products',
-                'min:0',
                 'max:2147483647'
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Product ID is not Integer!'],
                 'exists'=>['default_text'=>'Product ID absent in products table!'],
-                'min'=>['default_text'=> 'Product ID value must be greater than zero'],
                 'max'=>['default_text'=>'Product ID must be less than 2147483647'],
             ],
         ],
@@ -71,13 +69,11 @@ class ProductTag extends BaseModel
                 'integer',
                 'required',
                 'exists:languages',
-                'min:0',
                 'max:2147483647'
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Language ID is not Integer!'],
                 'exists'=>['default_text'=>'Language ID absent in languages table!'],
-                'min'=>['default_text'=> 'Language ID value must be greater than zero'],
                 'max'=>['default_text'=>'Language ID must be less than 2147483647'],
             ],
         ],

@@ -145,7 +145,7 @@ class ProductModelTest extends ATestCase
             $product->validate($data);
         } catch (ValidationException $e) {
             $errors = $product->errors()['validation'];
-            var_Dump($errors);
+            //var_Dump($errors);
         }
         $this->assertCount(0, $errors);
 
@@ -369,7 +369,7 @@ class ProductModelTest extends ATestCase
             $product->validate();
         } catch (ValidationException $e) {
             $errors = $product->errors()['validation'];
-            var_dump($errors);
+            //var_dump($errors);
         }
 
         $this->assertCount(1, $errors);

@@ -30,7 +30,7 @@ class UrlAliasTest extends TestCase
             $url->validate($data);
         } catch (ValidationException $e) {
             $errors = $url->errors()['validation'];
-            var_Dump($errors);
+            //var_Dump($errors);
         }
         $this->assertCount(0, $errors);
     }

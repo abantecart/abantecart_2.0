@@ -33,7 +33,7 @@ class ContentTest extends TestCase
             $content->validate($data);
         } catch (ValidationException $e) {
             $errors = $content->errors()['validation'];
-            var_Dump($errors);
+           // var_Dump($errors);
         }
         $this->assertCount(0, $errors);
     }

@@ -34,7 +34,7 @@ class ResourceMapTest extends TestCase
             $resource->validate($data);
         } catch (ValidationException $e) {
             $errors = $resource->errors()['validation'];
-            var_Dump($errors);
+            //var_Dump($errors);
         }
         $this->assertCount(0, $errors);
     }

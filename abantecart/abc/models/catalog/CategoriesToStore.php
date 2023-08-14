@@ -63,8 +63,9 @@ class CategoriesToStore extends BaseModel
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Category ID is not integer!'],
-                'min'=>['default_text' => 'Category ID must be greater than zero'],
-                'max'=>['default_text'=>'Category ID must be less than 2147483647']
+                'max'=>['default_text'=>'Category ID must be less than 2147483647'],
+                'min'=>['default_text'=> 'Category ID value must be greater than zero'],
+                'required'=>['default_text'=>'Category ID required']
             ],
         ],
         'store_id'=> [
@@ -72,13 +73,14 @@ class CategoriesToStore extends BaseModel
                 'integer',
                 'sometimes',
                 'required',
+                'max:2147483647',
                 'min:0',
-                'max:2147483647'
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Store ID is not integer!'],
-                'min'=>['default_text' => 'Store ID must be greater than zero'],
-                'max'=>['default_text'=>'Store ID must be less than 2147483647']
+                'max'=>['default_text'=>'Store ID must be less than 2147483647'],
+                'min'=>['default_text'=> 'Store ID value must be greater than zero'],
+                'required'=>['default_text'=>'Store ID required']
             ],
         ],
     ];

@@ -32,7 +32,7 @@ class GlobalAttributesValueTest extends TestCase
             $attr->validate($data);
         } catch (ValidationException $e) {
             $errors = $attr->errors()['validation'];
-            var_Dump($errors);
+            //var_Dump($errors);
         }
         $this->assertCount(0, $errors);
     }

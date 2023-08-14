@@ -98,44 +98,53 @@ class CustomerTransaction extends BaseModel
         'customer_transaction_id' => [
             'checks'   => [
                 'integer',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                'integer' => [
-                    'default_text' => 'Transaction ID must be an integer!',
-                ],
+                'integer' => ['default_text' => 'Transaction ID must be an integer!'],
+                'min'=>['default_text'=> 'Transaction ID value must be greater than zero'],
+                'max'=>['default_text'=>'Transaction ID must be less than 2147483647'],
             ],
         ],
         'customer_id'             => [
             'checks'   => [
                 'integer',
                 'required',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => 'Customer ID must be an integer!',
-                ],
+                'integer' => ['default_text' => 'Customer ID must be an integer!',],
+                'max'=>['default_text'=>'Customer ID must be less than 2147483647'],
+                'min'=>['default_text'=> 'Customer ID value must be greater than zero'],
+                'required'=>['default_text'=>'Customer ID required']
             ],
         ],
         'order_id'                => [
             'checks'   => [
                 'integer',
                 'nullable',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                'integer' => [
-                    'default_text' => 'Order ID must be an integer or Null!',
-                ],
+                'integer' => ['default_text' => 'Order ID must be an integer or Null!'],
+                'max'=>['default_text'=>'Order ID must be less than 2147483647'],
+                'min'=>['default_text'=> 'Order ID value must be greater than zero'],
             ],
         ],
         'created_by'              => [
             'checks'   => [
                 'integer',
                 'required',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => 'User ID (:attribute) who creates transaction must be an integer!',
-                ],
+                'integer' => ['default_text' => 'User ID (:attribute) who creates transaction must be an integer!'],
+                'max'=>['default_text'=>'User ID must be less than 2147483647'],
+                'min'=>['default_text'=> 'User ID value must be greater than zero'],
             ],
         ],
         'section'                 => [

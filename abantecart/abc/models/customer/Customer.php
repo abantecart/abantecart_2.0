@@ -157,9 +157,13 @@ class Customer extends BaseModel
         'customer_id' => [
             'checks'   => [
                 'integer',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => ['default_text' => 'Customer ID is not Integer!'],
+                'integer' => ['default_text' => 'Customer ID is not Integer!'],
+                'min'=>['default_text'=> 'Customer ID value must be greater than zero'],
+                'max'=>['default_text'=>'Customer ID must be less than 2147483647']
             ],
         ],
         /** @see validate() */
@@ -168,6 +172,8 @@ class Customer extends BaseModel
                 'integer',
                 //required only when new customer creating
                 'required_without:customer_id',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
                 'integer'                      => [
@@ -176,6 +182,8 @@ class Customer extends BaseModel
                 'required_without:customer_id' => [
                     'default_text' => 'Store ID required.',
                 ],
+                'max'=>['default_text'=>'Store ID must be less than 2147483647'],
+                'min'=>['default_text'=> 'Store ID value must be greater than zero'],
             ],
         ],
 
@@ -340,11 +348,13 @@ class Customer extends BaseModel
             'checks'   => [
                 'integer',
                 'nullable',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => 'Address ID must be an integer!',
-                ],
+                'integer' => ['default_text' => 'Address ID must be an integer!'],
+                'max'=>['default_text'=>'Address ID must be less than 2147483647'],
+                'min'=>['default_text'=> 'Address ID value must be greater than zero'],
             ],
         ],
 
@@ -386,11 +396,13 @@ class Customer extends BaseModel
             'checks'   => [
                 'integer',
                 'nullable',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => 'Customer Group ID must be an integer or NULL !',
-                ],
+                'integer' => ['default_text' => 'Customer Group ID must be an integer or NULL !',],
+                'max'=>['default_text'=>'Customer Group ID must be less than 2147483647'],
+                'min'=>['default_text'=> 'Customer Group ID value must be greater than zero'],
             ],
         ],
 

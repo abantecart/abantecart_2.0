@@ -50,7 +50,7 @@ class ProductOptionModelTest extends ATestCase{
             $productOption->validate( $data );
         } catch (ValidationException $e) {
             $errors = $productOption->errors()['validation'];
-            var_Dump($errors);
+            //var_Dump($errors);
         }
         $this->assertCount(0, $errors);
     }
