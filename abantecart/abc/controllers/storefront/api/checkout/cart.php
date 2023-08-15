@@ -23,6 +23,7 @@ namespace abc\controllers\storefront;
 use abc\core\engine\AControllerAPI;
 use abc\core\engine\AResource;
 use abc\core\lib\AWeight;
+use abc\modules\traits\ProductOptionsTrait;
 
 /**
  * Class ControllerApiCheckoutCart
@@ -31,6 +32,7 @@ use abc\core\lib\AWeight;
  */
 class ControllerApiCheckoutCart extends AControllerAPI
 {
+    use ProductOptionsTrait;
     public $error = [];
 
     public function post()
@@ -43,7 +45,6 @@ class ControllerApiCheckoutCart extends AControllerAPI
         }
 
         $this->extensions->hk_InitData($this, __FUNCTION__);
-        $this->loadModel('catalog/product');
 
         //check if we add single or multiple products to cart
         if (isset($request['quantity']) || is_array($request['products'])) {
@@ -117,13 +118,13 @@ class ControllerApiCheckoutCart extends AControllerAPI
 
     public function put()
     {
-        return $this->post();
+        $this->post();
     }
 
     protected function addToCart($product)
     {
         $options = $product['option'] ?? [];
-        if ($errors = $this->model_catalog_product->validateProductOptions($product['product_id'], $options)) {
+        if ($errors = $this->validateProductOptions((int)$product['product_id'], (array)$options)) {
             $this->rest->setResponseData(['error' => implode(' ', $errors)]);
             $this->rest->sendResponse(206);
         }
@@ -133,14 +134,9 @@ class ControllerApiCheckoutCart extends AControllerAPI
     protected function prepareCartData()
     {
         if ($this->cart->hasProducts()) {
-            $this->loadModel('tool/image');
             $products = [];
             $cart_products = $this->cart->getProducts();
-
-            $product_ids = [];
-            foreach ($cart_products as $result) {
-                $product_ids[] = (int)$result['product_id'];
-            }
+            $product_ids = array_map('intval',array_column( $cart_products, 'product_id'));
 
             $resource = new AResource('image');
             $thumbnails = $resource->getMainThumbList(

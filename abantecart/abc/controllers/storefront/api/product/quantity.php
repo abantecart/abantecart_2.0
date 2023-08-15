@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright 2011-2018 Belavier Commerce LLC
+  Copyright 2011-2023 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -21,6 +21,7 @@
 namespace abc\controllers\storefront;
 
 use abc\core\engine\AControllerAPI;
+use abc\models\catalog\Product;
 
 class ControllerApiProductQuantity extends AControllerAPI
 {
@@ -91,66 +92,64 @@ class ControllerApiProductQuantity extends AControllerAPI
     {
         $this->extensions->hk_InitData($this, __FUNCTION__);
         $request = $this->rest->getRequestParams();
-        $response_arr = array();
+        $output = [];
 
-        $product_id = $request['product_id'];
-        $opt_val_id = $request['option_value_id'];
+        $productId = $request['product_id'];
+        $optionValueId = $request['option_value_id'];
 
-        if (empty($product_id) || !is_numeric($product_id)) {
+        if (!$productId || !is_numeric($productId)) {
             $this->rest->setResponseData([
                 'error_code' => 400,
                 'error_text' => 'Bad request',
             ]);
             $this->rest->sendResponse(400);
-            return null;
+            return;
         }
 
         if (!$this->config->get('config_storefront_api_stock_check')) {
-            $this->rest->setResponseData([
-                'error_code' => 403,
-                'error_text' => 'Restricted access to stock check',
-            ]);
+            $this->rest->setResponseData(
+                [
+                    'error_code' => 403,
+                    'error_text' => 'Restricted access to stock check',
+                ]
+            );
             $this->rest->sendResponse(403);
-            return null;
+            return;
         }
 
         //Load all the data from the model
-        $this->loadModel('catalog/product');
-        $product_info = $this->model_catalog_product->getProduct($product_id);
-        if (count($product_info) <= 0) {
-            $this->rest->setResponseData([
-                'error_code' => 404,
-                'error_text' => 'No product found',
-            ]);
+        $product = Product::with('description', 'options', 'options.values')->find($productId);
+
+        if (!$product) {
+            $this->rest->setResponseData(
+                [
+                    'error_code' => 404,
+                    'error_text' => 'Product not found',
+                ]
+            );
             $this->rest->sendResponse(404);
-            return null;
-        }
-        //filter data and return only QTY for product and option values
-
-        $response_arr['quantity'] = $product_info['quantity'];
-        $response_arr['stock_status'] = $product_info['stock_status'];
-        if ($product_info['quantity'] <= 0) {
-            $response_arr['quantity'] = 0;
+            return;
         }
 
-        $product_info['options'] = $this->model_catalog_product->getProductOptions($product_id);
-        foreach ($product_info['options'] as $option) {
-            foreach ($option['option_value'] as $option_val) {
-                $response_arr['option_value_quantities'][] = array(
-                    'product_option_value_id' => $option_val['product_option_value_id'],
-                    'quantity'                => $option_val['quantity'],
-                );
+        $output['stock_status_details'] = $product->stock_status->toArray();
+        $output['stock_status'] = $product->stock_status->name;
+        $output['quantity'] = max($product->quantity,0);
+
+        foreach ($product->options as $option) {
+            foreach ($option->values as $optionValue) {
+                $output['option_value_quantities'][] = [
+                    'product_option_value_id' => $optionValue->product_option_value_id,
+                    'quantity'                => $optionValue->quantity,
+                ];
             }
         }
 
-        if (isset($opt_val_id)) {
+        if (isset($optionValueId)) {
             //replace and return only option value quantity
-            foreach ($response_arr['option_value_quantities'] as $option_val) {
-                if ($option_val['product_option_value_id'] == $opt_val_id) {
-                    $response_arr = $option_val;
-                    if ($response_arr['quantity'] <= 0) {
-                        $response_arr['quantity'] = 0;
-                    }
+            foreach ($output['option_value_quantities'] as $optionValue) {
+                if ($optionValue['product_option_value_id'] == $optionValueId) {
+                    $output = $optionValue;
+                    $output['quantity'] = max(0,$output['quantity']);
                     break;
                 }
             }
@@ -158,7 +157,7 @@ class ControllerApiProductQuantity extends AControllerAPI
 
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
 
-        $this->rest->setResponseData($response_arr);
+        $this->rest->setResponseData($output);
         $this->rest->sendResponse(200);
     }
 }

@@ -24,8 +24,10 @@ use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AResource;
 use abc\models\catalog\Category;
+use abc\models\catalog\Product;
 use abc\models\storefront\ModelCatalogCategory;
 use abc\models\storefront\ModelCatalogManufacturer;
+use stdClass;
 
 if (!class_exists('abc\core\ABC')) {
     header('Location: static_pages/?forbidden='.basename(__FILE__));
@@ -134,9 +136,16 @@ class ControllerResponsesEmbedJS extends AController
             return null;
         }
 
-        $this->loadModel('catalog/product');
         $this->loadLanguage('product/product');
-        $product_info = $this->model_catalog_product->getProduct($product_id);
+
+        //Load all the data from the model
+        /** @var Product|stdClass $product */
+        $product = Product::WithStockInfo()->WithOptionCount();
+        if ($this->config->get('enable_reviews')) {
+            $product->WithAvgRating();
+        }
+        $product_info = $product->with('description', 'options.description', 'tags')
+            ->find($product_id)?->toArray();
 
         //can not locate product? get out
         if (!$product_info) {
@@ -145,7 +154,7 @@ class ControllerResponsesEmbedJS extends AController
         //deal with quotes in name
         $product_info['name'] = htmlentities(
                             html_entity_decode(
-                                                $product_info['name'],
+                                                $product_info['description']['name'],
                                                 ENT_QUOTES,
                                                 ABC::env('APP_CHARSET')
                             ),
@@ -190,33 +199,19 @@ class ControllerResponsesEmbedJS extends AController
         $this->data['product_details_url'] = $this->html->getURL($rt, '&product_id='.$product_id);
 
         //handle stock messages
-        // if track stock is off. no messages needed.
-        if ($this->model_catalog_product->isStockTrackable($product_id)) {
-            $total_quantity = $this->model_catalog_product->hasAnyStock($product_id);
-            $product_info['track_stock'] = true;
-            //out of stock if no quantity and no stick checkout is disabled
-            if ($total_quantity <= 0 && !$this->config->get('config_stock_checkout')) {
-                $product_info['in_stock'] = false;
-                //show out of stock message
-                $product_info['stock'] = $product_info['stock_status'];
-            } else {
-                $product_info['in_stock'] = true;
-                if ($this->config->get('config_stock_display')) {
-                    $product_info['stock'] = $product_info['quantity'];
-                } else {
-                    $product_info['stock'] = $this->language->get('text_instock');
-                }
-            }
-
-            //check if we need to disable product for no stock
-            if ($this->config->get('config_nostock_autodisable') && $total_quantity <= 0) {
-                return null;
-            }
+        if ($product_info['quantity'] <= 0) {
+            $product_info['stock'] = $product_info['stock_status'];
+        } else {
+            $product_info['stock'] = $this->config->get('config_stock_display')
+                ? $product_info['quantity']
+                : $this->language->get('text_instock');
         }
 
-        $product_options = $this->model_catalog_product->getProductOptions($product_id);
+        if (!$product_info['minimum']) {
+            $product_info['minimum'] = 1;
+        }
 
-        if (!$product_options) {
+        if (!$product_info['option_count']) {
             $product_info['button_addtocart'] = $this->html->buildElement(
                 [
                     'type' => 'button',
@@ -240,7 +235,6 @@ class ControllerResponsesEmbedJS extends AController
                         .'" data-html="true" data-target="#abc_embed_modal" data-toggle="abcmodal" ',
                 ]
             );
-            $product_info['options'] = $product_options;
         }
 
         $product_info['quantity'] = $this->html->buildElement(
@@ -313,14 +307,20 @@ class ControllerResponsesEmbedJS extends AController
 
         foreach ($categories as &$category) {
             //deal with quotes
-            $category['name'] =
-                htmlentities(html_entity_decode($category['name'], ENT_QUOTES, ABC::env('APP_CHARSET')), ENT_QUOTES,
-                    ABC::env('APP_CHARSET'));
+            $category['name'] = htmlentities(
+                html_entity_decode(
+                    $category['name'],
+                    ENT_QUOTES,
+                    ABC::env('APP_CHARSET')
+                ),
+                ENT_QUOTES,
+                ABC::env('APP_CHARSET')
+            );
             $category['thumbnail'] = $thumbnails[$category['category_id']];
-            $rt =
-                $this->config->get('config_embed_click_action') == 'modal' ? 'r/product/category' : 'product/category';
+            $rt = $this->config->get('config_embed_click_action') == 'modal'
+                ? 'r/product/category'
+                : 'product/category';
             $category['details_url'] = $this->html->getURL($rt, '&category_id='.$category['category_id']);
-
         }
 
         $this->data['categories'] = $categories;
@@ -385,14 +385,25 @@ class ControllerResponsesEmbedJS extends AController
 
         foreach ($manufacturers as &$manufacturer) {
             //deal with quotes
-            $manufacturer['name'] =
-                htmlentities(html_entity_decode($manufacturer['name'], ENT_QUOTES, ABC::env('APP_CHARSET')), ENT_QUOTES,
-                    ABC::env('APP_CHARSET'));
+            $manufacturer['name'] = htmlentities(
+                html_entity_decode(
+                    $manufacturer['name'],
+                    ENT_QUOTES,
+                    ABC::env('APP_CHARSET')
+                ),
+                ENT_QUOTES,
+                ABC::env('APP_CHARSET')
+            );
+
             $manufacturer['thumbnail'] = $thumbnails[$manufacturer['manufacturer_id']];
-            $rt = $this->config->get('config_embed_click_action')
-            == 'modal' ? 'r/product/manufacturer' : 'product/manufacturer';
-            $manufacturer['details_url'] =
-                $this->html->getURL($rt, '&manufacturer_id='.$manufacturer['manufacturer_id']);
+            $rt = $this->config->get('config_embed_click_action') == 'modal'
+                ? 'r/product/manufacturer'
+                : 'product/manufacturer';
+
+            $manufacturer['details_url'] = $this->html->getURL(
+                $rt,
+                '&manufacturer_id='.$manufacturer['manufacturer_id']
+            );
 
         }
 
@@ -413,7 +424,7 @@ class ControllerResponsesEmbedJS extends AController
     {
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
-        $this->data['allowed'] = $this->request->cookie[ABC::env('SESSION_ID')] ? true : false;
+        $this->data['allowed'] = (bool)$this->request->cookie[ABC::env('SESSION_ID')];
         $this->data['abc_token'] = session_id();
 
         $this->view->setTemplate('embed/js_cookie_check.tpl');
@@ -452,17 +463,15 @@ class ControllerResponsesEmbedJS extends AController
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
-        $this->loadModel('catalog/product');
-        $product_info = $this->model_catalog_product->getProduct($this->request->get['product_id']);
-        if ($product_info) {
-
-            $qnt = (int)$this->request->get['quantity'];
-            if ($qnt < $product_info['minimum']) {
-                $qnt = (int)$product_info['minimum'];
-            }
-            $qnt = $qnt == 0 ? 1 : $qnt;
-            $this->cart->add($this->request->get['product_id'], $qnt);
+        $qnt = (int)$this->request->get['quantity'];
+        $product = Product::find($this->request->get['product_id']);
+        if ($product) {
+            $this->cart->add(
+                (int)$this->request->get['product_id'],
+                (max($qnt,$product->minimum) ?: 1)
+            );
         }
+
         $this->setJsHttpHeaders();
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
     }
