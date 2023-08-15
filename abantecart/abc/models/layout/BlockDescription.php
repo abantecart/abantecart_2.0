@@ -79,20 +79,30 @@ class BlockDescription extends BaseModel
             'checks'   => [
                 'int',
                 'required',
-                'sometimes'
+                'sometimes',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => ['default_text' => 'Custom Block ID is empty!'],
+                'int' => ['default_text' => 'Custom Block ID is not integer!'],
+                'max'=>['default_text'=>'Custom Block ID must be less than 2147483647'],
+                'min'=>['default_text'=> 'Custom Block ID value must be greater than zero'],
+                'required'=>['default_text'=>'Custom Block ID required']
             ],
         ],
         'language_id'     => [
             'checks'   => [
                 'int',
                 'required',
-                'sometimes'
+                'sometimes',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => ['default_text' => 'Language ID is not integer!'],
+                'int' => ['default_text' => 'Language ID is not integer!'],
+                'max'=>['default_text'=>'Language ID must be less than 2147483647'],
+                'min'=>['default_text'=> 'Language ID value must be greater than zero'],
+                'required'=>['default_text'=>'Language ID required']
             ],
         ],
         'block_wrapper'   => [

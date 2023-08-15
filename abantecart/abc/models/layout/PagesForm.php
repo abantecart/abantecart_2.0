@@ -51,20 +51,30 @@ class PagesForm extends BaseModel
             'checks'   => [
                 'int',
                 'required',
-                'sometimes'
+                'sometimes',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => ['default_text' => 'Page ID is empty!'],
+                'int' => ['default_text' => 'Page ID is not integer!'],
+                'max'=>['default_text'=>'Page ID must be less than 2147483647'],
+                'min'=>['default_text'=> 'Page ID value must be greater than zero'],
+                'required'=>['default_text'=>'Page ID required']
             ]
         ],
         'form_id' => [
             'checks'   => [
                 'int',
                 'required',
-                'sometimes'
+                'sometimes',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => ['default_text' => 'Form ID is empty!'],
+                'int' => ['default_text' => 'Form ID is not integer!'],
+                'max'=>['default_text'=>'Form ID must be less than 2147483647'],
+                'min'=>['default_text'=> 'Form ID value must be greater than zero'],
+                'required'=>['default_text'=>'Form ID required']
             ]
         ],
     ];

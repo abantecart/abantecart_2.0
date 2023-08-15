@@ -69,10 +69,27 @@ class PageDescription extends BaseModel
             'checks'   => [
                 'int',
                 'required',
-                'sometimes'
+                'sometimes',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => ['default_text' => 'Language ID is not integer!'],
+                'int' => ['default_text' => 'Language ID is not integer!'],
+                'max'=>['default_text'=>'Language ID must be less than 2147483647'],
+                'min'=>['default_text'=> 'Language ID value must be greater than zero'],
+                'required'=>['default_text'=>'Language ID required']
+            ],
+        ],
+        'page_id' => [
+            'checks'   => [
+                'int',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'int' => ['default_text' => 'Page ID is not integer!'],
+                'max'=>['default_text'=>'Page ID must be less than 2147483647'],
+                'min'=>['default_text'=> 'Page ID value must be greater than zero'],
             ],
         ],
         'name'        => [

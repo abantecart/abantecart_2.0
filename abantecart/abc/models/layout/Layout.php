@@ -60,10 +60,15 @@ class Layout extends BaseModel
             'checks'   => [
                 'int',
                 'required',
-                'sometimes'
+                'sometimes',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => ['default_text' => 'Layout ID is empty!'],
+                'int' => ['default_text' => 'Layout ID is not integer!'],
+                'max'=>['default_text'=>'Layout ID must be less than 2147483647'],
+                'min'=>['default_text'=> 'Layout ID value must be greater than zero'],
+                'required'=>['default_text'=>'Layout ID required']
             ],
         ],
         'template_id' => [
@@ -90,9 +95,13 @@ class Layout extends BaseModel
         'layout_type' => [
             'checks'   => [
                 'int',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => ['default_text' => 'Layout Type is not integer!'],
+                'int' => ['default_text' => 'Layout Type is not integer!'],
+                'max'=>['default_text'=>'Layout Type must be less than 2147483647'],
+                'min'=>['default_text'=> 'Layout Type value must be greater than zero'],
             ],
         ],
     ];

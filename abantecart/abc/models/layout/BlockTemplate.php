@@ -55,18 +55,27 @@ class BlockTemplate extends BaseModel
             'checks'   => [
                 'int',
                 'required',
-                'sometimes'
+                'sometimes',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => ['default_text' => 'Block ID is empty!'],
+                'int' => ['default_text' => 'Block ID is not integer!'],
+                'max'=>['default_text'=>'Block ID must be less than 2147483647'],
+                'min'=>['default_text'=> 'Block ID value must be greater than zero'],
+                'required'=>['default_text'=>'Block ID required']
             ],
         ],
         'parent_block_id' => [
             'checks'   => [
-                'int'
+                'int',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => ['default_text' => 'Parent Block ID is not integer!'],
+                'int' => ['default_text' => 'Parent Block ID is not integer!'],
+                'max'=>['default_text'=>'Parent Block ID must be less than 2147483647'],
+                'min'=>['default_text'=> 'Parent Block ID value must be greater than zero'],
             ],
         ],
         'template'        => [

@@ -64,44 +64,66 @@ class BlockLayout extends BaseModel
             'checks'   => [
                 'int',
                 'required',
-                'sometimes'
+                'sometimes',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => ['default_text' => 'Layout ID is empty!'],
+                'int' => ['default_text' => 'Layout ID is not integer!'],
+                'max'=>['default_text'=>'Layout ID must be less than 2147483647'],
+                'min'=>['default_text'=> 'Layout ID value must be greater than zero'],
+                'required'=>['default_text'=>'Layout ID required']
             ],
         ],
         'block_id'           => [
             'checks'   => [
                 'int',
                 'required',
-                'sometimes'
+                'sometimes',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => ['default_text' => 'Block ID is empty!'],
+                'int' => ['default_text' => 'Block ID is not integer!'],
+                'max'=>['default_text'=>'Block ID must be less than 2147483647'],
+                'min'=>['default_text'=> 'Block ID value must be greater than zero'],
+                'required'=>['default_text'=>'Block ID required']
             ],
         ],
         'custom_block_id'    => [
             'checks'   => [
                 'int',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => ['default_text' => 'Custom Block ID is empty!'],
+                'int' => ['default_text' => 'Custom Block ID is not integer!'],
+                'max'=>['default_text'=>'Custom Block ID must be less than 2147483647'],
+                'min'=>['default_text'=> 'Custom Block ID value must be greater than zero'],
             ],
         ],
         'parent_instance_id' => [
             'checks'   => [
                 'int',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => ['default_text' => 'Parent Instance ID is empty!'],
+                'int' => ['default_text' => 'Parent Instance ID is not integer!'],
+                'max'=>['default_text'=>'Parent Instance ID must be less than 2147483647'],
+                'min'=>['default_text'=> 'Parent Instance ID value must be greater than zero'],
             ],
         ],
         'position'           => [
             'checks'   => [
                 'int',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
                 '*' => ['default_text' => 'Position is not integer!'],
+                'max'=>['default_text'=>'Position must be less than 2147483647'],
+                'min'=>['default_text'=> 'Position value must be greater than zero'],
             ],
         ],
         'status'             => [

@@ -91,6 +91,18 @@ class Page extends BaseModel
                     'default_text' => 'Key Parameter cannot be empty! key Value Length must be less than 40 characters'
                 ],
             ],
+        ],
+        'parent_page_id' => [
+            'checks'   => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Parent Page ID is not integer!'],
+                'max'=>['default_text'=>'Parent Page ID must be less than 2147483647'],
+                'min'=>['default_text'=> 'Parent Page ID value must be greater than zero'],
+            ],
         ]
     ];
 
