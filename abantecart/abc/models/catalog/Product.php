@@ -2473,20 +2473,23 @@ class Product extends BaseModel
     {
 
         $bestSellerIds = self::getBestSellerProductIds($params);
-        $searchParams = [
-            'initiator'    => __METHOD__,
-            'filter'       => [
-                'include'     => $bestSellerIds,
-                'language_id' => $params['language_id'] ?: Registry::language()->getContentLanguageID(),
-                'store_id'    => $params['store_id'] ?? (int)Registry::config()->get('config_store_id')
-            ],
-            'start'        => (int)$params['start'],
-            'limit'        => (int)$params['limit'] ?: 20,
-            //NOTE: sorting by giver product_ids sequence (see $bestSellerIds var)
-            'sort'         => 'include',
-            'only_enabled' => true,
-            'with_all'     => true
-        ];
+        $searchParams = array_merge(
+                $params,
+                [
+                'initiator'    => __METHOD__,
+                'filter'       => [
+                    'include'     => $bestSellerIds,
+                    'language_id' => $params['language_id'] ?: Registry::language()->getContentLanguageID(),
+                    'store_id'    => $params['store_id'] ?? (int)Registry::config()->get('config_store_id')
+                ],
+                'start'        => (int)$params['start'],
+                'limit'        => (int)$params['limit'] ?: 20,
+                //NOTE: sorting by giver product_ids sequence (see $bestSellerIds var)
+                'sort'         => 'include',
+                'only_enabled' => true,
+                'with_all'     => true
+            ]
+        );
         return Product::getProducts($searchParams);
     }
 

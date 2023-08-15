@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2023 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -23,21 +23,19 @@ namespace abc\controllers\storefront;
 use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\Registry;
-use abc\core\lib\APromotion;
 use abc\core\engine\AResource;
+use abc\models\catalog\Product;
+use abc\models\QueryBuilder;
 use abc\modules\traits\ProductListingTrait;
+use Illuminate\Database\Eloquent\Collection;
 
 /**
  * Class ControllerPagesProductSpecial
  *
  * @package abc\controllers\storefront
- * @property \abc\models\storefront\ModelCatalogReview $model_catalog_review
  */
 class ControllerPagesProductBestSeller extends AController
 {
-
-    public $data = [];
-
     use ProductListingTrait;
 
     public function __construct(Registry $registry, $instance_id, $controller, $parent_controller = '')
@@ -46,100 +44,92 @@ class ControllerPagesProductBestSeller extends AController
         $this->fillSortsList();
     }
 
-    /**
-     * Check if HTML Cache is enabled for the method
-     *
-     * @return array - array of data keys to be used for cache key building
-     */
-    public static function main_cache_keys()
-    {
-        return ['page', 'limit', 'sort', 'order'];
-    }
-
     public function main()
     {
-        $this->loadModel('catalog/product');
-
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
         $request = $this->request->get;
+
+        $cart_rt = $this->config->get('embed_mode') ? 'r/checkout/cart/embed' : 'checkout/cart';
+
         $this->loadLanguage('product/bestseller');
         $this->document->setTitle($this->language->get('heading_title'));
-        $this->document->resetBreadcrumbs();
-        $this->document->addBreadcrumb([
-            'href'      => $this->html->getHomeURL(),
-            'text'      => $this->language->get('text_home'),
-            'separator' => false,
-        ]);
-
 
         if ($this->config->get('config_require_customer_login') && !$this->customer->isLogged()) {
             abc_redirect($this->html->getSecureURL('account/login'));
         }
 
-        $url = '';
-        if (isset($request['page'])) {
-            $url .= '&page='.$request['page'];
-        }
+        $page = $request['page'] ?? 1;
 
-        $this->document->addBreadcrumb([
-            'href'      => $this->html->getNonSecureURL('product/bestseller', $url),
-            'text'      => $this->language->get('heading_title'),
-            'separator' => $this->language->get('text_separator'),
-        ]);
-
-        if (isset($request['page'])) {
-            $page = $request['page'];
-        } else {
-            $page = 1;
-        }
-
-        if (isset($request['limit'])) {
-            $limit = (int)$request['limit'];
-            $limit = $limit > 50 ? 50 : $limit;
-        } else {
-            $limit = $this->config->get('config_catalog_limit');
-        }
-
-        if (isset($request['sort'])) {
-            $sorting_href = $request['sort'];
-        } else {
+        $sorting_href = $request['sort'];
+        if (!$sorting_href || !isset($this->data['sorts'][$request['sort']])) {
             $sorting_href = $this->config->get('config_product_default_sort_order');
         }
+
         list($sort, $order) = explode("-", $sorting_href);
-        if ($sort == 'name') {
-            $sort = 'pd.'.$sort;
-        } elseif ($sort == 'sort_order') {
-            $sort = 'p.'.$sort;
-        } elseif ($sort == 'price') {
-            $sort = 'ps.'.$sort;
+
+        $limit = $this->config->get('config_catalog_limit');
+        if (isset($request['limit']) && intval($request['limit']) > 0) {
+            $limit = intval($request['limit']);
+            if ($limit > 50) {
+                $limit = 50;
+            }
         }
 
-        $promotion = new APromotion();
+        $this->data['search_parameters'] =
+            [
+                'sort'                => $sort,
+                'order'               => $order,
+                'start'               => ($page - 1) * $limit,
+                'limit'               => $limit,
+            ];
 
-        $product_total =  $this->model_catalog_product->getBestSellerProducts(['total' => true]);
+        //init controller data
+        $this->extensions->hk_InitData($this, __FUNCTION__);
 
+        $this->document->setTitle($this->language->get('heading_title'));
+        $this->document->resetBreadcrumbs();
+        $this->document->addBreadcrumb(
+            [
+                'href'      => $this->html->getHomeURL(),
+                'text'      => $this->language->get('text_home'),
+                'separator' => false,
+            ]
+        );
+
+        $url = '';
+        if (isset($request['sort'])) {
+            $url .= '&sort=' . $request['sort'];
+        }
+
+        if (isset($request['order'])) {
+            $url .= '&order=' . $request['order'];
+        }
+
+        if (isset($request['page'])) {
+            $url .= '&page=' . $request['page'];
+        }
+        if (isset($request['limit'])) {
+            $url .= '&limit=' . $request['limit'];
+        }
+
+        $this->document->addBreadcrumb(
+            [
+                'href'      => $this->html->getNonSecureURL('product/bestseller', $url),
+                'text'      => $this->language->get('heading_title'),
+                'separator' => $this->language->get('text_separator'),
+            ]
+        );
+
+        /** @see Product::getProducts() */
+        $productsList = Product::getBestSellerProducts($this->data['search_parameters']);
+        /** @see QueryBuilder::get() */
+        $product_total = $productsList::getFoundRowsCount();
 
         if ($product_total) {
-            $product_total = count($product_total);
-            $this->loadModel('catalog/review');
             $this->loadModel('tool/seo_url');
-            $this->loadModel('tool/image');
-
             $this->data['button_add_to_cart'] = $this->language->get('button_add_to_cart');
-
-            $results = $this->model_catalog_product->getBestSellerProducts([
-                'sort' => $sort,
-                'order' => $order,
-                'start' => ($page - 1) * $limit,
-                'limit' => $limit,
-                ]
-            );
-
-            $product_ids = [];
-            foreach ($results as $result) {
-                $product_ids[] = (int)$result['product_id'];
-            }
+            $product_ids = $productsList?->pluck('product_id')->toArray();
 
             //Format product data specific for confirmation page
             $resource = new AResource('image');
@@ -149,59 +139,91 @@ class ControllerPagesProductBestSeller extends AController
                 $this->config->get('config_image_product_width'),
                 $this->config->get('config_image_product_height')
             );
-            $stock_info = $this->model_catalog_product->getProductsStockInfo($product_ids);
 
             $this->data['is_customer'] = false;
-            $whishlist = [];
+            $wishlist = [];
             if ($this->customer->isLogged() || $this->customer->isUnauthCustomer()) {
                 $this->data['is_customer'] = true;
-                $whishlist = $this->customer->getWishList();
+                $wishlist = $this->customer->getWishList();
             }
 
-            foreach ($results as $result) {
-                $thumbnail = $thumbnails[$result['product_id']];
-                if ($this->config->get('enable_reviews')) {
-                    $rating = $this->model_catalog_review->getAverageRating($result['product_id']);
-                } else {
-                    $rating = false;
+            $product_ids = $productsList->pluck('product_id')->toArray();
+
+            //Format product data specific for confirmation page
+            $resource = new AResource('image');
+            $thumbnails = $resource->getMainThumbList(
+                'products',
+                $product_ids,
+                $this->config->get('config_image_product_width'),
+                $this->config->get('config_image_product_height')
+            );
+
+            //if single result, redirect to the product
+            if (count($productsList) == 1) {
+                abc_redirect(
+                    $this->html->getSEOURL(
+                        'product/product',
+                        '&product_id=' . $productsList->first()->product_id,
+                        '&encode')
+                );
+            }
+            $products = [];
+            /** @var Collection $listItem */
+            foreach ($productsList as $i => $listItem) {
+                $products[$i] = $listItem->toArray();
+                $thumbnail = $thumbnails[$listItem['product_id']];
+                $rating = $this->config->get('enable_reviews') ? $listItem['rating'] : false;
+                $special = false;
+                $discount = $listItem['discount_price'];
+
+                $in_wishlist = false;
+                if ($wishlist && $wishlist[$listItem['product_id']]) {
+                    $in_wishlist = true;
                 }
 
-                $special = false;
-                $discount = $promotion->getProductDiscount($result['product_id']);
                 if ($discount) {
                     $price = $this->currency->format(
                         $this->tax->calculate(
                             $discount,
-                            $result['tax_class_id'],
+                            $listItem['tax_class_id'],
                             $this->config->get('config_tax')
                         )
                     );
                 } else {
                     $price = $this->currency->format(
                         $this->tax->calculate(
-                            $result['price'],
-                            $result['tax_class_id'],
+                            $listItem['price'],
+                            $listItem['tax_class_id'],
                             $this->config->get('config_tax')
                         )
                     );
-                    $special = $promotion->getProductSpecial($result['product_id']);
+                    $special = $listItem['special_price'];
                     if ($special) {
-                        $special = $this->currency->format(
-                            $this->tax->calculate($special, $result['tax_class_id'], $this->config->get('config_tax'))
-                        );
+                        $special =
+                            $this->currency->format(
+                                $this->tax->calculate(
+                                    $special,
+                                    $listItem['tax_class_id'],
+                                    $this->config->get('config_tax')
+                                )
+                            );
                     }
                 }
 
-                $options = $this->model_catalog_product->getProductOptions($result['product_id']);
-                if ($options) {
-                    $add = $this->html->getSEOURL('product/product', '&product_id='.$result['product_id'], '&encode');
+                $hasOptions = $listItem['option_count'];
+                if ($hasOptions) {
+                    $addToCartUrl = $this->html->getSEOURL(
+                        'product/product',
+                        '&product_id=' . $listItem['product_id'],
+                        '&encode'
+                    );
                 } else {
                     if ($this->config->get('config_cart_ajax')) {
-                        $add = '#';
+                        $addToCartUrl = '#';
                     } else {
-                        $add = $this->html->getSecureURL(
-                            'checkout/cart',
-                            '&product_id='.$result['product_id'],
+                        $addToCartUrl = $this->html->getSecureURL(
+                            $cart_rt,
+                            '&product_id=' . $listItem['product_id'],
                             '&encode'
                         );
                     }
@@ -211,60 +233,51 @@ class ControllerPagesProductBestSeller extends AController
                 $track_stock = false;
                 $in_stock = false;
                 $no_stock_text = $this->language->get('text_out_of_stock');
-                $total_quantity = 0;
-                $stock_checkout = $result['stock_checkout'] === ''
+                $stock_checkout = $listItem['stock_checkout'] === ''
                     ? $this->config->get('config_stock_checkout')
-                    : $result['stock_checkout'];
-                if ($stock_info[$result['product_id']]['subtract']) {
+                    : $listItem['stock_checkout'];
+                $total_quantity = 0;
+                if ($listItem['subtract']) {
                     $track_stock = true;
-                    $total_quantity = $stock_info[$result['product_id']]['quantity'];
+                    $total_quantity = $listItem['quantity'];
                     //we have stock or out of stock checkout is allowed
                     if ($total_quantity > 0 || $stock_checkout) {
                         $in_stock = true;
                     }
                 }
 
-                $in_wishlist = false;
-                if ($whishlist && $whishlist[$result['product_id']]) {
-                    $in_wishlist = true;
-                }
-
-                $this->data['products'][] = [
-                    'product_id'     => $result['product_id'],
-                    'name'           => $result['name'],
-                    'model'          => $result['model'],
-                    'rating'         => $rating,
-                    'stars'          => sprintf($this->language->get('text_stars'), $rating),
-                    'price'          => $price,
-                    'raw_price'      => $result['price'],
-                    'call_to_order'  => $result['call_to_order'],
-                    'options'        => $options,
-                    'special'        => $special,
-                    'thumb'          => $thumbnail,
-                    'href'           => $this->html->getSEOURL(
-                        'product/product',
-                        '&product_id='.$result['product_id'],
-                        '&encode'
-                    ),
-                    'add'            => $add,
-                    'description'    => html_entity_decode($result['description'], ENT_QUOTES, ABC::env('APP_CHARSET')),
-                    'blurb'          => $result['blurb'],
-                    'track_stock'    => $track_stock,
-                    'in_stock'       => $in_stock,
-                    'no_stock_text'  => $no_stock_text,
-                    'total_quantity' => $total_quantity,
-                    'tax_class_id'   => $result['tax_class_id'],
-                    'in_wishlist'   => $in_wishlist,
-                    'product_wishlist_add_url' => $this->html->getURL(
-                        'product/wishlist/add',
-                        '&product_id='.$result['product_id']
-                    ),
-                    'product_wishlist_remove_url' => $this->html->getURL(
-                        'product/wishlist/remove',
-                        '&product_id='.$result['product_id']
-                    ),
-                ];
+                $products[$i]['rating'] = $rating;
+                $products[$i]['stars'] = sprintf($this->language->get('text_stars'), $rating);
+                $products[$i]['thumb'] = $thumbnail;
+                $products[$i]['price'] = $price;
+                $products[$i]['raw_price'] = $listItem['price'];
+                $products[$i]['options'] = $hasOptions;
+                $products[$i]['special'] = $special;
+                $products[$i]['href'] = $this->html->getSEOURL(
+                    'product/product',
+                    '&keyword=' . $request['keyword']
+                    . $url
+                    . '&product_id=' . $listItem['product_id'],
+                    '&encode');
+                $products[$i]['add'] = $addToCartUrl;
+                $products[$i]['description'] = html_entity_decode(
+                    $listItem['description'],
+                    ENT_QUOTES,
+                    ABC::env('APP_CHARSET')
+                );
+                $products[$i]['track_stock'] = $track_stock;
+                $products[$i]['in_stock'] = $in_stock;
+                $products[$i]['no_stock_text'] = $no_stock_text;
+                $products[$i]['total_quantity'] = $total_quantity;
+                $products[$i]['in_wishlist'] = $in_wishlist;
+                $products[$i]['product_wishlist_add_url'] = $this->html->getURL(
+                    'product/wishlist/add',
+                    '&product_id=' . $listItem['product_id']);
+                $products[$i]['product_wishlist_remove_url'] = $this->html->getURL(
+                    'product/wishlist/remove',
+                    '&product_id=' . $listItem['product_id']);
             }
+            $this->data['products'] = $products;
 
             if ($this->config->get('config_customer_price')) {
                 $display_price = true;
@@ -275,80 +288,96 @@ class ControllerPagesProductBestSeller extends AController
             }
             $this->data['display_price'] = $display_price;
 
-            $sorts = [];
-            $sorts[] = [
-                'text'  => $this->language->get('text_default'),
-                'value' => 'p.sort_order-ASC',
-                'href'  => $this->html->getURL('product/bestseller', $url.'&sort=p.sort_order&order=ASC', '&encode'),
-            ];
+            $url = '';
+            if (isset($request['keyword'])) {
+                $url .= '&keyword=' . $request['keyword'];
+            }
 
-            $sorts[] = [
-                'text'  => $this->language->get('text_sorting_name_asc'),
-                'value' => 'pd.name-ASC',
-                'href'  => $this->html->getURL('product/bestseller', $url.'&sort=pd.name&order=ASC', '&encode'),
-            ];
+            if (isset($request['category_id'])) {
+                $url .= '&category_id=' . $request['category_id'];
+            }
 
-            $sorts[] = [
-                'text'  => $this->language->get('text_sorting_name_desc'),
-                'value' => 'pd.name-DESC',
-                'href'  => $this->html->getURL('product/bestseller', $url.'&sort=pd.name&order=DESC', '&encode'),
-            ];
+            if (isset($request['description'])) {
+                $url .= '&description=' . $request['description'];
+            }
 
-            $sorts[] = [
-                'text'  => $this->language->get('text_sorting_price_asc'),
-                'value' => 'p.price-ASC',
-                'href'  => $this->html->getURL('product/bestseller', $url.'&sort=price&order=ASC', '&encode'),
-            ];
+            if (isset($request['model'])) {
+                $url .= '&model=' . $request['model'];
+            }
 
-            $sorts[] = [
-                'text'  => $this->language->get('text_sorting_price_desc'),
-                'value' => 'p.price-DESC',
-                'href'  => $this->html->getURL('product/bestseller', $url.'&sort=price&order=DESC', '&encode'),
-            ];
+            if (isset($request['page'])) {
+                $url .= '&page=' . $request['page'];
+            }
+            if (isset($request['limit'])) {
+                $url .= '&limit=' . $request['limit'];
+            }
 
             $sort_options = [];
-            foreach ($sorts as $item) {
-                $sort_options[$item['value']] = $item['text'];
+
+            foreach ($this->data['sorts'] as $value => &$text) {
+                $sort_options[$value] = $text;
+                list($s, $o) = explode('-', $value);
+                $text = [
+                    'text'  => $text,
+                    'value' => $value,
+                    'href'  => $this->html->getURL('product/search', $url . '&sort=' . $s . '&order=' . $o, '&encode'),
+                ];
             }
+
             $sorting = $this->html->buildElement(
                 [
                     'type'    => 'selectbox',
                     'name'    => 'sort',
                     'options' => $sort_options,
-                    'value'   => $sort.'-'.$order,
+                    'value'   => $sort . '-' . $order,
                 ]
             );
 
-            $this->view->assign('sorting', $sorting);
-            $this->view->assign('url', $this->html->getURL('product/bestseller'));
+            $this->data['sorting'] = $sorting;
+            $url = '';
+            if (isset($request['keyword'])) {
+                $url .= '&keyword=' . $request['keyword'];
+            }
+            if (isset($request['category_id'])) {
+                $url .= '&category_id=' . $request['category_id'];
+            }
 
-            $this->data['sorts'] = $sorts;
-            $pagination_url = $this->html->getURL(
-                'product/bestseller',
-                '&sort='.$sorting_href.'&page={page}'.'&limit='.$limit,
-                '&encode'
-            );
+            if (isset($request['description'])) {
+                $url .= '&description=' . $request['description'];
+            }
 
-            $this->data['pagination_bootstrap'] = $this->html->buildElement(
-                [
-                    'type'       => 'Pagination',
-                    'name'       => 'pagination',
-                    'text'       => $this->language->get('text_pagination'),
-                    'text_limit' => $this->language->get('text_per_page'),
-                    'total'      => $product_total,
-                    'page'       => $page,
-                    'limit'      => $limit,
-                    'url'        => $pagination_url,
-                    'style'      => 'pagination',
-                ]);
+            if (isset($request['model'])) {
+                $url .= '&model=' . $request['model'];
+            }
 
+            if (isset($request['sort'])) {
+                $url .= '&sort=' . $request['sort'];
+            }
+
+            $url .= '&sort=' . $sorting_href;
+            $url .= '&limit=' . $limit;
+
+            $this->data['pagination_bootstrap'] = $this->html->buildElement([
+                'type'       => 'Pagination',
+                'name'       => 'pagination',
+                'text'       => $this->language->get('text_pagination'),
+                'text_limit' => $this->language->get('text_per_page'),
+                'total'      => $product_total,
+                'page'       => $page,
+                'limit'      => $limit,
+                'url'        => $this->html->getURL('product/bestseller', $url . '&page={page}', '&encode'),
+                'style'      => 'pagination',
+            ]);
             $this->data['sort'] = $sort;
             $this->data['order'] = $order;
+            $this->data['limit'] = $limit;
+
+            $this->data['url'] = $this->html->getURL('product/bestseller');
+
             $this->data['review_status'] = $this->config->get('enable_reviews');
-            $this->view->batchAssign($this->data);
             $this->view->setTemplate('pages/product/bestseller.tpl');
         } else {
-            $this->view->assign('text_error', $this->language->get('text_empty'));
+            $this->data['text_error'] = $this->language->get('text_empty');
             $continue = $this->html->buildElement(
                 [
                     'type'  => 'button',
@@ -356,10 +385,11 @@ class ControllerPagesProductBestSeller extends AController
                     'text'  => $this->language->get('button_continue'),
                     'style' => 'button',
                 ]);
-            $this->view->assign('button_continue', $continue);
-            $this->view->assign('continue', $this->html->getHomeURL());
+            $this->data['button_continue'] = $continue;
+            $this->data['continue'] = $this->html->getHomeURL();
             $this->view->setTemplate('pages/error/not_found.tpl');
         }
+        $this->view->batchAssign($this->data);
         $this->processTemplate();
 
         //init controller data
