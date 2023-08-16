@@ -1149,6 +1149,7 @@ class ModelCatalogProduct extends Model
     }
 
     /**
+     * @deprecated
      * check if product option is group option
      * if yes, return array of possible groups for option_value_id
      *
