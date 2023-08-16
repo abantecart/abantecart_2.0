@@ -240,7 +240,11 @@ class ControllerApiProductProduct extends AControllerAPI
         }
 
         foreach (['description', 'name'] as $name) {
-            $product->{$name} = html_entity_decode($product->{$name}, ENT_QUOTES, ABC::env('APP_CHARSET'));
+            $product->description->$name = html_entity_decode(
+                $product->description->$name,
+                ENT_QUOTES,
+                ABC::env('APP_CHARSET')
+            );
         }
 
         if ($this->config->get('enable_reviews')) {

@@ -23,6 +23,7 @@ namespace abc\controllers\storefront;
 use abc\core\engine\AController;
 use abc\core\engine\AResource;
 use abc\core\lib\AJson;
+use abc\models\catalog\Product;
 use Exception;
 use H;
 
@@ -172,12 +173,12 @@ class ControllerResponsesProductProduct extends AController
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
-        $this->loadModel('catalog/product');
-        $product_info = $this->model_catalog_product->getProduct($this->request->get['product_id']);
-        if ($product_info) {
+        $qnt = (int)$this->request->get['quantity'];
+        $product = Product::find($this->request->get['product_id']);
+        if ($product) {
             $this->cart->add(
-                $this->request->get['product_id'],
-                ($product_info['minimum'] ? : 1)
+                (int)$this->request->get['product_id'],
+                (max($qnt,$product->minimum) ?: 1)
             );
         }
 

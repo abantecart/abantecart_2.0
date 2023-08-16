@@ -1263,6 +1263,7 @@ class Product extends BaseModel
 
     /**
      * @return HasMany
+     * TODO: add condition for storefront active only. See date_start and date_end
      */
     public function discounts()
     {
@@ -1274,11 +1275,16 @@ class Product extends BaseModel
      */
     public function options()
     {
-        return $this->hasMany(ProductOption::class, 'product_id');
+        $instance = $this->hasMany(ProductOption::class, 'product_id');
+        if( ABC::env('IS_ADMIN') !== true ) {
+            $instance->getQuery()->where('status', '=', 1);
+        }
+        return $instance;
     }
 
     /**
      * @return HasMany
+     *  TODO: add condition for storefront active only. See date_start and date_end
      */
     public function specials()
     {
@@ -1304,6 +1310,7 @@ class Product extends BaseModel
 
     /**
      * @return BelongsToMany
+     *  TODO: add condition for storefront active only.
      */
     public function related()
     {
@@ -1345,6 +1352,7 @@ class Product extends BaseModel
 
     /**
      * @return BelongsToMany
+     *  TODO: add condition for storefront active only. See date_start and date_end
      */
     public function downloads()
     {
@@ -1353,6 +1361,7 @@ class Product extends BaseModel
 
     /**
      * @return BelongsToMany
+     *  TODO: add condition for storefront active only. See date_start and date_end
      */
     public function stores()
     {
@@ -2464,20 +2473,23 @@ class Product extends BaseModel
     {
 
         $bestSellerIds = self::getBestSellerProductIds($params);
-        $searchParams = [
-            'initiator'    => __METHOD__,
-            'filter'       => [
-                'include'     => $bestSellerIds,
-                'language_id' => $params['language_id'] ?: Registry::language()->getContentLanguageID(),
-                'store_id'    => $params['store_id'] ?? (int)Registry::config()->get('config_store_id')
-            ],
-            'start'        => (int)$params['start'],
-            'limit'        => (int)$params['limit'] ?: 20,
-            //NOTE: sorting by giver product_ids sequence (see $bestSellerIds var)
-            'sort'         => 'include',
-            'only_enabled' => true,
-            'with_all'     => true
-        ];
+        $searchParams = array_merge(
+                $params,
+                [
+                'initiator'    => __METHOD__,
+                'filter'       => [
+                    'include'     => $bestSellerIds,
+                    'language_id' => $params['language_id'] ?: Registry::language()->getContentLanguageID(),
+                    'store_id'    => $params['store_id'] ?? (int)Registry::config()->get('config_store_id')
+                ],
+                'start'        => (int)$params['start'],
+                'limit'        => (int)$params['limit'] ?: 20,
+                //NOTE: sorting by giver product_ids sequence (see $bestSellerIds var)
+                'sort'         => 'include',
+                'only_enabled' => true,
+                'with_all'     => true
+            ]
+        );
         return Product::getProducts($searchParams);
     }
 
