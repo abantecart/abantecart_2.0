@@ -4,17 +4,19 @@
 	$tax_exempt = $this->customer->isTaxExempt();
 	$config_tax = $this->config->get('config_tax');
 	foreach ($products as $product) {
-		$item = array();
+        $item = [];
 		$item['image'] = $product['thumb']['thumb_html'];
 		$item['title'] = $product['name'];
 		$item['description'] = $product['model'];
-		$item['rating'] = ($product['rating']) ? "<img class=\"rating\" src='" . $this->templateResource('assets/images/stars_' . $product['rating'] . '.png') . "' alt='" . $product['stars'] . "' width='64' height='12' />" : '';
+        $item['rating'] = ($product['rating'])
+            ? "<img class=\"rating\" src='" . $this->templateResource('assets/images/stars_' . $product['rating'] . '.png') . "' alt='" . $product['stars'] . "' width='64' height='12' />"
+            : '';
 
 		$item['info_url'] = $product['href'];
 		$item['buy_url'] = $product['add'];
 
 		if (!$display_price) {
-			$item['price'] = '';
+            $product['price'] = $product['special'] = '';
 		}
 
 		$review = $button_write;
@@ -96,16 +98,9 @@
 						<?php echo $this->getHookvar('product_listing_details0_'.$product['product_id']);?>
 					</div>
 				</div>
-				
-				
-				
-				
 			</div>
-			
 		</div>
-	<?php
-	}
-	?>
+    <?php } ?>
 </div>
 
 <div class="thumbnails list row">
@@ -113,7 +108,7 @@
 	$tax_exempt = $this->customer->isTaxExempt();
 	$config_tax = $this->config->get('config_tax');
 	foreach ($products as $product) {
-		$item = array();
+        $item = [];
 		$item['image'] = $product['thumb']['thumb_html'];
 		$item['title'] = $product['name'];
 		$item['rating'] = ($product['rating']) ? "<img class=\"rating\" src='" . $this->templateResource('assets/images/stars_' . $product['rating'] . '.png') . "' alt='" . $product['stars'] . "' />" : '';
@@ -121,7 +116,7 @@
 		$item['info_url'] = $product['href'];
 		$item['buy_url'] = $product['add'];
 		if (!$display_price) {
-			$item['price'] = '';
+            $product['price'] = $product['special'] = '';
 		}
 
 		$tax_message = '';
@@ -181,12 +176,9 @@
 									<i class="fa fa-cart-plus fa-fw"></i>
 								</a>
 							<?php } ?>
-
-
-							
 						</div>
-						<?php } ?>
-						<?php echo $this->getHookvar('product_listing_details11_'.$product['product_id']);?>
+                        <?php }
+                        echo $this->getHookvar('product_listing_details11_' . $product['product_id']); ?>
 						<a class="details" href="<?php echo $item['info_url'] ?>"><?php echo $button_view ?></a>
 							<?php if ($review_status) { ?>
 								<a class="compare"
@@ -195,13 +187,9 @@
 							<?php echo $product['buttons'];?>
 						</div>
 						<div class="blurb"><?php echo $product['blurb'] ?></div>
-
 					</div>
-
 				</div>
 			</div>
 		</div>
-	<?php
-	}
-	?>
+    <?php } ?>
 </div>

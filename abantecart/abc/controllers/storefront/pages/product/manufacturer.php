@@ -47,191 +47,74 @@ class ControllerPagesProductManufacturer extends AController
 
     public function main()
     {
+        $manufacturerId = $this->request->get['manufacturer_id'];
 
-        $this->loadModel('tool/seo_url');
-        $this->loadModel('tool/image');
+        $this->parsePaginationQueryParams($this->request->get);
+
+        $this->data['search_parameters'] = [
+            'with_all'    => true,
+            'start'       => ($this->data['page'] - 1) * $this->data['limit'],
+            'limit'       => $this->data['limit'],
+            'language_id' => $this->language->getLanguageID(),
+            'sort'        => $this->data['sort'],
+            'order'       => $this->data['order'],
+            'filter'      => [
+                'manufacturer_id' => $manufacturerId
+            ]
+        ];
 
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
-        $request = $this->request->get;
-        if ($this->config->get('embed_mode')) {
-            //load special headers
-            $this->addChild('responses/embed/head', 'head');
-            $this->addChild('responses/embed/footer', 'footer');
-        }
-
-        $this->loadLanguage('product/manufacturer');
 
         if ($this->config->get('config_require_customer_login') && !$this->customer->isLogged()) {
             abc_redirect($this->html->getSecureURL('account/login'));
         }
 
-        $this->document->resetBreadcrumbs();
-        $this->document->addBreadcrumb([
-            'href'      => $this->html->getHomeURL(),
-            'text'      => $this->language->get('text_home'),
-            'separator' => false,
-        ]);
+        $this->loadLanguage('product/manufacturer');
+        $manufacturerInfo = Manufacturer::find($manufacturerId);
+        if (!$manufacturerInfo) {
+            abc_redirect($this->html->getHomeURL());
+        }
 
-        $manufacturerId = $request['manufacturer_id'] ?? 0;
+        $title = $manufacturerInfo->name;
 
-        $manufacturerInfo = (new Manufacturer())->getManufacturer($manufacturerId);
-        if ($manufacturerInfo) {
-            $this->document->addBreadcrumb(
-                [
-                    'href'      => $this->html->getSEOURL(
-                        'product/manufacturer',
-                        '&manufacturer_id=' . $request['manufacturer_id'],
-                        true
-                    ),
-                    'text'      => $manufacturerInfo['name'],
-                    'separator' => $this->language->get('text_separator'),
-                ]
-            );
+        $this->document->setTitle($title);
+        $this->data['heading_title'] = $title;
 
-            $this->document->setTitle($manufacturerInfo['name']);
-            $this->data['heading_title'] = $manufacturerInfo['name'];
-            $this->data['text_sort'] = $this->language->get('text_sort');
+        $this->setBreadCrumbs(
+            $this->getSelfUrl(
+                'product/manufacturer',
+                ['manufacturer_id'],
+                ['manufacturer_id' => $manufacturerId]
+            ),
+            $title
+        );
 
-            $resource = new AResource('image');
-            $thumbnail = $resource->getMainThumb(
-                'manufacturers',
-                $manufacturerInfo['manufacturer_id'],
-                $this->config->get('config_image_grid_width'),
-                $this->config->get('config_image_grid_height')
-            );
-            if (!str_contains($thumbnail['thumb_url'], 'no_image')) {
-                $this->data['manufacturer_icon'] = $thumbnail['thumb_url'];
-            }
+        /** @see Product::getProducts() */
+        $productList = Product::search($this->data['search_parameters']);
+        /** @see QueryBuilder::get() */
+        $productTotal = $productList::getFoundRowsCount();
 
-            if ($manufacturerInfo['product_count']) {
-                $page = $request['page'] ?? 1;
-                if (isset($request['limit'])) {
-                    $limit = (int)$request['limit'];
-                    $limit = min($limit, 50);
-                } else {
-                    $limit = $this->config->get('config_catalog_limit');
-                }
+        if ($productTotal) {
+            //if single result, redirect to the product
+            $this->forwardSingleResult($productList);
+            $this->data['button_add_to_cart'] = $this->language->get('button_add_to_cart');
+            $this->processList($productList);
 
-                $sorting_href = $request['sort'];
-                if (!$sorting_href || !isset($this->data['sorts'][$request['sort']])) {
-                    $sorting_href = $this->config->get('config_product_default_sort_order');
-                }
-                list($sort, $order) = explode("-", $sorting_href);
-                if ($sort == 'name') {
-                    $sort = 'pd.' . $sort;
-                } elseif (in_array($sort, ['sort_order', 'price'])) {
-                    $sort = 'p.' . $sort;
-                }
+            $this->data['display_price'] = ($this->config->get('config_customer_price') || $this->customer->isLogged());
+            $this->data['review_status'] = $this->config->get('enable_reviews');
 
-                $this->data['button_add_to_cart'] = $this->language->get('button_add_to_cart');
+            $this->data['url'] = $this->html->getURL('product/manufacturer', '&manufacturer_id=' . $manufacturerId);
 
-                $results = Product::search(
-                    [
-                        'filter'              => [
-                            'manufacturer_id' => $manufacturerId
-                        ],
-                        'with_final_price'    => true,
-                        'with_discount_price' => true,
-                        'with_special_price'  => true,
-                        'with_rating'         => true,
-                        'with_stock_info'     => true,
-                        'with_option_count'   => true,
-                        'start'               => ($page - 1) * $limit,
-                        'limit'               => $limit,
-                        'sort'                => $sort,
-                        'order'               => $order,
-                    ]
-                );
+            $this->setSortingSelector();
+            $this->setPagination('product/manufacturer', $productTotal, ['manufacturer_id' => $manufacturerId]);
 
-                $this->processList($results);
-
-
-                if ($this->config->get('config_customer_price')) {
-                    $display_price = true;
-                } elseif ($this->customer->isLogged()) {
-                    $display_price = true;
-                } else {
-                    $display_price = false;
-                }
-                $this->data['display_price'] = $display_price;
-
-                $sorting = $this->html->buildSelectbox(
-                    [
-                        'name'    => 'sort',
-                        'options' => $this->data['sorts'],
-                        'value'   => $sorting_href,
-                    ]
-                );
-
-                $this->data['sorting'] = $sorting;
-                $this->data['url'] = $this->html->getSEOURL(
-                    'product/manufacturer',
-                    '&manufacturer_id=' . $request['manufacturer_id']
-                );
-
-                $pagination_url = $this->html->getSEOURL(
-                    'product/manufacturer',
-                    '&manufacturer_id=' . $request['manufacturer_id']
-                    . '&sort=' . $sorting_href
-                    . '&page={page}'
-                    . '&limit=' . $limit,
-                    '&encode'
-                );
-
-                $this->data['pagination_bootstrap'] = $this->html->buildElement(
-                    [
-                        'type'       => 'Pagination',
-                        'name'       => 'pagination',
-                        'text'       => $this->language->get('text_pagination'),
-                        'text_limit' => $this->language->get('text_per_page'),
-                        'total'      => $results::getFoundRowsCount(),
-                        'page'       => $page,
-                        'limit'      => $limit,
-                        'url'        => $pagination_url,
-                        'style'      => 'pagination',
-                    ]
-                );
-                $this->data['sort'] = $sort;
-                $this->data['order'] = $order;
-                $this->view->setTemplate('pages/product/manufacturer.tpl');
-            } else {
-                $this->document->setTitle($manufacturerInfo['name']);
-                $this->data['heading_title'] = $manufacturerInfo['name'];
-                $this->data['text_error'] = $this->language->get('text_empty');
-                $continue = $this->html->buildElement(
-                    [
-                        'type'  => 'button',
-                        'name'  => 'continue_button',
-                        'text'  => $this->language->get('button_continue'),
-                        'style' => 'button',
-                    ]
-                );
-                $this->data['button_continue'] = $continue;
-                $this->data['continue'] = $this->html->getHomeURL();
-                $this->view->setTemplate('pages/error/not_found.tpl');
-            }
+            $this->view->setTemplate('pages/product/manufacturer.tpl');
         } else {
-
-            $url = $request['sort'] ? '&sort=' . $request['sort'] : '';
-            $url .= $request['order'] ? '&order=' . $request['order'] : '';
-            $url .= $request['page'] ? '&page=' . $request['page'] : '';
-
-            $this->document->addBreadcrumb([
-                'href'      => $this->html->getSEOURL(
-                    'product/manufacturer',
-                    '&manufacturer_id=' . $manufacturerId . $url,
-                    '&encode'
-                ),
-                'text'      => $this->language->get('text_error'),
-                'separator' => $this->language->get('text_separator'),
-            ]);
-
-            $this->document->setTitle($this->language->get('text_error'));
-
-            $this->data['heading_title'] = $this->language->get('text_error');
-            $this->data['text_error'] = $this->language->get('text_error');
-            $continue = $this->html->buildElement(
+            $this->document->setTitle($title);
+            $this->data['heading_title'] = $title;
+            $this->data['text_error'] = $this->language->get('text_empty');
+            $this->data['button_continue'] = $this->html->buildElement(
                 [
                     'type'  => 'button',
                     'name'  => 'continue_button',
@@ -239,13 +122,9 @@ class ControllerPagesProductManufacturer extends AController
                     'style' => 'button',
                 ]
             );
-            $this->data['button_continue'] = $continue;
             $this->data['continue'] = $this->html->getHomeURL();
-
             $this->view->setTemplate('pages/error/not_found.tpl');
         }
-
-        $this->data['review_status'] = $this->config->get('enable_reviews');
 
         $this->view->batchAssign($this->data);
         $this->processTemplate();

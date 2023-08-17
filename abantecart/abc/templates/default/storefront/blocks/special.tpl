@@ -2,7 +2,11 @@
 <?php if ( $block_framed ) { ?>
 	<div class="block_frame block_frame_<?php echo $block_details['block_txt_id']; ?>"
 				 id="block_frame_<?php echo $block_details['block_txt_id'] . '_' . $block_details['instance_id'] ?>">
-	<h2 class="heading2"><span><?php echo $heading_title; ?></span></h2>
+        <h2 class="heading2">
+            <a href="<?php echo $this->html->getSecureUrl('product/special') ?>">
+                <span><?php echo $heading_title; ?></span>
+            </a>
+        </h2>
 <?php } ?>
 		<ul class="side_prd_list">
 <?php

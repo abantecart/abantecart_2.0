@@ -37,7 +37,6 @@
 					</td>
 					<td class="align_left"><?php echo $product['model']; ?></td>
 					
-					<?php if ($display_price) { ?>
 					<td class="align_right">
 						<?php if ($product['special']) { ?>
 						    <div class="pricenew"><?php echo $product['special'] ?></div>
@@ -46,12 +45,9 @@
 						    <div class="oneprice"><?php echo $product['price'] ?></div>
 						<?php } ?>					
 					</td>
-					<?php } ?>
-					
-					<td class="align_right"><?php echo $product['added']; ?></td>
-					<td class="align_center">
 
-					<?php if ($display_price) { ?>
+                    <td class="align_right"><?php echo $product['added']; ?></td>
+					<td class="align_center">
 						<?php if($product['call_to_order']){ ?>
 							<a data-id="<?php echo $product['product_id'] ?>" href="#"
 								   class="btn call_to_order" title="<?php echo $text_call_to_order?>">
@@ -64,8 +60,6 @@
 								<i class="fa fa-cart-plus fa-fw"></i>
 							</a>
 						<?php } ?>
-					<?php } ?>
-						
 						<a href="#" onclick="wishlist_remove('<?php echo $product['product_id'] ?>'); return false;" class="btn btn-sm btn-default btn-remove"><i class="fa fa-trash-o fa-fw"></i></a>
 					</td>
 				</tr>

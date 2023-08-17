@@ -2,6 +2,7 @@
 
 namespace abc\modules\traits;
 
+use abc\core\ABC;
 use abc\core\engine\AResource;
 use abc\core\lib\AException;
 use abc\models\catalog\Product;
@@ -18,6 +19,29 @@ use stdClass;
  */
 trait ProductListingTrait
 {
+    public function parsePaginationQueryParams(?array $request = [])
+    {
+        $request = $request ?: $this->request->get;
+        $this->data['page'] = $request['page'] ?? 1;
+
+        if (!$this->data['sorts']) {
+            $this->fillSortsList();
+        }
+
+        $sorting_href = $request['sort'];
+        if (!$sorting_href || !isset($this->data['sorts'][$request['sort']])) {
+            $sorting_href = $this->config->get('config_product_default_sort_order');
+        }
+        $this->data['sorting_href'] = $sorting_href;
+        list($this->data['sort'], $this->data['order']) = explode("-", $sorting_href);
+
+        if (isset($request['limit'])) {
+            $this->data['limit'] = (int)$request['limit'] ?: $this->config->get('config_catalog_limit');
+            $this->data['limit'] = min($this->data['limit'], 50);
+        } else {
+            $this->data['limit'] = $this->config->get('config_catalog_limit');
+        }
+    }
     public function fillSortsList()
     {
         $default_sorting = $this->config->get('config_product_default_sort_order');
@@ -40,9 +64,21 @@ trait ProductListingTrait
         ];
     }
 
+    public function forwardSingleResult(Collection $productList)
+    {
+        if ($productList->count() == 1 && $this->data['page'] == 1) {
+            abc_redirect(
+                $this->html->getSEOURL(
+                    'product/product',
+                    '&product_id=' . $productList->first()->product_id,
+                    '&encode')
+            );
+        }
+    }
 
     /**
      * @param Collection|array $list
+     * @param array|null $options
      * @return void
      * @throws AException
      * @throws InvalidArgumentException
@@ -185,7 +221,78 @@ trait ProductListingTrait
                 '&product_id=' . $result->product_id
             );
             $this->data['products'][$i]['catalog_mode'] = $catalog_mode;
+            $this->data['products'][$i]['description'] = html_entity_decode(
+                $this->data['products'][$i]['description'],
+                ENT_QUOTES,
+                ABC::env('APP_CHARSET')
+            );
         }
+    }
+
+    public function getSelfUrl(string $rt, ?array $paramNames = [], ?array $values = [])
+    {
+        $values = $values ?: $this->request->get;
+        $paramNames = array_merge((array)$paramNames, ['sort', 'order', 'page', 'limit']);
+        $queryString = '';
+
+        foreach ($paramNames as $paramName) {
+            $queryString .= $values[$paramName] ? '&' . $paramName . '=' . $values[$paramName] : '';
+        }
+        return $this->html->getSecureURL($rt, $queryString);
+    }
+
+    public function setBreadCrumbs(string $pageUrl, ?string $customText = '')
+    {
+        $this->document->resetBreadcrumbs();
+        $this->document->addBreadcrumb(
+            [
+                'href'      => $this->html->getHomeURL(),
+                'text'      => $this->language->get('text_home'),
+                'separator' => false,
+            ]
+        );
+
+        $this->document->addBreadcrumb(
+            [
+                'href'      => $pageUrl,
+                'text'      => $customText ?: $this->language->get('heading_title'),
+                'separator' => $this->language->get('text_separator'),
+            ]
+        );
+    }
+
+    public function setPagination(string $rt, int $total, ?array $queryParameters = [])
+    {
+        $this->data['pagination_bootstrap'] = $this->html->buildElement(
+            [
+                'type'       => 'Pagination',
+                'name'       => 'pagination',
+                'text'       => $this->language->get('text_pagination'),
+                'text_limit' => $this->language->get('text_per_page'),
+                'total'      => $total,
+                'page'       => $this->data['page'],
+                'limit'      => $this->data['limit'],
+                'url'        => $this->html->getURL(
+                    $rt,
+                    ($queryParameters ? '&' . http_build_query($queryParameters) : '') .
+                    '&sort=' . $this->data['sorting_href'] . '&page={page}' . '&limit=' . $this->data['limit'],
+                    '&encode'
+                ),
+                'style'      => 'pagination',
+            ]
+        );
+    }
+
+    public function setSortingSelector()
+    {
+        $this->data['sorting'] = $this->html->buildElement(
+            [
+                'type'    => 'selectbox',
+                'name'    => 'sort',
+                'options' => $this->data['sorts'],
+                'value'   => $this->data['sorting_href'],
+            ]
+        );
     }
 
 }

@@ -76,13 +76,13 @@ $('#sort').change(function () {
 function contentSearch() {
 	url = '<?php echo $this->html->getURL('product/search','&limit='.$limit); ?>';
 
-	var keyword = $('#keyword').attr('value');
+    var keyword = $('#keyword').val();
 
 	if (keyword) {
 		url += '&keyword=' + encodeURIComponent(keyword);
 	}
 
-	var category_id = $('#category_id').attr('value');
+    var category_id = $('#category_id').val();
 
 	if (category_id) {
 		url += '&category_id=' + encodeURIComponent(category_id);
