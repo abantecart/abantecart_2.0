@@ -45,32 +45,34 @@ class ControllerResponsesProductProduct extends AController
         $this->response->setOutput($this->data['output']);
     }
 
-    public function is_group_option()
-    {
-        //init controller data
-        $this->extensions->hk_InitData($this, __FUNCTION__);
-
-        $this->loadModel('catalog/product');
-        $group_options = $this->model_catalog_product->getProductGroupOptions(
-            $this->request->get['product_id'],
-            $this->request->get['option_id'],
-            $this->request->get['option_value_id']
-        );
-
-        foreach ($group_options as $option_id => $option_values) {
-            foreach ($option_values as $option_value_id => $option_value) {
-                $name = $option_value['name'];
-                $this->data['group_option'][$option_id][$option_value_id] = $name;
-            }
-        }
-
-        //update controller data
-        $this->extensions->hk_UpdateData($this, __FUNCTION__);
-
-        $this->load->library('json');
-        $this->response->addJSONHeader();
-        $this->response->setOutput(AJson::encode($this->data['group_option']));
-    }
+//    public function is_group_option()
+//    {
+//        //TODO: rethink this method in the future
+//        return;
+//        //init controller data
+//        $this->extensions->hk_InitData($this, __FUNCTION__);
+//
+//        $this->loadModel('catalog/product');
+//        $group_options = $this->model_catalog_product->getProductGroupOptions(
+//            $this->request->get['product_id'],
+//            $this->request->get['option_id'],
+//            $this->request->get['option_value_id']
+//        );
+//
+//        foreach ($group_options as $option_id => $option_values) {
+//            foreach ($option_values as $option_value_id => $option_value) {
+//                $name = $option_value['name'];
+//                $this->data['group_option'][$option_id][$option_value_id] = $name;
+//            }
+//        }
+//
+//        //update controller data
+//        $this->extensions->hk_UpdateData($this, __FUNCTION__);
+//
+//        $this->load->library('json');
+//        $this->response->addJSONHeader();
+//        $this->response->setOutput(AJson::encode($this->data['group_option']));
+//    }
 
     /*
      * Load images for product option
