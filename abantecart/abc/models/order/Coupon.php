@@ -183,11 +183,14 @@ class Coupon extends BaseModel
                 'int',
                 'sometimes',
                 'required',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => 'Total coupon usage count is not integer!',
-                ],
+                'int' => ['default_text' => 'Total coupon usage count is not integer!'],
+                'max'=>['default_text'=>'Total coupon usage count must be less than 2147483647'],
+                'min'=>['default_text'=> 'Total coupon usage count value must be greater than zero'],
+                'required'=>['default_text'=>'Total coupon usage count required']
             ],
         ],
         'uses_customer' => [
@@ -195,11 +198,14 @@ class Coupon extends BaseModel
                 'integer',
                 'sometimes',
                 'required',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => 'Total coupon usage count is not integer!',
-                ],
+                'integer' => ['default_text' => 'Total coupon usage count is not integer!'],
+                'max'=>['default_text'=>'Total coupon usage count must be less than 2147483647'],
+                'min'=>['default_text'=> 'Total coupon usage count value must be greater than zero'],
+                'required'=>['default_text'=>'Total coupon usage count required']
             ],
         ],
 

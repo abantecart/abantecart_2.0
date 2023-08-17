@@ -208,21 +208,25 @@ class Order extends BaseModel
         'order_id'       => [
             'checks'   => [
                 'integer',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => ':attribute is not integer!',
-                ],
+                'integer' => ['default_text' => ':attribute is not integer!'],
+                'max'=>['default_text'=>':attribute must be less than 2147483647'],
+                'min'=>['default_text'=> ':attribute value must be greater than zero'],
             ],
         ],
         'invoice_id'     => [
             'checks'   => [
                 'integer',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => ':attribute is not integer!',
-                ],
+                'integer' => ['default_text' => ':attribute is not integer!'],
+                'max'=>['default_text'=>':attribute must be less than 2147483647'],
+                'min'=>['default_text'=> ':attribute value must be greater than zero'],
             ],
         ],
         'invoice_prefix' => [
@@ -231,20 +235,22 @@ class Order extends BaseModel
                 'max:10',
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => ':attribute must be string :max characters length!',
-                ],
+                '*' => ['default_text' => ':attribute must be string :max characters length!'],
+
             ],
         ],
         'store_id'       => [
             'checks'   => [
                 'integer',
                 'exists:stores',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => ':attribute is not integer!',
-                ],
+                'integer' => ['default_text' => ':attribute is not integer!'],
+                'max'=>['default_text'=>':attribute must be less than 2147483647'],
+                'min'=>['default_text'=> ':attribute value must be greater than zero'],
+                'exists'=>['default_text'=>':attribute not exists in stores table']
             ],
         ],
         'store_name'     => [
@@ -273,21 +279,26 @@ class Order extends BaseModel
                 'integer',
                 'nullable',
                 'exists:customers',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => ':attribute is not integer Or absent in customers table!',
-                ],
+                'integer' => ['default_text' => ':attribute is not integer Or absent in customers table!'],
+                'max'=>['default_text'=>':attribute must be less than 2147483647'],
+                'min'=>['default_text'=> ':attribute value must be greater than zero'],
+                'exists'=>['default_text'=>':attribute not exists in customers table']
             ],
         ],
         'customer_group_id' => [
             'checks'   => [
                 'integer',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => ':attribute is not integer!',
-                ],
+                'integer' => ['default_text' => ':attribute is not integer!'],
+                'max'=>['default_text'=>':attribute must be less than 2147483647'],
+                'min'=>['default_text'=> ':attribute value must be greater than zero'],
             ],
         ],
 
@@ -440,11 +451,13 @@ class Order extends BaseModel
             'checks'   => [
                 'int',
                 'nullable',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => ':attribute is not integer!',
-                ],
+                'int' => ['default_text' => ':attribute is not integer!'],
+                'max'=>['default_text'=>':attribute must be less than 2147483647'],
+                'min'=>['default_text'=> ':attribute value must be greater than zero'],
             ],
         ],
         'shipping_country'        => [
@@ -461,11 +474,13 @@ class Order extends BaseModel
         'shipping_country_id'     => [
             'checks'   => [
                 'int',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => ':attribute is not integer!',
-                ],
+                'int' => ['default_text' => ':attribute is not integer!'],
+                'max'=>['default_text'=>':attribute must be less than 2147483647'],
+                'min'=>['default_text'=> ':attribute value must be greater than zero'],
             ],
         ],
         'shipping_address_format' => [
@@ -594,11 +609,13 @@ class Order extends BaseModel
             'checks'   => [
                 'int',
                 'nullable',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => ':attribute is not integer!',
-                ],
+                'int' => ['default_text' => ':attribute is not integer!'],
+                'max'=>['default_text'=>':attribute must be less than 2147483647'],
+                'min'=>['default_text'=> ':attribute value must be greater than zero'],
             ],
         ],
         'payment_country'        => [
@@ -615,11 +632,13 @@ class Order extends BaseModel
         'payment_country_id'     => [
             'checks'   => [
                 'int',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => ':attribute is not integer!',
-                ],
+                'int' => ['default_text' => ':attribute is not integer!'],
+                'max'=>['default_text'=>':attribute must be less than 2147483647'],
+                'min'=>['default_text'=> ':attribute value must be greater than zero'],
             ],
         ],
         'payment_address_format' => [
@@ -682,33 +701,42 @@ class Order extends BaseModel
             'checks'   => [
                 'int',
                 'exists:order_statuses',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => ':attribute is not integer or absent in order_statuses table!',
-                ],
+                'int' => ['default_text' => ':attribute is not integer or absent in order_statuses table!'],
+                'max'=>['default_text'=>':attribute must be less than 2147483647'],
+                'min'=>['default_text'=> ':attribute value must be greater than zero'],
+                'exists'=>['default_text'=>':attribute not exists in order_statuses table']
             ],
         ],
         'language_id'     => [
             'checks'   => [
                 'int',
                 'exists:languages',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => ':attribute is not integer or absent in languages table!',
-                ],
+                'int' => ['default_text' => ':attribute is not integer or absent in languages table!'],
+                'max'=>['default_text'=>':attribute must be less than 2147483647'],
+                'min'=>['default_text'=> ':attribute value must be greater than zero'],
+                'exists'=>['default_text'=>':attribute not exists in languages table']
             ],
         ],
         'currency_id'     => [
             'checks'   => [
                 'int',
                 'exists:currencies',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => ':attribute is not integer or absent in currencies table!',
-                ],
+                'int' => ['default_text' => ':attribute is not integer or absent in currencies table!'],
+                'max'=>['default_text'=>':attribute must be less than 2147483647'],
+                'min'=>['default_text'=> ':attribute value must be greater than zero'],
+                'exists'=>['default_text'=>':attribute not exists in currencies table']
             ],
         ],
         'currency'        => [
@@ -739,11 +767,14 @@ class Order extends BaseModel
                 'int',
                 'nullable',
                 'exists:coupons',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => ':attribute is not integer or absent in coupons table!',
-                ],
+                'int' => ['default_text' => ':attribute is not integer or absent in coupons table!'],
+                'max'=>['default_text'=>':attribute must be less than 2147483647'],
+                'min'=>['default_text'=> ':attribute value must be greater than zero'],
+                'exists'=>['default_text'=>':attribute not exists in coupons table']
             ],
         ],
         'ip'             => [

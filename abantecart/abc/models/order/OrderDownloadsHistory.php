@@ -76,11 +76,15 @@ class OrderDownloadsHistory extends BaseModel
                 'integer',
                 'required',
                 'exists:orders',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => ':attribute is not integer or not presents in orders table!',
-                ],
+                'integer' => ['default_text' => ':attribute is not integer'],
+                'max'=>['default_text'=>':attribute must be less than 2147483647'],
+                'min'=>['default_text'=> ':attribute value must be greater than zero'],
+                'exists'=>['default_text'=>':attribute not exists in orders table'],
+                'required'=>['default_text'=>':attribute required']
             ],
         ],
         'order_download_id' => [
@@ -88,11 +92,15 @@ class OrderDownloadsHistory extends BaseModel
                 'integer',
                 'required',
                 'exists:order_downloads',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => ':attribute is not integer or not presents in order_downloads table!',
-                ],
+                'integer' => ['default_text' => ':attribute is not integer!'],
+                'max'=>['default_text'=>':attribute must be less than 2147483647'],
+                'min'=>['default_text'=> ':attribute value must be greater than zero'],
+                'exists'=>['default_text'=>':attribute not exists in order_downloads table'],
+                'required'=>['default_text'=>':attribute required']
             ],
         ],
         'order_product_id'  => [
@@ -100,11 +108,15 @@ class OrderDownloadsHistory extends BaseModel
                 'integer',
                 'required',
                 'exists:order_products',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => ':attribute is not integer or not presents in order_products table!',
-                ],
+                'integer' => ['default_text' => ':attribute is not integer!'],
+                'max'=>['default_text'=>':attribute must be less than 2147483647'],
+                'min'=>['default_text'=> ':attribute value must be greater than zero'],
+                'exists'=>['default_text'=>':attribute not exists in order_products table'],
+                'required'=>['default_text'=>':attribute required']
             ],
         ],
         'filename'          => [
@@ -136,22 +148,27 @@ class OrderDownloadsHistory extends BaseModel
                 'integer',
                 'nullable',
                 'exists:downloads',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => ':attribute must be an integer!',
-                ],
+                'integer' => ['default_text' => ':attribute must be an integer!'],
+                'max'=>['default_text'=>':attribute must be less than 2147483647'],
+                'min'=>['default_text'=> ':attribute value must be greater than zero'],
+                'exists'=>['default_text'=>':attribute not exists in download table']
             ],
         ],
         'download_percent'  => [
             'checks'   => [
                 'integer',
                 'nullable',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => ':attribute must be an integer!',
-                ],
+                'integer' => ['default_text' => ':attribute must be an integer!'],
+                'max'=>['default_text'=>':attribute must be less than 2147483647'],
+                'min'=>['default_text'=> ':attribute value must be greater than zero'],
             ],
         ],
     ];
