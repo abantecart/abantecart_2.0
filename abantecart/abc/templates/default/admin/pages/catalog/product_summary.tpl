@@ -16,21 +16,21 @@
 								class="fa fa-external-link-alt"></i> <?php echo $text_view; ?></a>
 				</td>
 				<td class="summary_label"><?php echo $entry_name; ?></td>
-				<td class="summary_value"><?php echo $product['name']; ?></td>
+                <td class="summary_value"><?php echo $product['description']['name']; ?></td>
 				<td class="summary_label"><?php echo $entry_product_id; ?></td>
-				<td class="summary_value"><?php echo $product['product_id']; ?></td>
+                <td class="summary_value">#<?php echo $product['product_id']; ?></td>
 			</tr>
 			<tr>
 				<td class="summary_label"><?php echo $entry_model; ?></td>
 				<td class="summary_value"><?php echo $product['model']; ?></td>
 				<td class="summary_label"><?php echo $entry_price; ?></td>
-				<td class="summary_value"><?php echo $product['price']; ?></td>
+                <td class="summary_value"><?php echo $product['format_price']; ?></td>
 			</tr>
 			<tr>
 				<td class="summary_label"><?php echo $text_product_condition; ?></td>
 				<td class="summary_value"><?php
 					if ($product['condition']){
-						echo '<div class="alert-danger col-sm-8">' . implode('<br>', $product['condition']) . '</div>';
+                        echo '<div class="alert alert-warning"><i class="fa fa-exclamation-triangle fa-2x"></i> <b>' . implode('</p><p>', $product['condition']) . '</b></div>';
 					} else{
 						echo $text_product_available;
 					} ?></td>

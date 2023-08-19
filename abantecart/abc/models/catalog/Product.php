@@ -1893,7 +1893,8 @@ class Product extends BaseModel
             '=',
             $this->getKey()
         );
-        return ($query->count());
+        $query->where('product_options.status', '=', 1);
+        return ($query->useCache('product')->count());
     }
 
     /**
