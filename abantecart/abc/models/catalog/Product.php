@@ -1852,6 +1852,7 @@ class Product extends BaseModel
         }
         /** @var Product $product */
         $product = Product::with('description', 'categories', 'stores', 'tagsByLanguage')
+            ->useCache('product')
             ->find($product_id);
         if (!$product) {
             return [];

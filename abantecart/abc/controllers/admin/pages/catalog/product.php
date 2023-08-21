@@ -668,8 +668,8 @@ class ControllerPagesCatalogProduct extends AController
     {
         $product_id = (int)$this->request->get['product_id'];
 
-        $viewport_mode = isset($args[0]['viewport_mode']) ? $args[0]['viewport_mode'] : '';
-        $content_language_id = $this->language->getContentLanguageID();
+        $viewport_mode = $args[0]['viewport_mode'] ?? '';
+        $contentLanguageId = $this->language->getContentLanguageID();
 
         $product_info = Product::getProductInfo($product_id);
         if(!$product_info){
@@ -776,7 +776,7 @@ class ControllerPagesCatalogProduct extends AController
 
         if (isset($this->request->post['product_store'])) {
             $this->data['product_store'] = $this->request->post['product_store'];
-        } elseif (isset($product_info) && !empty($product_info)) {
+        } elseif ($product_info) {
             $this->data['product_store'] = array_column($product_info['stores'], 'store_id');
         } else {
             $this->data['product_store'] = [0];
@@ -784,11 +784,8 @@ class ControllerPagesCatalogProduct extends AController
 
         if (isset($this->request->post['product_description'])) {
             $this->data['product_description'] = $this->request->post['product_description'];
-        } elseif (isset($product_info)) {
-            $this->data['product_description'] = $this->model_catalog_product->getProductDescriptions(
-                $product_id,
-                $content_language_id
-            );
+        } elseif ($product_info) {
+            $this->data['product_description'] = $product_info['description'];
         } else {
             $this->data['product_description'] = [];
         }
@@ -847,28 +844,15 @@ class ControllerPagesCatalogProduct extends AController
         $length_info = $this->model_localisation_length_class->getLengthClassDescriptionByUnit(
             $this->config->get('config_length_class')
         );
-        if (isset($this->request->post['length_class_id'])) {
-            $this->data['length_class_id'] = $this->request->post['length_class_id'];
-        } elseif (isset($product_info)) {
-            $this->data['length_class_id'] = $product_info['length_class_id'];
-        } elseif (isset($length_info)) {
-            $this->data['length_class_id'] = $length_info['length_class_id'];
-        } else {
-            $this->data['length_class_id'] = '';
-        }
 
-        if ($this->data['status'] === null) {
-            $this->data['status'] = 1;
-        }
-        if ($this->data['quantity'] === null) {
-            $this->data['quantity'] = 1;
-        }
-        if ($this->data['minimum'] == null) {
-            $this->data['minimum'] = 1;
-        }
-        if ($this->data['sort_order'] === null) {
-            $this->data['sort_order'] = 1;
-        }
+        $this->data['length_class_id'] = $this->request->post['length_class_id']
+            ?: $product_info['length_class_id']
+                ?: $length_info['length_class_id'];
+
+        $this->data['status'] = $this->data['status'] ?? 1;
+        $this->data['quantity'] = $this->data['quantity'] ?? 1;
+        $this->data['minimum'] = $this->data['minimum'] ?? 1;
+        $this->data['sort_order'] = $this->data['sort_order'] ?? 1;
 
         $this->data['active'] = 'details';
         if (!isset($product_id)) {
@@ -1374,7 +1358,7 @@ class ControllerPagesCatalogProduct extends AController
             '&product_id='.$this->request->get['product_id']
         );
         $this->data['form_language_switch'] = $this->html->getContentLanguageSwitcher();
-        $this->data['language_id'] = $content_language_id;
+        $this->data['language_id'] = $contentLanguageId;
         $this->data['language_code'] = $this->session->data['language'];
         $this->data['help_url'] = $this->gen_help_url('product_edit');
         $saved_list_data = json_decode(html_entity_decode($this->request->cookie['grid_params']));

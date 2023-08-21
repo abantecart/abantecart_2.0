@@ -50,8 +50,8 @@ class ControllerPagesCatalogProductSummary extends AController
         $thumbnail = $resource->getMainThumb(
             'products',
             $this->request->get['product_id'],
-            $this->config->get('config_image_grid_width'),
-            $this->config->get('config_image_grid_height'),
+            $this->config->get('config_image_product_width'),
+            $this->config->get('config_image_product_height'),
             true
         );
         $this->data['product']['image'] = $thumbnail;
@@ -83,6 +83,7 @@ class ControllerPagesCatalogProductSummary extends AController
                 ]
             );
         }
+        /** @see Order::getOrders() */
         $this->data['product']['orders'] = Order::search(
             [
                 'filter' => [
