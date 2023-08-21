@@ -72,6 +72,7 @@
                     <?php echo $this->getHookVar('product_summary_hookvar'); ?>
                 </table>
             </div>
+        </div>
 	</div>
 </div>
 
