@@ -2389,13 +2389,14 @@ class ModelCatalogProduct extends Model
     }
 
     /**
-     * function checks if product will be displayed on storefront and returns array with messages about causes
-     *
      * @param $product_id
      *
      * @return array
      * @throws \Exception
      * @throws \Psr\SimpleCache\InvalidArgumentException
+     *@deprecated
+     * function checks if product will be displayed on storefront and returns array with messages about causes
+     *
      */
     public function getProductCondition($product_id)
     {

@@ -2334,15 +2334,19 @@ body.stickyheader .sticky_left {
 #summary th, #summary td{
     border: none;
 }
+
+.summary-button {
+    min-width: 100px;
+}
 .summary_label {
-    font-weight: bold;
-    text-align: left;
+    text-align: right;
     color: #333;
-    font-size: 13px;
+    font-size: 15px;
 }
 .summary_value {
-    font-size: 13px;
+    font-size: 15px;
     color: #636e7b;
+    font-weight: bold;
 }
 
 .panel-body .shortcut img {
@@ -3482,3 +3486,7 @@ th.left, td.left {
 /*
 End Vuetify conflict fixes
  */
+
+.nav-tabs.nav-justified.nav-profile > li.active {
+    border: 1px solid #d5d4d4 !important;
+}

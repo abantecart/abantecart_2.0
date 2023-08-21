@@ -1852,6 +1852,7 @@ class Product extends BaseModel
         }
         /** @var Product $product */
         $product = Product::with('description', 'categories', 'stores', 'tagsByLanguage')
+            ->useCache('product')
             ->find($product_id);
         if (!$product) {
             return [];
@@ -1893,7 +1894,8 @@ class Product extends BaseModel
             '=',
             $this->getKey()
         );
-        return ($query->count());
+        $query->where('product_options.status', '=', 1);
+        return ($query->useCache('product')->count());
     }
 
     /**

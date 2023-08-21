@@ -958,6 +958,10 @@ label.h4 {
    margin-top: -2px;
 }
 
+.mt-auto {
+   margin-top: auto;
+}
+
 .nav .dropdown .caret {
    border-top-color: #666;
 }
@@ -1139,7 +1143,6 @@ label.h4 {
 .media-heading {
    color: #333;
    font-size: 14px;
-   font-family: 'LatoBold';
    margin: 0;
 }
 
@@ -1154,15 +1157,11 @@ small.media-desc {
 }
 
 .table {
-	background: #fcfcfc;
-	-moz-box-shadow: 0 3px 0 rgba(12,12,12,0.03);
-   -webkit-box-shadow: 0 3px 0 rgba(12,12,12,0.03);
-   box-shadow: 0 3px 0 rgba(12,12,12,0.03);
+   background: #ffffff !important;
 }
 
 .table th {
 	font-weight: normal;
-	font-family: 'LatoBold';
 }
 
 .table thead > tr > th {
