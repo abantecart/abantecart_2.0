@@ -114,7 +114,7 @@ $wrapper_id = \H::randomWord(6);
         mcei.selector = 'textarea#text_editor_<?php echo $id ?>';
 
         //tinymce.baseURL = "<?php echo $this->templateResource('templates/assets/js/tinymce'); ?>";
-        tinymce.baseURL = 'templates/default_bs3/admin/assets/js/tinymce';
+        tinymce.baseURL = 'templates/default/admin/assets/js/tinymce';
         tinymce.init(mcei);
 
         //for modal mode
