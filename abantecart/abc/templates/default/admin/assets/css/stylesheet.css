@@ -955,7 +955,7 @@ h1 a:hover, h2 a:hover, h3  a:hover {
     position: absolute;
     top: 23px;
     right: 25px;
-    max-width: 400px;
+    max-width: 600px;
     white-space: nowrap;
     overflow: hidden;
 }
