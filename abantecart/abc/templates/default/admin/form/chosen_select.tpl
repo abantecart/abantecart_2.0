@@ -49,7 +49,11 @@
         if (is_array($text)) {
         $check_id = preg_replace('/[^a-zA-Z0-9_]/', '', $id . $v); ?>
         $('#<?php echo $check_id ?>').html(<?php abc_js_echo($text['image']); ?>);
-        $('#<?php echo $check_id ?>').append('<span class="hide_text"> <?php abc_js_echo($text['name']); ?></span>');
+        $('#<?php echo $check_id ?>').append(
+            '<p class="mt10 hidden hide_text">' +
+            <?php abc_js_echo($text['name'] . ($text['price'] ? ' - ' . $text['price'] : '')); ?>
+            +"</span>"
+        );
         <?php           }
         }
         } ?>
