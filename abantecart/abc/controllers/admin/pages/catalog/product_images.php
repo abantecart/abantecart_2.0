@@ -41,10 +41,9 @@ class ControllerPagesCatalogProductImages extends AController
         $productId = $this->request->get['product_id'];
 
         $this->loadLanguage('catalog/product');
-        $this->document->setTitle($this->language->get('heading_title'));
 
-        $this->data['product_info'] = $product_info = Product::getProductInfo($productId);
-        if (!$product_info) {
+        $this->data['product_info'] = $productInfo = Product::getProductInfo($productId);
+        if (!$productInfo) {
             $this->session->data['warning'] = $this->language->get('error_product_not_found');
             abc_redirect($this->html->getSecureURL('catalog/product'));
         }
@@ -72,7 +71,7 @@ class ControllerPagesCatalogProductImages extends AController
                 'href' => $this->html->getSecureURL('catalog/product/update', '&product_id=' . $productId),
                 'text' => $this->language->get('text_edit')
                     . '&nbsp;' . $this->language->get('text_product')
-                    . ' - ' . $product_info['name'],
+                    . ' - ' . $productInfo['name'],
             ]
         );
         $this->document->addBreadcrumb(
@@ -82,6 +81,8 @@ class ControllerPagesCatalogProductImages extends AController
                 'current' => true
             ]
         );
+
+        $this->document->setTitle($productInfo['name'] . ' ' . $this->language->get('tab_media'));
 
         $this->loadModel('tool/image');
         $this->data['no_image'] = $this->model_tool_image->resize('no_image.jpg', 100, 100);

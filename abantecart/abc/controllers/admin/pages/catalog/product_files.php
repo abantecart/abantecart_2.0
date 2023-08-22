@@ -40,7 +40,6 @@ class ControllerPagesCatalogProductFiles extends AController
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
         $this->loadLanguage('catalog/files');
-        $this->document->setTitle($this->language->get('heading_title'));
         $this->loadModel('catalog/download');
         $productId = $this->request->get['product_id'];
         $downloadId = $this->request->get['download_id'];
@@ -120,6 +119,7 @@ class ControllerPagesCatalogProductFiles extends AController
                 'current'   => true,
             ]
         );
+        $this->document->setTitle($productInfo['name'] . ' ' . $this->language->get('tab_files'));
 
         $this->data['active'] = 'files';
         //load tabs controller

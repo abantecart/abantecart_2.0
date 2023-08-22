@@ -45,7 +45,7 @@ class ControllerPagesCatalogProductPromotions extends AController
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
         $this->loadLanguage('catalog/product');
-        $this->document->setTitle($this->language->get('heading_title'));
+
         $productId = (int)$this->request->get['product_id'];
 
         if ($this->request->is_POST() && $this->validateForm($this->request->post)) {
@@ -134,6 +134,8 @@ class ControllerPagesCatalogProductPromotions extends AController
                 'current'   => true,
             ]
         );
+
+        $this->document->setTitle($productInfo['name'] . ' ' . $this->language->get('tab_promotions'));
 
         $this->data['customer_groups'] = CustomerGroup::all()?->pluck('name', 'customer_group_id')?->toArray();
 

@@ -38,7 +38,6 @@ class ControllerPagesCatalogProductRelations extends AController
         $productId = (int)$this->request->get['product_id'];
 
         $this->loadLanguage('catalog/product');
-        $this->document->setTitle($this->language->get('heading_title'));
 
         if ($this->request->is_POST()) {
             $this->request->post['product_category'] = array_filter($this->request->post['product_category'] ?: []);
@@ -92,6 +91,8 @@ class ControllerPagesCatalogProductRelations extends AController
                 'current'   => true,
             ]
         );
+
+        $this->document->setTitle($productInfo['name'] . ' ' . $this->language->get('tab_relations'));
 
         $this->data['categories'] = array_column(Category::getCategories(), 'name', 'category_id');
 
