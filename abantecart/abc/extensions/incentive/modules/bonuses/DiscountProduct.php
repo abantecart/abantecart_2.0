@@ -107,7 +107,6 @@ class DiscountProduct extends BaseIncentiveBonus implements IncentiveBonusInterf
                     $options[$productId]['name'] = $r->name . " " . ($r->model ? '(' . $r->model . ')' : '');
                     $options[$productId]['image'] = $thumbnails[$productId]['thumb_html']
                         . '&nbsp;'
-                        . $options[$productId]['name']
                         . trim(
                             $html->buildElement(
                                 [

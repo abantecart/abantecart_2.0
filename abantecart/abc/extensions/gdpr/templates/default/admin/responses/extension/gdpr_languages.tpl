@@ -13,6 +13,7 @@ $registry->get('load')->model('localisation/language_definitions');
 $language = new ALanguage($registry, 'en', 0);
 $language->load('gdpr/gdpr');
 
+$this->load->model('localisation/language_definitions');
 $filter_data = [
     'language_id'   => 1,
     'filter'        => [
@@ -23,6 +24,7 @@ $filter_data = [
     'subsql_filter' => "LOWER(`block`) = 'gdpr_gdpr' ",
 ];
 $definitions = $this->model_localisation_language_definitions->getLanguageDefinitions($filter_data);
+
 ?>
 <div class="table-responsive" style="max-height: 500px; overflow: auto;">
 	<table class="table table-striped table-bordered table-hover">

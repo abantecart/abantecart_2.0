@@ -50,8 +50,8 @@ class ControllerPagesCatalogProductSummary extends AController
         $thumbnail = $resource->getMainThumb(
             'products',
             $this->request->get['product_id'],
-            $this->config->get('config_image_product_width'),
-            $this->config->get('config_image_product_height'),
+            150,
+            150,
             true
         );
         $this->data['product']['image'] = $thumbnail;

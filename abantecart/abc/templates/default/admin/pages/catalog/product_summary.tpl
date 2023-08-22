@@ -9,7 +9,7 @@
 	<div class="panel-body panel-body-nopadding table-responsive" style="display: block;">
 
         <div class="row">
-            <div class="media col-3">
+            <div class="media col-3 col-sm-4">
                 <div class="media-left">
                     <a title="<?php abc_echo_html2view($text_view); ?>" href="<?php echo $product['preview']; ?>"
                        target="_blank">
