@@ -130,8 +130,10 @@ include($tpl_common_dir . 'action_confirm.tpl'); ?>
 </div>
 
 <?php echo $this->html->buildElement(
-		array('type' => 'modal',
-				'id' => 'discount_modal',
-				'modal_type' => 'lg',
-				'data_source' => 'ajax'));
+    [
+        'type'        => 'modal',
+        'id'          => 'discount_modal',
+        'modal_type'  => 'lg',
+        'data_source' => 'ajax'
+    ]);
 ?>

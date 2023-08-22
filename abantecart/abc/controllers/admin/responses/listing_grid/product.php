@@ -371,14 +371,9 @@ class ControllerResponsesListingGridProduct extends AController
         }
 
         $this->loadLanguage('catalog/product');
-        $this->loadModel('catalog/product');
-        if (isset($this->request->get['id'])) {
+        if ($this->request->get['id']) {
             //request sent from edit form. ID in url
-            foreach ($this->request->post as $key => $value) {
-                $data = [$key => $value];
-                $discount = ProductDiscount::find($this->request->get['id']);
-                $discount?->update($data);
-            }
+            ProductDiscount::find($this->request->get['id'])?->update($this->request->post);
 
             $this->extensions->hk_ProcessData(
                 $this,
@@ -416,15 +411,9 @@ class ControllerResponsesListingGridProduct extends AController
         }
 
         $this->loadLanguage('catalog/product');
-        $this->loadModel('catalog/product');
-        if (isset($this->request->get['id'])) {
+        if ($this->request->get['id']) {
             //request sent from edit form. ID in url
-            foreach ($this->request->post as $key => $value) {
-                $data = [$key => $value];
-                $special = ProductSpecial::find($this->request->get['id']);
-                $special?->update($data);
-            }
-
+            ProductSpecial::find($this->request->get['id'])?->update($this->request->post);
             $this->extensions->hk_ProcessData(
                 $this,
                 __FUNCTION__,
