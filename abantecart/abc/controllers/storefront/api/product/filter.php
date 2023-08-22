@@ -25,12 +25,10 @@ use abc\core\engine\AControllerAPI;
 use abc\core\engine\AResource;
 use abc\core\lib\AFilter;
 use abc\models\catalog\Product;
+use abc\models\QueryBuilder;
 use abc\models\storefront\ModelCatalogProduct;
 use stdClass;
 
-/**
- * @property ModelCatalogProduct $model_catalog_product
- */
 class ControllerApiProductFilter extends AControllerAPI
 {
     /**
@@ -192,7 +190,7 @@ class ControllerApiProductFilter extends AControllerAPI
     public function get()
     {
         //TODO: Add support store_id and language_id, maybe currency
-        //TODO: Change Error response to standart
+        //TODO: Change Error response to standard
         $this->data['search_parameters'] = [
             'with_all' => true,
             'filter'   => [
@@ -255,7 +253,7 @@ class ControllerApiProductFilter extends AControllerAPI
         $this->data['search_parameters']['limit'] = $requestParams['limit'];
 
         $products = Product::getProducts($this->data['search_parameters']);
-
+        /** @see QueryBuilder::get() */
         $total = $products::getFoundRowsCount();
 
         //get total

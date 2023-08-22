@@ -9,28 +9,22 @@
 		<?php echo $regexp_pattern ? 'pattern="'.$regexp_pattern.'"':'';?>
 		<?php echo $error_text ? 'title="'.$error_text.'"':'';?>/>
 <?php if ( $required == 'Y' ) { ?>
-<div class="input-group-append">
-	<span class="input-group-text required">*</span>
-</div>
+    <span class="input-group-addon"><span class="required">*</span></span>
 <?php } ?>
 
 <script type="application/javascript">
 	$(document).ready(function () {
-		try {
-			$('#<?php echo $id ?>').intlTelInput({
-				autoHideDialCode: false,
-				nationalMode: <?php echo $value ? 'false' : 'true'; ?>,
-				utilsScript: "vendor/components/intl-tel-input/build/js/utils.js"
-			});
+        $('#<?php echo $id ?>').intlTelInput({
+            autoHideDialCode: false,
+            nationalMode: <?php echo $value ? 'false' : 'true'; ?>,
+            utilsScript: "<?php echo $this->templateResource('assets/js/intl-tel-input/js/utils.js'); ?>"
+        });
 
-			$('#<?php echo $id ?>').on("blur", function () {
-				var intlNumber = $(this).intlTelInput("getNumber");
-				intlNumber = intlNumber.replace(/[^0-9\+]+/g, '');
-				$(this).val(intlNumber);
-			});
-		}catch(e){
-			console.log('intlTelInput initiation failed for input id "<?php echo $id ?>" !');
-		}
+        $('#<?php echo $id ?>').on("blur", function () {
+            var intlNumber = $(this).intlTelInput("getNumber");
+            intlNumber = intlNumber.replace(/[^0-9\+]+/g, '');
+            $(this).val(intlNumber);
+        });
 
 	});
 </script>

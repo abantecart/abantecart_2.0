@@ -1,8 +1,10 @@
 <?php include($tpl_common_dir . 'action_confirm.tpl'); ?>
 
 <div class="modal-header">
-	<h4 class="modal-title"><?php  echo $title; ?></h4>
+
 	<button aria-hidden="true" data-dismiss="modal" class="close" type="button">&times;</button>
+    <h4 class="modal-title"><?php echo $title; ?></h4>
+
 </div>
 <?php if(!empty($form_store_switch)) { ?>
 <div id="content" class="panel panel-default">
@@ -32,7 +34,9 @@
 				}
 				$widthcasses .= " col-xs-12";
 			?>
-		<div class="form-group row align-items-start <?php if (!empty($error[$name])) { echo "has-error"; } ?>">
+                <div class="form-group <?php if (!empty($error[$name])) {
+                    echo "has-error";
+                } ?>">
 			<label class="control-label col-sm-4 col-xs-12" for="<?php echo $field->element_id; ?>"><?php echo ${'entry_' . $name}; ?></label>
 			<div class="input-group afield <?php echo $widthcasses; ?> <?php echo (is_int(strpos($name, 'description')) ? 'ml_ckeditor' : '')?>">
 				<?php echo $field; ?>
@@ -63,7 +67,7 @@
 			 <i class="fa fa-save"></i> <?php echo $button_save; ?>
 			 </button>&nbsp;
 			 <a class="btn btn-default" data-dismiss="modal" href="<?php echo $cancel; ?>">
-			 <i class="fa fa-times"></i> <?php echo $button_close; ?>
+                 <i class="fa fa-close"></i> <?php echo $button_close; ?>
 			 </a>
 		   </div>
 		</div>

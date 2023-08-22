@@ -40,7 +40,8 @@ if (!empty($multivalue['description'])) { ?>
 </span>
 
 
-<script type="text/javascript" src="admin/view/default/js/jquery/ui/jquery.ui.draggable.js"></script>
+<script type="text/javascript"
+        src="<?php echo $this->view->templateResource('assets/js/jquery/ui/jquery.ui.draggable.js') ?>"></script>
 <script type="text/javascript">
 
     $('#<?php echo $id ?>_save_reset').find('a:eq(0)').click(function () {

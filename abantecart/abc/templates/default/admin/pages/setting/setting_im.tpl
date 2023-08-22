@@ -47,7 +47,9 @@
 			$protocol = $name;
 			$id = current($field)->element_id;
 			?>
-		<div id="<?php echo $id.'_fld'; ?>" class="form-group row align-items-start <?php if (!empty($error[$name])) { echo "has-error"; } ?>">
+        <div id="<?php echo $id . '_fld'; ?>" class="form-group <?php if (!empty($error[$name])) {
+            echo "has-error";
+        } ?>">
 			<label class="control-label col-sm-2 tooltips" for="<?php echo $id; ?>" ><?php echo $this->language->get('entry_'.$protocol.'_driver'); ?></label>
 			<div class="input-group col-sm-10 col-xs-12 row">
 				<?php
@@ -81,7 +83,7 @@
 		     <i class="fa fa-save fa-fw"></i> <?php echo $form['submit']->text; ?>
 		     </button>&nbsp;
 		     <a class="btn btn-default" href="<?php echo $cancel; ?>">
-		     <i class="fa fa-sync fa-fw"></i> <?php echo $button_reset; ?>
+                 <i class="fa fa-sync fa-fw"></i> <?php echo $button_reset; ?>
 		     </a>
 		   </div>
 		</div>

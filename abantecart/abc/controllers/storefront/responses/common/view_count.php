@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2023 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -19,10 +19,8 @@
 ------------------------------------------------------------------------------*/
 namespace abc\controllers\storefront;
 use abc\core\engine\AController;
+use abc\models\catalog\Product;
 
-if (!class_exists('abc\core\ABC')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
 class ControllerResponsesCommonViewCount extends AController {
 
 	public function main(){}
@@ -30,11 +28,8 @@ class ControllerResponsesCommonViewCount extends AController {
 
 		//init controller data
         $this->extensions->hk_InitData($this,__FUNCTION__);
-		$product_id = $this->request->get['product_id'];
-		if ( $product_id ) {
-			$this->loadModel('catalog/product');
-	    	$this->model_catalog_product->updateViewed($product_id);
-		}
+        Product::find((int)$this->request->get['product_id'])
+            ?->increment('viewed');
         //init controller data
         $this->extensions->hk_InitData($this,__FUNCTION__);
   	}

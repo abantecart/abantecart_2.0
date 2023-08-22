@@ -1,5 +1,9 @@
+<style>
+    .tab-pane {
+        padding: 10px;
+    }
+</style>
 <?php include($tpl_common_dir . 'action_confirm.tpl'); ?>
-
 <ul class="nav nav-tabs nav-justified nav-profile">
 	<?php
 		foreach ($tabs as $tab) {
@@ -11,7 +15,10 @@
 			}else{
 				$classname = '';
 			}
-	?>		<li class="nav-item"><a class="nav-link <?php echo $classname; ?>" <?php echo ($tab['href'] ? 'href="' . $tab['href'] . '" ' : ''); ?>><strong><?php echo $tab['text']; ?></strong></a></li>
+            ?>
+            <li class="nav-item <?php echo $classname; ?>"><a
+                        class="nav-link <?php echo $classname; ?>" <?php echo($tab['href'] ? 'href="' . $tab['href'] . '" ' : ''); ?>><strong><?php echo $tab['text']; ?></strong></a>
+            </li>
 	<?php } ?>
 
 	<?php echo $this->getHookVar('extension_tabs'); ?>
@@ -45,7 +52,7 @@
 			$active = 'active';
 			}
 		?>
-			<li class="nav-item">
+            <li class="nav-item <?= $active ?>">
 				<a class="nav-link <?=$active?>" id="pills-<?=$key?>-tab" data-toggle="pill" href="#pills-<?=$key?>" role="tab" aria-controls="pills-<?=$key?>" aria-selected="true">
 					<?php echo $key; ?>
 				</a>
@@ -63,10 +70,11 @@
 		foreach ($form['fields'] as $key => $value) {
 			$active = '';
 		if ($i == 0) {
-		$active = 'show active';
+            $active = 'active';
 		}
 		?>
-			<div class="tab-pane fade <?=$active?>" id="pills-<?=$key?>" role="tabpanel" aria-labelledby="pills-<?=$key?>-tab">
+            <div class="tab-pane fade <?= $active ?> in" id="pills-<?= $key ?>" role="tabpanel"
+                 aria-labelledby="pills-<?= $key ?>-tab">
 
 		<?php
 				foreach ($value as $name => $field) {

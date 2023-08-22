@@ -64,7 +64,7 @@
 										</div>
                                        <?php } ?>
 									<button data-toggle="dropdown" class="btn btn-default btn-xs dropdown-toggle">
-										<i class="fa fa-external-link fa-lg"></i>&nbsp;
+                                        <i class="fa fa-external-link-alt fa-lg"></i>&nbsp;
 										<span class="caret"></span>&nbsp;
 										<span class="badge"><?php echo count($file['map_list']); ?></span>&nbsp;
 									</button>
@@ -86,13 +86,11 @@
 						</tr>
 					<?php
 						}
-					} else {
-					?>	
+                } else { ?>
 						<tr >
 							<td colspan="6" class="center"><?php echo $text_no_results; ?></td>
 						</tr>
-					<?php
-					} ?>
+                <?php } ?>
 				</tbody>
 			</table>
 		</div>
@@ -100,10 +98,11 @@
 	</div>
 </div>
 <?php echo $this->html->buildElement(
-		array('type' => 'modal',
-				'id' => 'file_modal',
-				'modal_type' => 'lg',
-				'data_source' => 'ajax',
-				'js_onload' => "$('#downloadFrm_activate').change(); "
-		));
-?>
+    [
+        'type'        => 'modal',
+        'id'          => 'file_modal',
+        'modal_type'  => 'lg',
+        'data_source' => 'ajax',
+        'js_onload'   => "$('#downloadFrm_activate').change(); "
+    ]
+); ?>

@@ -7,7 +7,7 @@
 			<div class="actionitem btn-group mr10 toolbar">
                 <?php if($insert){?>
 				<a class="btn btn-primary lock-on-click tooltips" href="<?php echo $insert; ?>" title="<?php echo $button_add; ?>">
-				<i class="fa fa-plus"></i>
+                    <i class="fa fa-plus"></i>
 				</a>
                 <?php } ?>
 			</div>

@@ -122,7 +122,6 @@ class ControllerPagesProductProduct extends AController
             }
         }
 
-        $this->loadModel('catalog/manufacturer');
         if (isset($request['manufacturer_id'])) {
             $manufacturer_info = (new Manufacturer)->getManufacturer($request['manufacturer_id']);
 
@@ -166,16 +165,6 @@ class ControllerPagesProductProduct extends AController
             $product_id = 0;
         }
 
-        $urls = [
-            'is_group_option' => $this->html->getURL(
-                'r/product/product/is_group_option',
-                '&product_id=' . $product_id,
-                '&encode'
-            ),
-        ];
-        $this->view->assign('urls', $urls);
-
-        $this->loadModel('catalog/product');
         $promotion = new APromotion();
 
         $rels = [

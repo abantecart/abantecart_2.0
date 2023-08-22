@@ -23,6 +23,7 @@ namespace abc\controllers\storefront;
 use abc\core\engine\AController;
 use abc\core\engine\AResource;
 use abc\core\lib\AJson;
+use abc\models\catalog\Product;
 use Exception;
 use H;
 
@@ -44,32 +45,34 @@ class ControllerResponsesProductProduct extends AController
         $this->response->setOutput($this->data['output']);
     }
 
-    public function is_group_option()
-    {
-        //init controller data
-        $this->extensions->hk_InitData($this, __FUNCTION__);
-
-        $this->loadModel('catalog/product');
-        $group_options = $this->model_catalog_product->getProductGroupOptions(
-            $this->request->get['product_id'],
-            $this->request->get['option_id'],
-            $this->request->get['option_value_id']
-        );
-
-        foreach ($group_options as $option_id => $option_values) {
-            foreach ($option_values as $option_value_id => $option_value) {
-                $name = $option_value['name'];
-                $this->data['group_option'][$option_id][$option_value_id] = $name;
-            }
-        }
-
-        //update controller data
-        $this->extensions->hk_UpdateData($this, __FUNCTION__);
-
-        $this->load->library('json');
-        $this->response->addJSONHeader();
-        $this->response->setOutput(AJson::encode($this->data['group_option']));
-    }
+//    public function is_group_option()
+//    {
+//        //TODO: rethink this method in the future
+//        return;
+//        //init controller data
+//        $this->extensions->hk_InitData($this, __FUNCTION__);
+//
+//        $this->loadModel('catalog/product');
+//        $group_options = $this->model_catalog_product->getProductGroupOptions(
+//            $this->request->get['product_id'],
+//            $this->request->get['option_id'],
+//            $this->request->get['option_value_id']
+//        );
+//
+//        foreach ($group_options as $option_id => $option_values) {
+//            foreach ($option_values as $option_value_id => $option_value) {
+//                $name = $option_value['name'];
+//                $this->data['group_option'][$option_id][$option_value_id] = $name;
+//            }
+//        }
+//
+//        //update controller data
+//        $this->extensions->hk_UpdateData($this, __FUNCTION__);
+//
+//        $this->load->library('json');
+//        $this->response->addJSONHeader();
+//        $this->response->setOutput(AJson::encode($this->data['group_option']));
+//    }
 
     /*
      * Load images for product option
@@ -172,12 +175,12 @@ class ControllerResponsesProductProduct extends AController
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
-        $this->loadModel('catalog/product');
-        $product_info = $this->model_catalog_product->getProduct($this->request->get['product_id']);
-        if ($product_info) {
+        $qnt = (int)$this->request->get['quantity'];
+        $product = Product::find($this->request->get['product_id']);
+        if ($product) {
             $this->cart->add(
-                $this->request->get['product_id'],
-                ($product_info['minimum'] ? : 1)
+                (int)$this->request->get['product_id'],
+                (max($qnt,$product->minimum) ?: 1)
             );
         }
 

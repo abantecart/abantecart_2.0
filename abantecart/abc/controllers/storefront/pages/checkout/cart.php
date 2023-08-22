@@ -3,7 +3,7 @@
  * AbanteCart, Ideal Open Source Ecommerce Solution
  * http://www.abantecart.com
  *
- * Copyright 2011-2018 Belavier Commerce LLC
+ * Copyright 2011-2023 Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
@@ -24,19 +24,22 @@ use abc\core\lib\APromotion;
 use abc\core\engine\AResource;
 use abc\core\lib\ADataset;
 use abc\core\lib\AFile;
+use abc\core\lib\AWeight;
+use abc\models\catalog\ProductOption;
 use abc\models\customer\Address;
+use abc\modules\traits\ProductOptionsTrait;
 use H;
 
 
 /**
  * Class ControllerPagesCheckoutCart
  *
- * @property \abc\core\lib\AWeight $weight
+ * @property AWeight $weight
  */
 class ControllerPagesCheckoutCart extends AController
 {
+    use ProductOptionsTrait;
     public $error = [];
-    public $data = [];
 
     /**
      * NOTE: this method have a few hk_processData calls.
@@ -49,7 +52,7 @@ class ControllerPagesCheckoutCart extends AController
         $product_rt = 'product/product';
         $checkout_rt = 'checkout/shipping';
         //is this an embed mode
-        if ($this->config->get('embed_mode') == true) {
+        if ($this->config->get('embed_mode')) {
             $cart_rt = 'r/checkout/cart/embed';
         }
 
@@ -122,26 +125,22 @@ class ControllerPagesCheckoutCart extends AController
                     if (isset($post['quantity'])) {
                         //we update cart
                         if (!is_array($post['quantity'])) {
-
-                            $this->loadModel('catalog/product', 'storefront');
-                            $product_id = $post['product_id'];
-
-                            if (isset($post['option'])) {
-                                $options = $post['option'];
-                            } else {
-                                $options = [];
-                            }
+                            $product_id = (int)$post['product_id'];
+                            $options = $post['option'] ?? [];
 
                             //for FILE-attributes
                             if (H::has_value($this->request->files['option']['name'])) {
 
                                 $fm = new AFile();
                                 foreach ($this->request->files['option']['name'] as $id => $name) {
-
-                                    $attribute_data = $this->model_catalog_product->getProductOption($product_id, $id);
-                                    $attribute_data['settings'] = unserialize($attribute_data['settings']);
-                                    $file_path_info =
-                                        $fm->getUploadFilePath($attribute_data['settings']['directory'], $name);
+                                    $attribute_data = ProductOption::where('product_id', $product_id)
+                                        ->active()
+                                        ->where('product_option_id', $id)
+                                        ->get();
+                                    $file_path_info = $fm->getUploadFilePath(
+                                        $attribute_data['settings']['directory'],
+                                        $name
+                                    );
 
                                     $options[$id] = $file_path_info['name'];
 
@@ -194,16 +193,18 @@ class ControllerPagesCheckoutCart extends AController
                                 }
                             }
 
-                            if ($text_errors =
-                                $this->model_catalog_product->validateProductOptions($product_id, $options)) {
-                                $this->session->data['error'] = $text_errors;
+                            $textErrors = $this->validateProductOptions($product_id, (array)$options);
+                            if ($textErrors){
+                                $this->session->data['error'] = $textErrors;
                                 //send options values back via _GET
-                                $url = '&'.http_build_query(['option' => $post['option']]);
-                                abc_redirect($this->html->getSecureURL($product_rt,
-                                    '&product_id='.$post['product_id'].$url));
+                                abc_redirect(
+                                    $this->html->getSecureURL(
+                                        $product_rt,
+                                        '&product_id='.$post['product_id']
+                                        .'&'.http_build_query(['option' => $post['option']])));
                             }
 
-                            $this->cart->add($post['product_id'], $post['quantity'], $options);
+                            $this->cart->add((int)$post['product_id'], (int)$post['quantity'], (array)$options);
                         } else {
                             foreach ($post['quantity'] as $key => $value) {
                                 $this->cart->update($key, $value);
@@ -542,7 +543,7 @@ class ControllerPagesCheckoutCart extends AController
                     'href'  => $this->html->getHomeURL(),
                     'style' => 'button',
                 ]);
-            if ($this->config->get('embed_mode') == true) {
+            if ($this->config->get('embed_mode')) {
                 $this->data['back_url'] = $this->html->getNonSecureURL('r/product/category');
             }
 

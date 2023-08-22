@@ -149,14 +149,23 @@ class ControllerResponsesCommonDoEmbed extends AController
         $this->data['help_url'] = $this->gen_help_url('embed');
 
         $template_name = $this->config->get('config_storefront_template');
-        $this->data['sf_css_embed_url'] = $remote_store_url.'storefront/view/default/css/embed.css';
+        $this->data['sf_css_embed_url'] = $remote_store_url.'templates/default/storefront/assets/css/embed.css';
         //override css url for extension templates
         if ($template_name != 'default') {
-            $css_file =
-                ABC::env('DIR_ROOT').'/extensions/'.$template_name.'/storefront/view/'.$template_name.'/css/embed.css';
+            $css_file = ABC::env('DIR_ROOT')
+                .'/extensions/'
+                .$template_name.'/'
+                .'storefront/assets/view/'
+                .$template_name
+                .'/css/embed.css';
             if (is_file($css_file)) {
                 $this->data['sf_css_embed_url'] =
-                    $remote_store_url.'extensions/'.$template_name.'/storefront/view/'.$template_name.'/css/embed.css';
+                    $remote_store_url
+                    .'extensions/'
+                    .$template_name.'/'
+                    .'storefront/assets/view/'
+                    .$template_name
+                    .'/css/embed.css';
             }
         }
 
@@ -324,8 +333,10 @@ class ControllerResponsesCommonDoEmbed extends AController
         $this->data['sf_base_url'] = $remote_store_url;
         $this->data['help_url'] = $this->gen_help_url('embed');
 
-        $this->data['sf_css_embed_url'] =
-            $remote_store_url.'storefront/view/'.$this->config->get('config_storefront_template').'/css/embed.css';
+        $this->data['sf_css_embed_url'] = $remote_store_url
+            .'storefront/view/'
+            .$this->config->get('config_storefront_template')
+            .'/assets/css/embed.css';
 
         //update controller data
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
@@ -458,8 +469,10 @@ class ControllerResponsesCommonDoEmbed extends AController
         $this->data['sf_base_url'] = $remote_store_url;
         $this->data['help_url'] = $this->gen_help_url('embed');
 
-        $this->data['sf_css_embed_url'] =
-            $remote_store_url.'storefront/view/'.$this->config->get('config_storefront_template').'/css/embed.css';
+        $this->data['sf_css_embed_url'] = $remote_store_url
+            .'storefront/view/'
+            .$this->config->get('config_storefront_template')
+            .'/assets/css/embed.css';
 
         //update controller data
         $this->extensions->hk_UpdateData($this, __FUNCTION__);

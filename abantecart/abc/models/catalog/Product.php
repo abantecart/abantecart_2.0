@@ -1263,6 +1263,7 @@ class Product extends BaseModel
 
     /**
      * @return HasMany
+     * TODO: add condition for storefront active only. See date_start and date_end
      */
     public function discounts()
     {
@@ -1274,11 +1275,16 @@ class Product extends BaseModel
      */
     public function options()
     {
-        return $this->hasMany(ProductOption::class, 'product_id');
+        $instance = $this->hasMany(ProductOption::class, 'product_id');
+        if( ABC::env('IS_ADMIN') !== true ) {
+            $instance->getQuery()->where('status', '=', 1);
+        }
+        return $instance;
     }
 
     /**
      * @return HasMany
+     *  TODO: add condition for storefront active only. See date_start and date_end
      */
     public function specials()
     {
@@ -1304,6 +1310,7 @@ class Product extends BaseModel
 
     /**
      * @return BelongsToMany
+     *  TODO: add condition for storefront active only.
      */
     public function related()
     {
@@ -1345,6 +1352,7 @@ class Product extends BaseModel
 
     /**
      * @return BelongsToMany
+     *  TODO: add condition for storefront active only. See date_start and date_end
      */
     public function downloads()
     {
@@ -1353,6 +1361,7 @@ class Product extends BaseModel
 
     /**
      * @return BelongsToMany
+     *  TODO: add condition for storefront active only. See date_start and date_end
      */
     public function stores()
     {
@@ -1842,7 +1851,17 @@ class Product extends BaseModel
             return [];
         }
         /** @var Product $product */
-        $product = Product::with('description', 'categories', 'stores', 'tagsByLanguage')
+        $product = Product::with(
+            [
+                'description',
+                'categories',
+                'categories.description',
+                'stores',
+                'tagsByLanguage',
+                'related',
+                'related.description'
+            ]
+        )->useCache('product')
             ->find($product_id);
         if (!$product) {
             return [];
@@ -1884,7 +1903,8 @@ class Product extends BaseModel
             '=',
             $this->getKey()
         );
-        return ($query->count());
+        $query->where('product_options.status', '=', 1);
+        return ($query->useCache('product')->count());
     }
 
     /**
@@ -2464,20 +2484,23 @@ class Product extends BaseModel
     {
 
         $bestSellerIds = self::getBestSellerProductIds($params);
-        $searchParams = [
-            'initiator'    => __METHOD__,
-            'filter'       => [
-                'include'     => $bestSellerIds,
-                'language_id' => $params['language_id'] ?: Registry::language()->getContentLanguageID(),
-                'store_id'    => $params['store_id'] ?? (int)Registry::config()->get('config_store_id')
-            ],
-            'start'        => (int)$params['start'],
-            'limit'        => (int)$params['limit'] ?: 20,
-            //NOTE: sorting by giver product_ids sequence (see $bestSellerIds var)
-            'sort'         => 'include',
-            'only_enabled' => true,
-            'with_all'     => true
-        ];
+        $searchParams = array_merge(
+                $params,
+                [
+                'initiator'    => __METHOD__,
+                'filter'       => [
+                    'include'     => $bestSellerIds,
+                    'language_id' => $params['language_id'] ?: Registry::language()->getContentLanguageID(),
+                    'store_id'    => $params['store_id'] ?? (int)Registry::config()->get('config_store_id')
+                ],
+                'start'        => (int)$params['start'],
+                'limit'        => (int)$params['limit'] ?: 20,
+                //NOTE: sorting by giver product_ids sequence (see $bestSellerIds var)
+                'sort'         => 'include',
+                'only_enabled' => true,
+                'with_all'     => true
+            ]
+        );
         return Product::getProducts($searchParams);
     }
 
@@ -2710,9 +2733,9 @@ class Product extends BaseModel
     public static function getProducts(array $params = [])
     {
         $finalPriceSql = '';
-        $params['sort'] = $params['sort'] ?: 'sort_order';
-        $params['order'] = $params['order'] ?? 'ASC';
-        $params['start'] = max($params['start'], 0);
+        $params['sort'] = (string)$params['sort'] ?: 'sort_order';
+        $params['order'] = (string)$params['order'] ?: 'ASC';
+        $params['start'] = max((int)$params['start'], 0);
         $params['limit'] = abs((int)$params['limit']) ?: 20;;
 
         $filter = (array)$params['filter'];
@@ -2720,6 +2743,7 @@ class Product extends BaseModel
         $filter['exclude'] = $filter['exclude'] ?? [];
         $filter['category_id'] = $filter['category_id'] ?? 0;
         $filter['manufacturer_id'] = $filter['manufacturer_id'] ?? 0;
+        $filter['related_to'] = $filter['related_to'] ?? [];
 
         $filter['only_enabled'] = (bool)$filter['only_enabled'];
         $filter['customer_group_id'] = $filter['customer_group_id']
@@ -2845,6 +2869,17 @@ class Product extends BaseModel
         }
         if ($filter['only_featured']) {
             $query->where('products.featured', '=', 1);
+        }
+
+        if ($filter['related_to']) {
+            $relatedIds = Registry::db()
+                ->table('products_related')
+                ->whereIn('product_id', (array)$filter['related_to'])
+                ->get()
+                ->pluck('related_id')?->toArray();
+            if ($relatedIds) {
+                $filter['include'] = array_merge((array)$filter['include'], $relatedIds);
+            }
         }
 
         if ($filter['keyword']) {

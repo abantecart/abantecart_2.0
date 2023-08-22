@@ -23,6 +23,7 @@ namespace abc\controllers\storefront;
 use abc\core\engine\AController;
 use abc\core\engine\Registry;
 use abc\models\catalog\Product;
+use abc\models\QueryBuilder;
 use abc\modules\traits\ProductListingTrait;
 
 class ControllerPagesProductSpecial extends AController
@@ -36,122 +37,50 @@ class ControllerPagesProductSpecial extends AController
 
     public function main()
     {
-        $request = $this->request->get;
-        $page = $request['page'] ?? 1;
-        $sorting_href = $request['sort'];
-        if (!$sorting_href || !isset($this->data['sorts'][$request['sort']])) {
-            $sorting_href = $this->config->get('config_product_default_sort_order');
-        }
-        list($sort, $order) = explode("-", $sorting_href);
 
-        if (isset($request['limit'])) {
-            $limit = (int)$request['limit'];
-            $limit = min($limit, 50);
-        } else {
-            $limit = $this->config->get('config_catalog_limit');
-        }
+        $this->parsePaginationQueryParams($this->request->get);
 
         $this->data['search_parameters'] = [
-            'start'       => ($page - 1) * $limit,
-            'limit'       => $limit,
+            'start' => ($this->data['page'] - 1) * $this->data['limit'],
+            'limit' => $this->data['limit'],
             'language_id' => $this->language->getLanguageID(),
-            'sort'        => $sort,
-            'order'       => $order
+            'sort'  => $this->data['sort'],
+            'order' => $this->data['order']
         ];
 
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
-        $this->data['page'] = $page;
-        $this->data['limit'] = $limit;
-        $this->data['sort'] = $sort;
-        $this->data['order'] = $order;
-
-        $this->loadLanguage('product/special');
-        $this->document->setTitle($this->language->get('heading_title'));
-        $this->document->resetBreadcrumbs();
-        $this->document->addBreadcrumb([
-            'href'      => $this->html->getHomeURL(),
-            'text'      => $this->language->get('text_home'),
-            'separator' => false,
-        ]);
-
-
         if ($this->config->get('config_require_customer_login') && !$this->customer->isLogged()) {
             abc_redirect($this->html->getSecureURL('account/login'));
         }
 
-        $url = '';
-        if (isset($request['page'])) {
-            $url .= '&page=' . $request['page'];
-        }
+        $this->loadLanguage('product/special');
+        $this->document->setTitle($this->language->get('heading_title'));
+        $this->setBreadCrumbs($this->getSelfUrl('product/special'));
 
-        $this->document->addBreadcrumb(
-            [
-                'href'      => $this->html->getNonSecureURL('product/special', $url),
-                'text'      => $this->language->get('heading_title'),
-                'separator' => $this->language->get('text_separator'),
-            ]
-        );
+        $productList = Product::getProductSpecials($this->data['search_parameters']);
+        /** @see QueryBuilder::get() */
+        $productTotal = $productList::getFoundRowsCount();
 
-        $sorting_href = $request['sort'];
-        if (!$sorting_href || !isset($this->data['sorts'][$request['sort']])) {
-            $sorting_href = $this->config->get('config_product_default_sort_order');
-        }
-
-        $results = Product::getProductSpecials($this->data['search_parameters']);
-        $product_total = $results::getFoundRowsCount();
-
-        if ($product_total) {
+        if ($productTotal) {
+            //if single result, redirect to the product
+            $this->forwardSingleResult($productList);
             $this->data['button_add_to_cart'] = $this->language->get('button_add_to_cart');
-            $this->processList($results);
+            $this->processList($productList);
 
-            if ($this->config->get('config_customer_price')) {
-                $display_price = true;
-            } elseif ($this->customer->isLogged()) {
-                $display_price = true;
-            } else {
-                $display_price = false;
-            }
-            $this->data['display_price'] = $display_price;
-
-            $sorting = $this->html->buildElement(
-                [
-                    'type'    => 'selectbox',
-                    'name'    => 'sort',
-                    'options' => $this->data['sorts'],
-                    'value'   => $this->data['sort'] . '-' . $this->data['order'],
-                ]
-            );
-
-            $this->view->assign('sorting', $sorting);
-            $this->view->assign('url', $this->html->getURL('product/special'));
-            $pagination_url = $this->html->getURL(
-                                'product/special',
-                                '&sort='.$sorting_href.'&page={page}'.'&limit='.$limit,
-                                '&encode'
-            );
-
-            $this->data['pagination_bootstrap'] = $this->html->buildElement(
-                [
-                    'type'       => 'Pagination',
-                    'name'       => 'pagination',
-                    'text'       => $this->language->get('text_pagination'),
-                    'text_limit' => $this->language->get('text_per_page'),
-                    'total'      => $product_total,
-                    'page'       => $this->data['page'],
-                    'limit'      => $this->data['limit'],
-                    'url'        => $pagination_url,
-                    'style'      => 'pagination',
-                ]
-            );
-
+            $this->data['display_price'] = ($this->config->get('config_customer_price') || $this->customer->isLogged());
             $this->data['review_status'] = $this->config->get('enable_reviews');
-            $this->view->batchAssign($this->data);
+
+            $this->data['url'] = $this->html->getURL('product/special');
+
+            $this->setSortingSelector();
+            $this->setPagination('product/special', $productTotal);
+
             $this->view->setTemplate('pages/product/special.tpl');
         } else {
-            $this->view->assign('text_error', $this->language->get('text_empty'));
-            $continue = $this->html->buildElement(
+            $this->data['text_error'] = $this->language->get('text_empty');
+            $this->data['button_continue'] = $this->html->buildElement(
                 [
                     'type'  => 'button',
                     'name'  => 'continue_button',
@@ -159,10 +88,11 @@ class ControllerPagesProductSpecial extends AController
                     'style' => 'button',
                 ]
             );
-            $this->view->assign('button_continue', $continue);
-            $this->view->assign('continue', $this->html->getHomeURL());
+            $this->data['continue'] = $this->html->getHomeURL();
             $this->view->setTemplate('pages/error/not_found.tpl');
         }
+
+        $this->view->batchAssign($this->data);
         $this->processTemplate();
 
         //init controller data

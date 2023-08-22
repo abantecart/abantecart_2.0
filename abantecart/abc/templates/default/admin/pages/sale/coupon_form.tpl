@@ -3,7 +3,8 @@
 <?php if ($tabs) { ?>
 	<ul class="nav nav-tabs nav-justified nav-profile">
 	<?php foreach ( $tabs as $tab){ ?>
-		<li class="nav-item"><a class="nav-link <?php echo $tab['class']; ?>" href="<?php echo $tab['href']; ?>"><span><?php echo $tab['text']; ?></span></a></li>
+        <li class="<?php echo $tab['class']; ?>"><a
+                    href="<?php echo $tab['href']; ?>"><span><?php echo $tab['text']; ?></span></a></li>
 	<?php }?>
 		<?php echo $this->getHookVar('extension_tabs'); ?>
 	</ul>
@@ -34,8 +35,11 @@
 				}
 				$widthcasses .= " col-xs-12";
 			?>
-		<div class="form-group row align-items-start <?php if (!empty($error[$name])) { echo "has-error"; } ?>">
-			<label class="control-label offset-sm-1 col-sm-3 col-xs-12" for="<?php echo $field->element_id; ?>"><?php echo ${'entry_' . $name}; ?></label>
+        <div class="form-group <?php if (!empty($error[$name])) {
+            echo "has-error";
+        } ?>">
+            <label class="control-label col-sm-3 col-xs-12"
+                   for="<?php echo $field->element_id; ?>"><?php echo ${'entry_' . $name}; ?></label>
 			<div class="input-group afield <?php echo $widthcasses; ?> <?php echo ($name == 'description' ? 'ml_ckeditor' : '')?>">
 				<?php echo $field; ?>
 			</div>
@@ -53,7 +57,7 @@
 			<i class="fa fa-save fa-fw"></i> <?php echo $form['submit']->text; ?>
 			</button>
 			<button class="btn btn-default" type="reset">
-			<i class="fa fa-sync fa-fw"></i> <?php echo $button_reset; ?>
+                <i class="fa fa-sync fa-fw"></i> <?php echo $button_reset; ?>
 			</button>
 			<a class="btn btn-default" href="<?php echo $cancel; ?>">
 			<i class="fa fa-arrow-left fa-fw"></i> <?php echo $form['cancel']->text; ?>

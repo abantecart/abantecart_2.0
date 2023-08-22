@@ -33,23 +33,26 @@
 
 <a id="gotop" href="#"><?php echo $text_on_top; ?></a>
 
-<script type="text/javascript" src="vendor/components/modernizr/modernizr.js"></script>
-<?php
-/* ????WHAT FOR??
+<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/modernizr.min.js'); ?>"></script>
 <script type="text/javascript" src="<?php echo $this->templateResource('assets/js/jquery/jquery.sparkline.min.js'); ?>"></script>
-*/ ?>
-<script type="text/javascript" src="vendor/components/chosen/chosen.jquery.min.js"></script>
+<script type="text/javascript"
+        src="<?php echo $this->templateResource('assets/js/jquery/jquery.cookies.js'); ?>"></script>
+<script type="text/javascript"
+        src="<?php echo $this->templateResource('assets/js/jquery/chosen.jquery.js'); ?>"></script>
 <script type="text/javascript" src="<?php echo $this->templateResource('assets/js/jquery/ajax-chosen.js'); ?>"></script>
 <script type="text/javascript" src="<?php echo $this->templateResource('assets/js/bootstrap-growl.min.js'); ?>"></script>
-<script type="text/javascript" src="vendor/components/bootstrap-fileinput/js/fileinput.min.js"></script>
+<script type="text/javascript" src="<?php echo $this->templateResource('assets/js/fileinput.min.js'); ?>"></script>
 <script type="text/javascript" src="<?php echo $this->templateResource('assets/js/general.js'); ?>"></script>
-<script type="text/javascript" src="vendor/components/intl-tel-input/build/js/intlTelInput.min.js"></script>
-<?php if ($scripts_bottom && is_array($scripts_bottom)) {
+<script type="text/javascript"
+        src="<?php echo $this->templateResource('assets/js/intl-tel-input/js/intlTelInput.min.js'); ?>"></script>
+<?php
+if ($scripts_bottom && is_array($scripts_bottom)) {
     foreach ($scripts_bottom as $script) {
         ?>
 		<script type="text/javascript" src="<?php echo $script; ?>" defer></script>
         <?php
     }
 } ?>
+
 </body>
 </html>

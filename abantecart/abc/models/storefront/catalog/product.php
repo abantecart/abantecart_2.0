@@ -26,6 +26,7 @@ use abc\core\lib\APromotion;
 use abc\core\engine\HtmlElementFactory;
 use abc\core\engine\Model;
 use abc\models\catalog\Category;
+use abc\modules\traits\ProductOptionsTrait;
 use Exception;
 use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionException;
@@ -1106,6 +1107,7 @@ class ModelCatalogProduct extends Model
 //    }
 
     /**
+     * @deprecated
      * Update view count. Do not update modification date. See lat
      *
      * @param int $product_id
@@ -1147,6 +1149,7 @@ class ModelCatalogProduct extends Model
     }
 
     /**
+     * @deprecated
      * check if product option is group option
      * if yes, return array of possible groups for option_value_id
      *
@@ -1439,7 +1442,8 @@ class ModelCatalogProduct extends Model
 
     /**
      * Check if any of input options are required and provided
-     *
+     * @deprecated
+     * @see ProductOptionsTrait
      * @param int $product_id
      * @param array $input_options
      *

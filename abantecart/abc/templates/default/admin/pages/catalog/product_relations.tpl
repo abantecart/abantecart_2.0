@@ -26,8 +26,11 @@
 						$widthcasses = "col-sm-2";
 					}
 					$widthcasses .= " col-xs-12";	?>
-				<div class="form-group row align-items-start <?php if (!empty($error[$name])) { echo "has-error"; } ?>">
-					<label class="control-label offset-sm-1 col-sm-3 col-xs-12" for="<?php echo $field->element_id; ?>"><?php echo ${'entry_' . $name}; ?></label>
+        <div class="form-group <?php if (!empty($error[$name])) {
+            echo "has-error";
+        } ?>">
+            <label class="control-label col-sm-3 col-xs-12"
+                   for="<?php echo $field->element_id; ?>"><?php echo ${'entry_' . $name}; ?></label>
 					<div class="input-group afield <?php echo $widthcasses; ?> <?php echo ($name == 'description' ? 'ml_ckeditor' : '')?>">
 					<?php echo $field; ?></div>
 					<?php if (!empty($error[$name])) { ?>
@@ -37,20 +40,20 @@
 			<?php } ?><!-- <div class="fieldset"> -->
 	</div>
 	<div class="panel-footer col-xs-12">
-		<div class="text-center">
-            <?php
-            if($form['submit']){ ?>
+        <?php
+        if ($form['submit']) { ?>
+            <div class="text-center">
 			<button class="btn btn-primary lock-on-click">
 			<i class="fa fa-save fa-fw"></i> <?php echo $form['submit']->text; ?>
 			</button>
 			<button class="btn btn-default" type="reset">
-			<i class="fa fa-sync fa-fw"></i> <?php echo $button_reset; ?>
+                <i class="fa fa-sync fa-fw"></i> <?php echo $button_reset; ?>
 			</button>
 			<a class="btn btn-default" href="<?php echo $cancel; ?>">
 			<i class="fa fa-arrow-left fa-fw"></i> <?php echo $form['cancel']->text; ?>
 			</a>
-            <?php } ?>
 		</div>
+        <?php } ?>
 	</div>
 	</form>
 </div>

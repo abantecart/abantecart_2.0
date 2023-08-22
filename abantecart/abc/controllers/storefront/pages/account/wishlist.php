@@ -31,6 +31,17 @@ class ControllerPagesAccountWishlist extends AController
     use ProductListingTrait;
     public function main()
     {
+        $this->parsePaginationQueryParams($this->request->get);
+
+        $this->data['search_parameters'] = [
+            'with_final_price'  => true,
+            'with_option_count' => true,
+            'start'             => ($this->data['page'] - 1) * $this->data['limit'],
+            'limit'             => $this->data['limit'],
+            'sort'              => $this->data['sort'],
+            'order'             => $this->data['order']
+        ];
+
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
@@ -50,16 +61,10 @@ class ControllerPagesAccountWishlist extends AController
 
     private function getWishList()
     {
-        $cart_rt = 'checkout/cart';
-        //is this an embed mode
-        if ($this->config->get('embed_mode')) {
-            $cart_rt = 'r/checkout/cart/embed';
-        }
 
         $this->document->setTitle($this->language->get('heading_title'));
 
         $this->document->resetBreadcrumbs();
-
         $this->document->addBreadcrumb(
             [
                 'href' => $this->html->getHomeURL(),
@@ -67,7 +72,6 @@ class ControllerPagesAccountWishlist extends AController
                 'separator' => false,
             ]
         );
-
         $this->document->addBreadcrumb(
             [
                 'href' => $this->html->getSecureURL('account/account'),
@@ -75,7 +79,6 @@ class ControllerPagesAccountWishlist extends AController
                 'separator' => $this->language->get('text_separator'),
             ]
         );
-
         $this->document->addBreadcrumb(
             [
                 'href' => $this->html->getSecureURL('account/wishlist'),
@@ -87,16 +90,8 @@ class ControllerPagesAccountWishlist extends AController
         $wishList = $this->customer->getWishList();
 
         if ($wishList && count($wishList) > 0) {
-            $this->loadModel('tool/seo_url');
-            $productsList = Product::search(
-                [
-                    'filter'            => ['include' => array_keys($wishList)],
-                    'with_final_price'  => true,
-                    'with_option_count' => true,
-                    'sort'              => 'date_added',
-                    'order'             => 'desc',
-                ]
-            );
+            $this->data['search_parameters']['filter']['include'] = array_keys($wishList);
+            $productsList = Product::search($this->data['search_parameters']);
             if ($productsList) {
                 $this->processList(
                     $productsList,
@@ -123,15 +118,6 @@ class ControllerPagesAccountWishlist extends AController
                 unset($this->session->data['error']);
             }
 
-            if ($this->config->get('config_customer_price')) {
-                $display_price = true;
-            } elseif ($this->customer->isLogged()) {
-                $display_price = true;
-            } else {
-                $display_price = false;
-            }
-            $this->data['display_price'] = $display_price;
-
             $this->view->setTemplate('pages/account/wishlist.tpl');
         } else {
             $this->data['heading_title'] = $this->language->get('heading_title');
@@ -149,6 +135,10 @@ class ControllerPagesAccountWishlist extends AController
 
             $this->view->setTemplate('pages/error/not_found.tpl');
         }
+
+        $cart_rt = $this->config->get('embed_mode')
+            ? 'r/checkout/cart/embed'
+            : 'checkout/cart';
 
         $this->data['cart'] = $this->html->getSecureURL($cart_rt);
 

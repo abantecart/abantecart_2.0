@@ -1,12 +1,12 @@
 <?php include($tpl_common_dir . 'action_confirm.tpl'); ?>
 
-<?php echo $tabs ?>
+<?php if ($tabs) {
+    echo $tabs;
+} ?>
 
 <div id="content" class="panel panel-default">
-
 	<div class="panel-heading col-xs-12">
 		<div class="primary_content_actions pull-left">
-
 			<?php if (!empty ($list_url)) { ?>
 			<div class="btn-group">
 				<a class="btn btn-white tooltips" href="<?php echo $list_url; ?>" data-toggle="tooltip" data-original-title="<?php echo $text_back_to_list; ?>">
@@ -17,23 +17,21 @@
 
 			<div class="actionitem btn-group mr10 toolbar">
                 <?php if($insert){ ?>
-                <a class="btn btn-primary lock-on-click tooltips" href="<?php echo $insert; ?>"
-                   title="<?php echo $button_add; ?>">
-                    <i class="fa fa-plus"></i>
-                </a>
+                    <a class="btn btn-primary lock-on-click tooltips" href="<?php echo $insert; ?>"
+                       title="<?php echo $button_add; ?>">
+                        <i class="fa fa-plus"></i>
+                    </a>
+                <?php }
+                if ($auditLog) { ?>
+                    <a data-toggle="modal"
+                       class="btn btn-white tooltips"
+                       data-target="#viewport_modal"
+                       href="<?php echo $auditLog->vhref; ?>"
+                       data-fullmode-href="<?php echo $auditLog->href; ?>"
+                       rel="audit_log"
+                       title="<?php echo $auditLog->text; ?>">
+                        <i class="fa fa-history "></i></a>
                     <?php
-                    }
-				if ($auditLog) {
-				?>
-					<a data-toggle="modal"
-					   class="btn btn-white tooltips"
-					   data-target="#viewport_modal"
-					   href="<?php echo $auditLog->vhref; ?>"
-					   data-fullmode-href="<?php echo $auditLog->href; ?>"
-					   rel="audit_log"
-					   title="<?php echo $auditLog->text; ?>">
-						<i class="fa fa-history "></i></a>
-					<?php
 				}
 				?>
 			</div>
@@ -45,7 +43,7 @@
 	</div>
 
 	<?php echo $form['form_open']; ?>
-	<div class="panel-body panel-body-nopadding tab-content col-xs-12 row">
+    <div class="panel-body panel-body-nopadding tab-content col-xs-12">
 
 	<div class="col-md-9 mb10">
 		<?php foreach ($form['fields'] as $section => $fields) { ?>
@@ -65,11 +63,13 @@
 				}
 				$widthcasses .= " col-xs-12";
 			?>
-		<div class="form-group row align-items-start <?php if (!empty($error[$name])) { echo "has-error"; } ?>">
+                <div class="form-group <?php if (!empty($error[$name])) {
+                    echo "has-error";
+                } ?>">
 			<label class="control-label col-sm-3 col-xs-12" for="<?php echo $field->element_id; ?>"><?php echo ${'entry_' . $name}; ?></label>
 			<div class="input-group afield <?php echo $widthcasses; ?> <?php echo ($name == 'description' ? 'ml_ckeditor' : '')?>">
 				<?php if($name == 'keyword') { ?>
-				<span class="input-group-prepend">
+                    <span class="input-group-btn">
 					<?php echo $keyword_button; ?>
 				</span>
 				<?php } ?>
@@ -100,7 +100,7 @@
 			<i class="fa fa-save fa-fw"></i> <?php echo $form['submit']->text; ?>
 			</button>
 			<button class="btn btn-default" type="reset">
-			<i class="fa fa-sync fa-fw"></i> <?php echo $button_reset; ?>
+                <i class="fa fa-sync fa-fw"></i> <?php echo $button_reset; ?>
 			</button>
 			<a class="btn btn-default" href="<?php echo $cancel; ?>">
 			<i class="fa fa-arrow-left fa-fw"></i> <?php echo $form['cancel']->text; ?>

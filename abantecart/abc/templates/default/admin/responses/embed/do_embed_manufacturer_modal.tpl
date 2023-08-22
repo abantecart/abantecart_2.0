@@ -1,9 +1,9 @@
 <div class="modal-header" xmlns="http://www.w3.org/1999/html">
-	<h4 class="modal-title"><?php echo $text_get_manufacturer_embed_code; ?></h4>
 	<button aria-hidden="true" data-dismiss="modal" class="close" type="button">&times;</button>
+    <h4 class="modal-title"><?php echo $text_get_manufacturer_embed_code; ?></h4>
 </div>
 <div class="tab-content do_embed">
-	<div class="panel-body panel-body-nopadding row">
+    <div class="panel-body panel-body-nopadding">
 		<div class="col-sm-6 col-xs-12">
 			<div id="embed_container" class="embed_preview" style="pointer-events: none;"></div>
 		</div>
@@ -25,7 +25,7 @@
 				<?php foreach ($fields as $field) {
 				$widthclass = 'col-sm-6 col-xs-12';
 				$label = ${'entry_' . str_replace(array('[', ']'), '', $field->name)};		?>
-				<div class="form-group row align-items-start">
+                    <div class="form-group">
 					<?php if($label){?>
 					<label class="control-label col-md-6 col-xs-6" for="<?php echo $field->element_id; ?>">
 						<?php echo $label; ?>

@@ -24,7 +24,7 @@ jQuery(document).ready(function () {
             url += '/' + part[2];
         }
         var link = $('#menu_box a[href*=\'' + url + '&\']');
-        if (link.length === 0) {
+        if (link.length == 0) {
             link = $('#menu_box a[href*=\'' + part[0] + '/' + part[1] + '&\']');
         }
         if (link.length) {
@@ -120,14 +120,14 @@ jQuery(document).ready(function () {
     });
 
     $('.menutoggle').click(function () {
-        if (Cookies.get('leftpanel-collapsed')) {
-            Cookies.remove("leftpanel-collapsed");
+        if (jQuery.cookie('leftpanel-collapsed')) {
+            $.removeCookie("leftpanel-collapsed");
         } else {
-            Cookies.set('leftpanel-collapsed', 1);
+            $.cookie('leftpanel-collapsed', 1);
         }
         var body = $('body');
         var bodypos = body.css('position');
-        if (bodypos !== 'relative') {
+        if (bodypos != 'relative') {
             if (!body.hasClass('leftpanel-collapsed')) {
                 body.addClass('leftpanel-collapsed');
                 $('.nav-bracket ul').attr('style', '');
@@ -140,8 +140,7 @@ jQuery(document).ready(function () {
         } else {
             if (body.hasClass('leftpanel-show')) {
                 body.removeClass('leftpanel-show');
-            }
-            else {
+            } else {
                 body.addClass('leftpanel-show');
             }
             adjust_content_height();
@@ -154,7 +153,7 @@ jQuery(document).ready(function () {
     $('#right_side_view').click(function () {
         var body = $('body');
         var bodypos = body.css('position');
-        if (bodypos !== 'relative') {
+        if (bodypos != 'relative') {
             if (!body.hasClass('stats-view')) {
                 body.addClass('leftpanel-collapsed stats-view');
                 $('.nav-bracket ul').attr('style', '');
@@ -240,22 +239,22 @@ jQuery(document).ready(function () {
 
     //Set cookies for sticky panels
     $('.sticky_header').click(function () {
-        if (Cookies.get('sticky-header')) {
-            Cookies.remove("sticky-header");
+        if (jQuery.cookie('sticky-header')) {
+            $.removeCookie("sticky-header");
             $('body').removeClass('stickyheader');
             $('.sticky_header').removeClass('panel_frozen')
                 .removeClass('fa-toggle-on')
                 .addClass('fa-toggle-off');
         } else {
             $('body').addClass('stickyheader');
-            Cookies.set("sticky-header", 1);
+            $.cookie("sticky-header", 1);
             $('.sticky_header').addClass('panel_frozen')
                 .addClass('fa-toggle-on')
                 .removeClass('fa-toggle-off');
         }
     });
 
-    if (Cookies.get('sticky-header')) {
+    if (jQuery.cookie('sticky-header')) {
         $('body').addClass('stickyheader');
         $('.sticky_header').addClass('panel_frozen')
             .addClass('fa-toggle-on')
@@ -263,28 +262,28 @@ jQuery(document).ready(function () {
     }
 
     $('.sticky_left').click(function () {
-        if (Cookies.get('sticky-leftpanel')) {
-            Cookies.remove("sticky-leftpanel");
+        if (jQuery.cookie('sticky-leftpanel')) {
+            $.removeCookie("sticky-leftpanel");
             $('.leftpanel').removeClass('sticky-leftpanel');
             $('.sticky_left').removeClass('panel_frozen')
                 .removeClass('fa-toggle-on')
                 .addClass('fa-toggle-off');
         } else {
             $('.leftpanel').addClass('sticky-leftpanel');
-            Cookies.set("sticky-leftpanel", 1);
+            $.cookie("sticky-leftpanel", 1);
             $('.sticky_left').addClass('panel_frozen')
                 .addClass('fa-toggle-on')
                 .removeClass('fa-toggle-off');
         }
     });
-    if (Cookies.get('sticky-leftpanel')) {
+    if (jQuery.cookie('sticky-leftpanel')) {
         $('.leftpanel').addClass('sticky-leftpanel');
         $('.sticky_left').addClass('panel_frozen')
             .addClass('fa-toggle-on')
             .removeClass('fa-toggle-off');
     }
 
-    if (Cookies.get('leftpanel-collapsed')) {
+    if (jQuery.cookie('leftpanel-collapsed')) {
         $('body').addClass('leftpanel-collapsed');
         $('.menutoggle').addClass('menu-collapsed');
     }
@@ -344,15 +343,15 @@ jQuery(document).ready(function () {
     });
 
     //check if ads blocking is enabled in user browser
-    var div = $('<div>').attr('class', 'afs_ads').html('&nbsp;');
-    $('body').prepend(div);
-    setTimeout(function () {
-        if (!$(".afs_ads").is(':visible')) {
-            warning_alert('Ads block is enabled in your browser. Some AbanteCart administration features might not function as they will be blocked. Disable ads blocking in your browser.');
-        } else {
-            $(".afs_ads").remove();
-        }
-    }, 500);
+    // var div = $('<div>').attr('class', 'afs_ads').html('&nbsp;');
+    // $('body').prepend(div);
+    // setTimeout(function(){
+    // 	if(!$(".afs_ads").is(':visible')) {
+    // 		warning_alert('Ads block is enabled in your browser. Some AbanteCart administration features might not function as they will be blocked. Disable ads blocking in your browser.');
+    // 	} else {
+    // 		$(".afs_ads").remove();
+    // 	}
+    // }, 500);
 
 });
 
@@ -398,10 +397,10 @@ var statusMarker = function ($obj) {
     var $input = $obj.find('input.status_switch');
     if (!$input.length) {
         //check generic marker based on input name status
-        $input = $obj.find('input[name=status]');
+        $input = $obj.find('input[name=status]').not('.ui-jqgrid-view input[name=status]');
     }
     if ($input.length > 0) {
-        if ($input.val() === 0) {
+        if ($input.val() == 0) {
             $input.closest('.panel-body').addClass('status_off');
         } else {
             $input.closest('.panel-body').removeClass('status_off');
@@ -414,7 +413,7 @@ var buildTooltips = function (objects, options) {
     $(objects).each(function () {
         var elem = $(this);
         elem.addClass('tooltips');
-        elem.attr('data-original-title', elem.text());
+        elem.attr('data-original-title', elem.text())
         elem.tooltip({container: 'body'});
     });
 };
@@ -445,7 +444,7 @@ function getURLVar(URL, urlVarName) {
         for (var i = 0; i <= (urlVars.length); i++) {
             if (urlVars[i]) {
                 var urlVarPair = urlVars[i].split('=');
-                if (urlVarPair[0] && urlVarPair[0] === urlVarName.toLowerCase()) {
+                if (urlVarPair[0] && urlVarPair[0] == urlVarName.toLowerCase()) {
                     urlVarValue = decodeURIComponent(urlVarPair[1]);
                 }
             }
@@ -459,7 +458,7 @@ function getURLVar(URL, urlVarName) {
 // Function to show notification
 //-----------------------------------------
 function success_alert(text, autohide, elm) {
-    if (text.length === 0) {
+    if (text.length == 0) {
         return false;
     }
     var type = 'success';
@@ -468,7 +467,7 @@ function success_alert(text, autohide, elm) {
 }
 
 function error_alert(text, autohide, elm) {
-    if (text.length === 0) {
+    if (text.length == 0) {
         return false;
     }
     var type = 'danger';
@@ -477,7 +476,7 @@ function error_alert(text, autohide, elm) {
 }
 
 function warning_alert(text, autohide, elm) {
-    if (text.length === 0) {
+    if (text.length == 0) {
         return false;
     }
     var type = 'warning';
@@ -486,7 +485,7 @@ function warning_alert(text, autohide, elm) {
 }
 
 function info_alert(text, autohide, elm) {
-    if (text.length === 0) {
+    if (text.length == 0) {
         return false;
     }
     var type = 'info';
@@ -495,7 +494,7 @@ function info_alert(text, autohide, elm) {
 }
 
 function notice(text, autohide, elm, type, icon) {
-    if (text.length === 0) {
+    if (text.length == 0) {
         return false;
     }
     if (type == null) {
@@ -506,7 +505,7 @@ function notice(text, autohide, elm, type, icon) {
         elm = 'body';
     }
     var delay = 2000;
-    if (autohide == null || autohide === 'false' || autohide === false) {
+    if (autohide == null || autohide == 'false' || autohide == false) {
         delay = 0;
     }
 
@@ -557,13 +556,13 @@ function isModalOpen(modal) {
 // If you don't need to use it in your custom ajax-call set ajax option "global" to "false"
 $(document).ajaxError(function (e, jqXHR, settings, exception) {
     //If 401 authentication issue redirect for user to login
-    if (jqXHR.status === 401) {
+    if (jqXHR.status == 401) {
         window.location.reload();
         return;
     }
 
     var gl_error_alert = function (text, autohide) {
-        if (text.length === 0) {
+        if (text.length == 0) {
             return false;
         }
         error_alert(text, autohide);
@@ -578,11 +577,11 @@ $(document).ajaxError(function (e, jqXHR, settings, exception) {
         if (err.hasOwnProperty("error_title") || err.hasOwnProperty("error_text")) {
             var errors = err.error_text;
             var errlist = typeof errors === 'string' ? [errors] : errors;
-            //show alert for every error in the array of response
+            //show alert for every error in the array of responce
             for (var k in errlist) {
                 if (errlist[k].length > 0) {
                     //show error and prepend the title of the error
-                    gl_error_alert(err.error_title + ' ' + errlist[k], false);
+                    gl_error_alert((err.error_title ?? '') + ' ' + errlist[k], false);
                 }
             }
             var sent_params = $.parseParams(settings.data);
@@ -630,9 +629,8 @@ function checkAll(fldName, checked) {
 }
 
 var numberSeparators = {};
-
 function formatPrice(field) {
-    numberSeparators = numberSeparators.length === 0 ? {decimal: '.', thousand: ','} : numberSeparators;
+    numberSeparators = numberSeparators.length == 0 ? {decimal: '.', thousand: ','} : numberSeparators;
     var pattern = new RegExp(/[^0-9\-\.]+/g);
     var price = field.value.replace(pattern, '');
     field.value = $().number_format(price, {
@@ -641,9 +639,8 @@ function formatPrice(field) {
         thousandSeparator: numberSeparators.thousand
     });
 }
-
 function formatQty(field) {
-    numberSeparators = numberSeparators.length === 0 ? {decimal: '.', thousand: ''} : numberSeparators;
+    numberSeparators = numberSeparators.length == 0 ? {decimal: '.', thousand: ''} : numberSeparators;
     var pattern = new RegExp(/[^0-9\.]+/g);
     var price = field.value.replace(pattern, '');
     field.value = $().number_format(price, {
@@ -682,7 +679,7 @@ function visual2html(text) {
 var run_task_url, complete_task_url, abort_task_url;
 var task_fail = false;
 // You can set you own value inside tpl who runs interactive task.
-// see admin/templates/default/admin/pages/tool/backup.tpl
+// see admin/templates/default_bs3/admin/pages/tool/backup.tpl
 var task_complete_text = task_fail_text = '';
 
 var defaultTaskMessages = {
@@ -708,12 +705,12 @@ $(document).on('click', ".task_run", function () {
     }
 
     var modal =
-        '<div id="task_modal" class="\'<h4 class="modal-title">\'+task_title+\'</h4>\'+modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">' +
+        '<div id="task_modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">' +
         '<div class="modal-dialog">' +
         '<div class="modal-content">' +
         '<div class="modal-header">' +
-        '<h4 class="modal-title">' + task_title + '</h4>' +
         '<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>' +
+        '<h4 class="modal-title">' + task_title + '</h4>' +
         '</div>' +
         '<div class="modal-body panel-body panel-body-nopadding"></div>' +
         '</div></div></div>';
@@ -745,6 +742,7 @@ $(document).on('click', ".task_run", function () {
     }
 
     var send_data = $(this).parents('form').serialize();
+
     $.ajax({
         url: run_task_url,
         type: 'POST',
@@ -760,7 +758,7 @@ $(document).on('click', ".task_run", function () {
 
 
 var runTaskUI = function (data) {
-    if (data.hasOwnProperty("error") && data.error === true) {
+    if (data.hasOwnProperty("error") && data.error == true) {
         runTaskShowError('Creation of new task failed! Please check error log for details. \n' + data.error_text);
     } else {
         runTaskStepsUI(data.task_details);
@@ -768,7 +766,7 @@ var runTaskUI = function (data) {
 };
 
 var runTaskStepsUI = function (task_details) {
-    if (task_details.status !== '1') {
+    if (task_details.status != '1') {
         runTaskShowError('Cannot run task "' + task_details.name + '" steps because task is not yet "scheduled". Current status - ' + task_details.status);
     } else {
         //then run sequental ajax calls
@@ -792,6 +790,10 @@ var runTaskStepsUI = function (task_details) {
                 senddata['eta'] = step.eta;
                 timeout = (step.eta + 10) * 1000;
             }
+            if (step.hasOwnProperty('max_execution_time') && step.max_execution_time > 0) {
+                senddata['eta'] = step.max_execution_time;
+                timeout = (step.max_execution_time + 10) * 1000;
+            }
 
             ajaxes[k] = {
                 task_id: task_details.task_id,
@@ -804,10 +806,9 @@ var runTaskStepsUI = function (task_details) {
             };
             if (step.hasOwnProperty("settings") && step.settings != null
                 && step.settings.hasOwnProperty("interrupt_on_step_fault")
-                && step.settings.interrupt_on_step_fault === true) {
+                && step.settings.interrupt_on_step_fault == true) {
                 ajaxes[k]['interrupt_on_step_fault'] = true;
-            }
-            else {
+            } else {
                 ajaxes[k]['interrupt_on_step_fault'] = false;
             }
             num++;
@@ -922,7 +923,7 @@ function do_seqAjax(ajaxes, attempts_count) {
             jqXHR.abort();  //  aborts connection
             $.xhrPool.splice(i, 1); //  removes from list by index
         });
-    };
+    }
 
     var current = 0,
         current_key,
@@ -984,6 +985,8 @@ function do_seqAjax(ajaxes, attempts_count) {
             },
             error: function (xhr, status, error) {
                 var error_txt = '';
+                var network_statuses = [0, 404, 407, 409, 410, 500, 502, 503, 504, 598, 599];
+
                 try { //when server response is json formatted string
                     var err = $.parseJSON(xhr.responseText);
                     if (err.hasOwnProperty("error_text")) {
@@ -992,6 +995,9 @@ function do_seqAjax(ajaxes, attempts_count) {
                         error_txt = getErrorTextByXHR(xhr);
                     }
                 } catch (e) {
+                    if (network_statuses.indexOf(xhr.status) == -1) {
+                        attempts = 0;
+                    }
                     error_txt = getErrorTextByXHR(xhr);
                 }
 
@@ -999,9 +1005,8 @@ function do_seqAjax(ajaxes, attempts_count) {
                     error_txt = 'Connection error occurred. Timeout exceeded.';
                 }
 
-
                 //so.. if all attempts of this step are failed
-                if (attempts === 0) {
+                if (attempts == 0) {
                     task_complete_text += '<div class="alert-danger">'
                         + defaultTaskMessages.step + ' '
                         + (current + 1) + ' - '
@@ -1023,15 +1028,15 @@ function do_seqAjax(ajaxes, attempts_count) {
                     attempts--;
                 }
             },
-            complete: function (jqXHR, text_status) {
+            complete: function (xhr, text_status) {
                 //  get index for current connection completed
-                var i = $.xhrPool.indexOf(jqXHR);
+                var i = $.xhrPool.indexOf(xhr);
                 //  removes from list by index
                 if (i > -1) {
                     $.xhrPool.splice(i, 1);
                 }
-                if (text_status !== 'abort') {
-                    do_ajax();
+                if (text_status != 'abort') {
+                    setTimeout(do_ajax, 2000);
                 }
             }
         });
@@ -1043,7 +1048,7 @@ function do_seqAjax(ajaxes, attempts_count) {
 
 var getErrorTextByXHR = function (xhr) {
     var error_txt = ''
-    if (xhr.status === 200) {
+    if (xhr.status == 200) {
         error_txt = '(' + xhr.responseText + ')';
     } else {
         error_txt = 'HTTP-status:' + xhr.status;
@@ -1059,7 +1064,7 @@ var getUrlParameter = function (sParam) {
     var sURLVariables = sPageURL.split('&');
     for (var i in sURLVariables) {
         var sParameterName = sURLVariables[i].split('=');
-        if (sParameterName[0] === sParam) {
+        if (sParameterName[0] == sParam) {
             return sParameterName[1];
         }
     }
@@ -1071,7 +1076,7 @@ var searchSectionIcon = function (section) {
             return '<i class="fa fa-bullhorn fa-fw"></i> ';
             break;
         case 'orders':
-            return '<i class="fa fa-money-bill-alt fa-fw"></i> ';
+            return '<i class="fa fa-money fa-fw"></i> ';
             break;
         case 'customers':
             return '<i class="fa fa-group fa-fw"></i> ';
@@ -1155,7 +1160,7 @@ function openTextEditRLModal(editor, cursorPosition, baseUrl) {
             }
 
             var insert_html = '';
-            if (item.resource_path !== undefined && item.resource_path.length > 0) {
+            if (item.resource_path != undefined && item.resource_path.length > 0) {
                 var type_name = item.type_name;
                 insert_html = baseUrl + 'resources/' + type_name + '/' + item.resource_path;
                 if (type_name == 'image') {
@@ -1168,7 +1173,7 @@ function openTextEditRLModal(editor, cursorPosition, baseUrl) {
                     //TODO : need to add other RL-types support
                     return null;
                 }
-            } else if (item.resource_code !== undefined && item.resource_code.length > 0) {
+            } else if (item.resource_code != undefined && item.resource_code.length > 0) {
                 insert_html = item.resource_code;
             }
 
@@ -1196,12 +1201,12 @@ function openTextEditRLModal(editor, cursorPosition, baseUrl) {
 //Jquery extension with textarea management
 jQuery.fn.extend({
     setCursorPosition: function (position) {
-        if (this.length === 0) return this;
+        if (this.length == 0) return this;
         return $(this).setSelection(position, position);
     },
 
     setSelection: function (selectionStart, selectionEnd) {
-        if (this.length === 0) return this;
+        if (this.length == 0) return this;
         input = this[0];
         if (input.createTextRange) {
             var range = input.createTextRange();
@@ -1244,8 +1249,7 @@ jQuery.fn.extend({
                 sel = document.selection.createRange();
                 sel.text = myValue;
                 this.focus();
-            }
-            else if (this.selectionStart || this.selectionStart === '0') {
+            } else if (this.selectionStart || this.selectionStart == '0') {
                 //For browsers like Firefox and Webkit based
                 var startPos = this.selectionStart;
                 var endPos = this.selectionEnd;
@@ -1289,18 +1293,7 @@ jQuery.fn.extend({
     };
 })(jQuery);
 
-//Load modal forms from href of button
-$('.modal').on('show.bs.modal', function (e) {
-    var button = $(e.relatedTarget);
-    var modal = $(this);
-    if (button.attr('href') !== undefined && button.attr('data-toggle') === 'modal' && button.attr('href').indexOf('//') > -1) {
-        modal.find('.modal-content').load(button.attr('href'));
-    }
-});
-
 //order edit functions
-
-
 function formatMoney(num, decimal_place, decimal_point, thousand_point) {
     decimal_place = isNaN(decimal_place = Math.abs(decimal_place)) ? 2 : decimal_place;
     decimal_point = decimal_point === undefined ? "." : decimal_point;
@@ -1327,7 +1320,6 @@ function currencyToNumber(str, thousand_point, decimal_point, currency_symbol) {
     return final_number;
 }
 
-
 function numberToCurrency(num, currency_location, decimal_place, decimal_point, thousand_point) {
     var str;
     if (currency_location === 'left') {
@@ -1336,4 +1328,26 @@ function numberToCurrency(num, currency_location, decimal_place, decimal_point, 
         str = formatMoney(num, decimal_place, decimal_point, thousand_point) + currency_symbol;
     }
     return str;
+}
+
+function copyToClipboard(text) {
+    if (window.clipboardData && window.clipboardData.setData) {
+        // Internet Explorer-specific code path to prevent textarea being shown while dialog is visible.
+        return window.clipboardData.setData("Text", text);
+
+    } else if (document.queryCommandSupported && document.queryCommandSupported("copy")) {
+        var textarea = document.createElement("textarea");
+        textarea.textContent = text;
+        textarea.style.position = "fixed";  // Prevent scrolling to bottom of page in Microsoft Edge.
+        document.body.appendChild(textarea);
+        textarea.select();
+        try {
+            return document.execCommand("copy");  // Security exception may be thrown by some browsers.
+        } catch (ex) {
+            console.warn("Copy to clipboard failed.", ex);
+            return prompt("Copy to clipboard: Ctrl+C, Enter", text);
+        } finally {
+            document.body.removeChild(textarea);
+        }
+    }
 }

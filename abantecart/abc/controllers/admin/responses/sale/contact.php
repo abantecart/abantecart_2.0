@@ -320,6 +320,10 @@ class ControllerResponsesSaleContact extends AController
                     .' '.$user_info['lastname'];
                 $step = current($steps);
                 $step_settings = $step['settings'];
+                //case of broken data
+                if (!is_array($step_settings)) {
+                    $step_settings = (array)$step_settings;
+                }
                 if ($step_settings['subject']) {
                     $incm_task['subject'] = $step_settings['subject'];
                 }
