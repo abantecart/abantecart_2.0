@@ -26,9 +26,11 @@ use abc\core\engine\AResource;
 use abc\models\catalog\Category;
 use abc\models\catalog\Product;
 use abc\models\system\Store;
+use abc\modules\traits\EditProductTrait;
 
 class ControllerPagesCatalogProductRelations extends AController
 {
+    use EditProductTrait;
     public $error = [];
 
     public function main()
@@ -60,36 +62,10 @@ class ControllerPagesCatalogProductRelations extends AController
             unset($this->session->data['success']);
         }
 
-        $this->document->initBreadcrumb(
-            [
-                'href'      => $this->html->getSecureURL('index/home'),
-                'text'      => $this->language->get('text_home'),
-                'separator' => false,
-            ]
-        );
-        $this->document->addBreadcrumb(
-            [
-                'href'      => $this->html->getSecureURL('catalog/product'),
-                'text'      => $this->language->get('heading_title'),
-                'separator' => ' :: ',
-            ]
-        );
-        $this->document->addBreadcrumb(
-            [
-                'href'      => $this->html->getSecureURL('catalog/product/update', '&product_id=' . $productId),
-                'text'      => $this->language->get('text_edit')
-                    . '&nbsp;' . $this->language->get('text_product')
-                    . ' - ' . $productInfo['name'],
-                'separator' => ' :: ',
-            ]
-        );
-        $this->document->addBreadcrumb(
-            [
-                'href'      => $this->html->getSecureURL('catalog/product_relations', '&product_id=' . $productId),
-                'text'      => $this->language->get('tab_relations'),
-                'separator' => ' :: ',
-                'current'   => true,
-            ]
+        $this->setBreadCrumbs(
+            $productInfo,
+            $this->html->getSecureURL('catalog/product_relations', '&product_id=' . $productId),
+            $this->language->get('tab_relations')
         );
 
         $this->document->setTitle($productInfo['name'] . ' ' . $this->language->get('tab_relations'));

@@ -25,6 +25,7 @@ use abc\models\catalog\Product;
 use abc\models\catalog\ProductDiscount;
 use abc\models\catalog\ProductSpecial;
 use abc\models\customer\CustomerGroup;
+use abc\modules\traits\EditProductTrait;
 use Error;
 use Exception;
 use H;
@@ -36,6 +37,7 @@ use H;
  */
 class ControllerPagesCatalogProductPromotions extends AController
 {
+    use EditProductTrait;
     public $error = [];
 
     public function main()
@@ -101,38 +103,10 @@ class ControllerPagesCatalogProductPromotions extends AController
             unset($this->session->data['success']);
         }
 
-        $this->document->initBreadcrumb(
-            [
-            'href'      => $this->html->getSecureURL('index/home'),
-            'text'      => $this->language->get('text_home'),
-            'separator' => false,
-            ]
-        );
-        $this->document->addBreadcrumb(
-            [
-            'href'      => $this->html->getSecureURL('catalog/product'),
-            'text'      => $this->language->get('heading_title'),
-            'separator' => ' :: ',
-            ]
-        );
-
-        $this->document->addBreadcrumb(
-            [
-                'href'      => $this->html->getSecureURL('catalog/product/update', '&product_id=' . $productId),
-                'text'      => $productInfo['name'],
-                'separator' => ' :: ',
-            ]
-        );
-        $this->document->addBreadcrumb(
-            [
-                'href'      => $this->html->getSecureURL(
-                    'catalog/product_promotions',
-                    '&product_id=' . $productId
-                ),
-                'text'      => $this->language->get('tab_promotions'),
-                'separator' => ' :: ',
-                'current'   => true,
-            ]
+        $this->setBreadCrumbs(
+            $productInfo,
+            $this->html->getSecureURL('catalog/product_promotions', '&product_id=' . $productId),
+            $this->language->get('tab_promotions')
         );
 
         $this->document->setTitle($productInfo['name'] . ' ' . $this->language->get('tab_promotions'));

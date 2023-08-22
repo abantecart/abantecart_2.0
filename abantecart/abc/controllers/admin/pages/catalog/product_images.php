@@ -24,6 +24,7 @@ use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\models\catalog\Product;
+use abc\modules\traits\EditProductTrait;
 
 if (!class_exists('abc\core\ABC') || !ABC::env('IS_ADMIN')) {
     header('Location: static_pages/?forbidden=' . basename(__FILE__));
@@ -31,6 +32,7 @@ if (!class_exists('abc\core\ABC') || !ABC::env('IS_ADMIN')) {
 
 class ControllerPagesCatalogProductImages extends AController
 {
+    use EditProductTrait;
     public $error = [];
 
     public function main()
@@ -54,32 +56,10 @@ class ControllerPagesCatalogProductImages extends AController
             unset($this->session->data['success']);
         }
 
-        $this->document->initBreadcrumb(
-            [
-                'href' => $this->html->getSecureURL('index/home'),
-                'text' => $this->language->get('text_home'),
-            ]
-        );
-        $this->document->addBreadcrumb(
-            [
-                'href' => $this->html->getSecureURL('catalog/product'),
-                'text' => $this->language->get('heading_title'),
-            ]
-        );
-        $this->document->addBreadcrumb(
-            [
-                'href' => $this->html->getSecureURL('catalog/product/update', '&product_id=' . $productId),
-                'text' => $this->language->get('text_edit')
-                    . '&nbsp;' . $this->language->get('text_product')
-                    . ' - ' . $productInfo['name'],
-            ]
-        );
-        $this->document->addBreadcrumb(
-            [
-                'href'    => $this->html->getSecureURL('catalog/product_images', '&product_id=' . $productId),
-                'text'    => $this->language->get('tab_media'),
-                'current' => true
-            ]
+        $this->setBreadCrumbs(
+            $productInfo,
+            $this->html->getSecureURL('catalog/product_images', '&product_id=' . $productId),
+            $this->language->get('tab_media')
         );
 
         $this->document->setTitle($productInfo['name'] . ' ' . $this->language->get('tab_media'));
