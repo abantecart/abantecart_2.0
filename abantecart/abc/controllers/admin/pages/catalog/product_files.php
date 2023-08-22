@@ -49,7 +49,7 @@ class ControllerPagesCatalogProductFiles extends AController
             abc_redirect($this->html->getSecureURL('catalog/product'));
         }
 
-        $productInfo = Product::getProductInfo($productId);
+        $this->data['product_info'] = $productInfo = Product::getProductInfo($productId);
         if (!$productInfo) {
             $this->session->data['warning'] = $this->language->get('error_product_not_found');
             abc_redirect($this->html->getSecureURL('catalog/product'));

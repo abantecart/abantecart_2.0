@@ -42,10 +42,8 @@ class ControllerPagesCatalogProductImages extends AController
 
         $this->loadLanguage('catalog/product');
         $this->document->setTitle($this->language->get('heading_title'));
-        $this->loadModel('tool/image');
 
-
-        $product_info = Product::getProductInfo($productId);
+        $this->data['product_info'] = $product_info = Product::getProductInfo($productId);
         if (!$product_info) {
             $this->session->data['warning'] = $this->language->get('error_product_not_found');
             abc_redirect($this->html->getSecureURL('catalog/product'));
@@ -85,6 +83,7 @@ class ControllerPagesCatalogProductImages extends AController
             ]
         );
 
+        $this->loadModel('tool/image');
         $this->data['no_image'] = $this->model_tool_image->resize('no_image.jpg', 100, 100);
 
         $this->data['active'] = 'images';

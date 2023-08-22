@@ -49,7 +49,7 @@ class ControllerPagesCatalogProductRelations extends AController
             abc_redirect($this->html->getSecureURL('catalog/product_relations', '&product_id=' . $productId));
         }
 
-        $productInfo = Product::getProductInfo($productId);
+        $this->data['product_info'] = $productInfo = Product::getProductInfo($productId);
         if (!$productInfo) {
             $this->session->data['warning'] = $this->language->get('error_product_not_found');
             abc_redirect($this->html->getSecureURL('catalog/product'));
@@ -95,7 +95,6 @@ class ControllerPagesCatalogProductRelations extends AController
 
         $this->data['categories'] = array_column(Category::getCategories(), 'name', 'category_id');
 
-        $this->loadModel('setting/store');
         $this->data['stores'] = [
                 0 => $this->language->get('text_default')
             ]
