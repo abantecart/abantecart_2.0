@@ -46,6 +46,22 @@ class DatasetColumnProperty extends BaseModel
         'dataset_column_property_value',
     ];
 
+    protected $rules = [
+        /** @see validate() */
+        'dataset_column_id'  => [
+            'checks'   => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Dataset Column ID is not integer!'],
+                'max'=>['default_text'=>'Dataset Column ID must be less than 2147483647'],
+                'min'=>['default_text'=> 'Dataset Column ID value must be greater than zero'],
+            ],
+        ]
+    ];
+
     public function definition()
     {
         return $this->belongsTo(DatasetDefinition::class, 'dataset_column_id');

@@ -49,11 +49,14 @@ class OrderStatusDescription extends BaseModel
             'checks'   => [
                 'int',
                 'exists:order_statuses',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => ':attribute is not integer or absent in order_statuses table!',
-                ],
+                'int' => ['default_text' => ':attribute is not integer or absent in order_statuses table!'],
+                'max'=>['default_text'=>':attribute must be less than 2147483647'],
+                'min'=>['default_text'=> ':attribute value must be greater than zero'],
+                'exists'=>['default_text'=>':attribute not exists in order_statuses table']
             ],
         ],
 
@@ -61,11 +64,14 @@ class OrderStatusDescription extends BaseModel
             'checks'   => [
                 'int',
                 'exists:languages',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => ':attribute is not integer or absent in languages table!',
-                ],
+                'int' => ['default_text' => ':attribute is not integer or absent in languages table!'],
+                'max'=>['default_text'=>':attribute must be less than 2147483647'],
+                'min'=>['default_text'=> ':attribute value must be greater than zero'],
+                'exists'=>['default_text'=>':attribute not exists in languages table']
             ],
         ],
 

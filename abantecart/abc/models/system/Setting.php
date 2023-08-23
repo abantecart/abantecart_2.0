@@ -61,6 +61,21 @@ class Setting extends BaseModel
         'date_modified',
     ];
 
+    protected $rules = [
+        /** @see validate() */
+        'store_id'  => [
+            'checks'   => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Store ID is not integer!'],
+                'max'=>['default_text'=>'Store ID must be less than 2147483647'],
+                'min'=>['default_text'=> 'Store ID value must be greater than zero'],
+            ],
+        ]
+    ];
     public function store()
     {
         return $this->belongsTo(Store::class, 'store_id');

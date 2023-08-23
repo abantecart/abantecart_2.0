@@ -76,11 +76,14 @@ class OrderTotal extends BaseModel
             'checks'   => [
                 'int',
                 'exists:orders',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => ':attribute is not integer or absent in orders table!',
-                ],
+                'int' => ['default_text' => ':attribute is not integer!'],
+                'max'=>['default_text'=>':attribute must be less than 2147483647'],
+                'min'=>['default_text'=> ':attribute value must be greater than zero'],
+                'exists'=>['default_text'=>':attribute not exists in orders table']
             ],
         ],
 
@@ -123,12 +126,14 @@ class OrderTotal extends BaseModel
         'sort_order' => [
             'checks'   => [
                 'integer',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => ':attribute must be an integer!',
+                'integer' => ['default_text' => ':attribute must be an integer!'],
+                'max'=>['default_text'=>':attribute must be less than 2147483647'],
+                'min'=>['default_text'=> ':attribute value must be greater than zero'],
                 ],
-            ],
         ],
 
         'type' => [

@@ -56,6 +56,34 @@ class FieldsGroupDescription extends BaseModel
         'description',
     ];
 
+    protected $rules = [
+        /** @see validate() */
+        'group_id'  => [
+            'checks'   => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Group ID is not integer!'],
+                'max'=>['default_text'=>'Group ID must be less than 2147483647'],
+                'min'=>['default_text'=> 'Group ID value must be greater than zero'],
+            ],
+        ],
+        'language_id' => [
+            'checks'   => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Language ID is not integer!'],
+                'max'=>['default_text'=>'Language ID must be less than 2147483647'],
+                'min'=>['default_text'=> 'Language ID value must be greater than zero'],
+            ],
+        ],
+    ];
+
     public function form_group()
     {
         return $this->belongsTo(FormGroup::class, 'group_id');

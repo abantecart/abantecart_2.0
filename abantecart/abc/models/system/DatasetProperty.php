@@ -45,7 +45,21 @@ class DatasetProperty extends BaseModel
         'dataset_property_name',
         'dataset_property_value',
     ];
-
+    protected $rules = [
+        /** @see validate() */
+        'dataset_id'  => [
+            'checks'   => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Dataset ID is not integer!'],
+                'max'=>['default_text'=>'Dataset ID must be less than 2147483647'],
+                'min'=>['default_text'=> 'Dataset ID value must be greater than zero'],
+            ],
+        ]
+    ];
     public function dataset()
     {
         return $this->belongsTo(Dataset::class, 'dataset_id');

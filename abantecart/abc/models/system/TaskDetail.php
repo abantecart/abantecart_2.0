@@ -50,4 +50,20 @@ class TaskDetail extends BaseModel
         'created_by',
         'settings'
     ];
+
+    protected $rules = [
+        /** @see validate() */
+        'created_by'  => [
+            'checks'   => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Created By is not integer!'],
+                'max'=>['default_text'=>'Created By must be less than 2147483647'],
+                'min'=>['default_text'=> 'Created By value must be greater than zero'],
+            ],
+        ]
+    ];
 }

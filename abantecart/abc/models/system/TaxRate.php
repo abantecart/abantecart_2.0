@@ -82,6 +82,58 @@ class TaxRate extends BaseModel
         'date_modified',
     ];
 
+    protected $rules = [
+        /** @see validate() */
+        'location_id'  => [
+            'checks'   => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Location ID is not integer!'],
+                'max'=>['default_text'=>'Location ID must be less than 2147483647'],
+                'min'=>['default_text'=> 'Location ID value must be greater than zero'],
+            ],
+        ],
+        'zone_id' => [
+            'checks'   => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Zone ID is not integer!'],
+                'max'=>['default_text'=>'Zone ID must be less than 2147483647'],
+                'min'=>['default_text'=> 'Zone ID value must be greater than zero'],
+            ],
+        ],
+        'tax_class_id'  => [
+            'checks'   => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Tax Class ID is not integer!'],
+                'max'=>['default_text'=>'Tax Class ID must be less than 2147483647'],
+                'min'=>['default_text'=> 'Tax Class ID value must be greater than zero'],
+            ],
+        ],
+        'priority' => [
+            'checks'   => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Priority is not integer!'],
+                'max'=>['default_text'=>'Priority must be less than 2147483647'],
+                'min'=>['default_text'=> 'Priority value must be greater than zero'],
+            ],
+        ],
+    ];
+
     public function tax_class()
     {
         return $this->belongsTo(TaxClass::class, 'tax_class_id');

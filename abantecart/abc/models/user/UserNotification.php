@@ -68,6 +68,34 @@ class UserNotification extends BaseModel
         'date_modified',
     ];
 
+    protected $rules = [
+        /** @see validate() */
+        'user_id'  => [
+            'checks'   => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'User ID is not integer!'],
+                'max'=>['default_text'=>'User ID must be less than 2147483647'],
+                'min'=>['default_text'=> 'User ID value must be greater than zero'],
+            ],
+        ],
+        'store_id' => [
+            'checks'   => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Store ID is not integer!'],
+                'max'=>['default_text'=>'Store ID must be less than 2147483647'],
+                'min'=>['default_text'=> 'Store ID value must be greater than zero'],
+            ],
+        ],
+    ];
+
     /**
      * UserNotification constructor.
      *

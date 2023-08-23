@@ -73,6 +73,34 @@ class AntMessage extends BaseModel
         'date_modified',
     ];
 
+    protected $rules = [
+        /** @see validate() */
+        'priority'  => [
+            'checks'   => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Priority is not integer!'],
+                'max'=>['default_text'=>'Priority must be less than 2147483647'],
+                'min'=>['default_text'=> 'Priority value must be greater than zero'],
+            ],
+        ],
+        'viewed' => [
+            'checks'   => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Viewed is not integer!'],
+                'max'=>['default_text'=>'Viewed must be less than 2147483647'],
+                'min'=>['default_text'=> 'Viewed value must be greater than zero'],
+            ],
+        ],
+    ];
+
     public function __construct(array $attributes = [])
     {
         parent::__construct($attributes);

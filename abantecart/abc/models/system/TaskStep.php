@@ -69,5 +69,67 @@ class TaskStep extends BaseModel
         'settings'
     ];
 
-
+    protected $rules = [
+        /** @see validate() */
+        'task_id'  => [
+            'checks'   => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Task ID is not integer!'],
+                'max'=>['default_text'=>'Task ID must be less than 2147483647'],
+                'min'=>['default_text'=> 'Task ID value must be greater than zero'],
+            ],
+        ],
+        'sort_order' => [
+            'checks'   => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Sort Order is not integer!'],
+                'max'=>['default_text'=>'Sort Order must be less than 2147483647'],
+                'min'=>['default_text'=> 'Sort Order value must be greater than zero'],
+            ],
+        ],
+        'status'  => [
+            'checks'   => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Status is not integer!'],
+                'max'=>['default_text'=>'Status must be less than 2147483647'],
+                'min'=>['default_text'=> 'Status value must be greater than zero'],
+            ],
+        ],
+        'last_result' => [
+            'checks'   => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Last Result is not integer!'],
+                'max'=>['default_text'=>'Last Result must be less than 2147483647'],
+                'min'=>['default_text'=> 'Last Result value must be greater than zero'],
+            ],
+        ],
+        'max_execution_time' => [
+            'checks'   => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Max Execution Time is not integer!'],
+                'max'=>['default_text'=>'Max Execution Time must be less than 2147483647'],
+                'min'=>['default_text'=> 'Max Execution Time value must be greater than zero'],
+            ],
+        ],
+    ];
 }

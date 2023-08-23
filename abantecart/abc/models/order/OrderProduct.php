@@ -131,22 +131,29 @@ class OrderProduct extends BaseModel
                 'integer',
                 'required',
                 'exists:orders',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => ':attribute is not integer or not presents in orders table!',
-                ],
+                'integer' => ['default_text' => ':attribute is not integer'],
+                'max'=>['default_text'=>':attribute must be less than 2147483647'],
+                'min'=>['default_text'=> ':attribute value must be greater than zero'],
+                'exists'=>['default_text'=>':attribute not exists in orders table'],
+                'required'=>['default_text'=>':attribute required']
             ],
         ],
         'product_id' => [
             'checks'   => [
                 'integer',
                 'required',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => ':attribute is not integer!',
-                ],
+                'integer' => ['default_text' => ':attribute is not integer!'],
+                'max'=>['default_text'=>':attribute must be less than 2147483647'],
+                'min'=>['default_text'=> ':attribute value must be greater than zero'],
+                'required'=>['default_text'=>':attribute required']
             ],
         ],
         'name'  => [
@@ -217,11 +224,14 @@ class OrderProduct extends BaseModel
             'checks'   => [
                 'integer',
                 'required',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => ':attribute is not integer!',
-                ],
+                'integer' => ['default_text' => ':attribute is not integer!'],
+                'max'=>['default_text'=>':attribute must be less than 2147483647'],
+                'min'=>['default_text'=> ':attribute value must be greater than zero'],
+                'required'=>['default_text'=>':attribute required']
             ],
         ],
         'subtract'        => [
@@ -239,23 +249,31 @@ class OrderProduct extends BaseModel
                 'integer',
                 'required',
                 'exists:order_statuses',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => ':attribute is not integer or absent in order_statuses table!',
-                ],
+                'integer' => ['default_text' => ':attribute is not integer'],
+                'max'=>['default_text'=>':attribute must be less than 2147483647'],
+                'min'=>['default_text'=> ':attribute value must be greater than zero'],
+                'exists'=>['default_text'=>':attribute not exists in order_statuses table'],
+                'required'=>['default_text'=>':attribute required']
             ],
+
         ],
         'tax_class_id' => [
             'checks'   => [
                 'nullable',
                 'integer',
                 'exists:tax_classes',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => ':attribute is not integer or absent in tax_classes table!',
-                ],
+                'integer' => ['default_text' => ':attribute is not integer'],
+                'max'=>['default_text'=>':attribute must be less than 2147483647'],
+                'min'=>['default_text'=> ':attribute value must be greater than zero'],
+                'exists'=>['default_text'=>':attribute not exists in tax_classes table'],
             ],
         ],
         'weight' => [
@@ -274,11 +292,14 @@ class OrderProduct extends BaseModel
                 'integer',
                 'nullable',
                 'exists:weight_classes',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => ':attribute is not integer or absent in weight_classes table!',
-                ],
+                'integer' => ['default_text' => ':attribute is not integer!'],
+                'max'=>['default_text'=>':attribute must be less than 2147483647'],
+                'min'=>['default_text'=> ':attribute value must be greater than zero'],
+                'exists'=>['default_text'=>':attribute not exists in weight_classes table'],
             ],
         ],
         'length' => [
@@ -319,11 +340,14 @@ class OrderProduct extends BaseModel
                 'integer',
                 'nullable',
                 'exists:length_classes',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => ':attribute is not integer or not presents in length_classes table!',
-                ],
+                'integer' => ['default_text' => ':attribute is not integer!'],
+                'max'=>['default_text'=>':attribute must be less than 2147483647'],
+                'min'=>['default_text'=> ':attribute value must be greater than zero'],
+                'exists'=>['default_text'=>':attribute not exists in length_classes table'],
             ],
         ],
         'shipping' => [

@@ -90,6 +90,34 @@ class User extends BaseModel
         'date_modified',
     ];
 
+    protected $rules = [
+        /** @see validate() */
+        'user_group_id'  => [
+            'checks'   => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'User Group ID is not integer!'],
+                'max'=>['default_text'=>'User Group ID must be less than 2147483647'],
+                'min'=>['default_text'=> 'User Group ID value must be greater than zero'],
+            ],
+        ],
+        'status' => [
+            'checks'   => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Status is not integer!'],
+                'max'=>['default_text'=>'Status must be less than 2147483647'],
+                'min'=>['default_text'=> 'Status value must be greater than zero'],
+            ],
+        ],
+    ];
+
     /**
      * @return BelongsTo
      */

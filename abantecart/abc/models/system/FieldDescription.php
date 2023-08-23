@@ -57,6 +57,40 @@ class FieldDescription extends BaseModel
         'error_text',
     ];
 
+    protected $rules = [
+        /** @see validate() */
+        'field_id'  => [
+            'checks'   => [
+                'integer',
+                'exists:order_data_types',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => ':attribute is not integer!'],
+                'max'=>['default_text'=>':attribute must be less than 2147483647'],
+                'min'=>['default_text'=> ':attribute value must be greater than zero'],
+                'exists'=>['default_text'=>':attribute not exists in order_data_types table']
+            ],
+        ],
+        'language_id' => [
+            'checks'   => [
+                'integer',
+                'required',
+                'exists:orders',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => ':attribute is not integer!'],
+                'max'=>['default_text'=>':attribute must be less than 2147483647'],
+                'min'=>['default_text'=> ':attribute value must be greater than zero'],
+                'exists'=>['default_text'=>':attribute not exists in order_data_types table'],
+                'required'=>['default_text'=>':attribute required']
+            ],
+        ],
+    ];
+
     public function field()
     {
         return $this->belongsTo(Field::class, 'field_id');

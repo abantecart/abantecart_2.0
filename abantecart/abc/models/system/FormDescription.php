@@ -54,6 +54,34 @@ class FormDescription extends BaseModel
         'description',
     ];
 
+    protected $rules = [
+        /** @see validate() */
+        'form_id'  => [
+            'checks'   => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Form ID is not integer!'],
+                'max'=>['default_text'=>'Form ID must be less than 2147483647'],
+                'min'=>['default_text'=> 'Form ID value must be greater than zero'],
+            ],
+        ],
+        'language_id' => [
+            'checks'   => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Language ID is not integer!'],
+                'max'=>['default_text'=>'Language ID must be less than 2147483647'],
+                'min'=>['default_text'=> 'Language ID value must be greater than zero'],
+            ],
+        ],
+    ];
+
     public function form()
     {
         return $this->belongsTo(Form::class, 'form_id');
