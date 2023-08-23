@@ -31,7 +31,20 @@ use abc\core\lib\ALanguageManager;
  */
 trait EditProductTrait
 {
-    public function setBreadCrumbs(array $productInfo, string $currentUrl, string $currentText)
+    public function addTabs(string $active = 'general')
+    {
+        $this->data['active'] = $active;
+        $tabs_obj = $this->dispatch('pages/catalog/product_tabs', [$this->data]);
+        $this->data['product_tabs'] = $tabs_obj->dispatchGetOutput();
+        unset($tabs_obj);
+    }
+
+    public function addSummary()
+    {
+        $this->addChild('pages/catalog/product_summary', 'summary_form', 'pages/catalog/product_summary.tpl');
+    }
+
+    public function setBreadCrumbs(array $productInfo, ?string $currentUrl = '', ?string $currentText = '')
     {
         $this->document->resetBreadcrumbs();
         $this->document->initBreadcrumb(
@@ -50,16 +63,17 @@ trait EditProductTrait
             [
                 'href' => $this->html->getSecureURL('catalog/product/update', '&product_id=' . $productInfo['product_id']),
                 'text' => $productInfo['name'],
+                'current' => (!$currentUrl)
             ]
         );
-        $this->document->addBreadcrumb(
-            [
-                'href'    => $currentUrl,
-                'text'    => $currentText,
-                'current' => true
-            ]
-        );
-
-
+        if ($currentUrl) {
+            $this->document->addBreadcrumb(
+                [
+                    'href'    => $currentUrl,
+                    'text'    => $currentText,
+                    'current' => true
+                ]
+            );
+        }
     }
 }

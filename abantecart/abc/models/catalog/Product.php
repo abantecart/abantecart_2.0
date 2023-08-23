@@ -1840,11 +1840,11 @@ class Product extends BaseModel
 
     /**
      * @param $product_id
-     *
+     * @param array|null $withRelations
      * @return array
      * @throws Exception
      */
-    public static function getProductInfo($product_id)
+    public static function getProductInfo($product_id, ?array $withRelations = [])
     {
         $product_id = (int)$product_id;
         if (!$product_id) {
@@ -1852,7 +1852,7 @@ class Product extends BaseModel
         }
         /** @var Product $product */
         $product = Product::with(
-            [
+            array_merge([
                 'description',
                 'categories',
                 'categories.description',
@@ -1860,7 +1860,7 @@ class Product extends BaseModel
                 'tagsByLanguage',
                 'related',
                 'related.description'
-            ]
+            ], $withRelations)
         )->useCache('product')
             ->find($product_id);
         if (!$product) {
@@ -2127,14 +2127,26 @@ class Product extends BaseModel
         $pd = new ProductDescription();
         $fillable = $pd->getFillable();
 
+        //NOTE: product description can be a separate array in case of data import process
         $update = [];
-        foreach ($fillable as $field_name) {
-            if (isset($product_data['product_description'][$field_name])) {
-                $update[$field_name] = $product_data['product_description'][$field_name];
+        foreach ($fillable as $attrName) {
+            /** $valueExists  - sign if value was set.
+             * Needed because value can be any */
+            $valueExists = $value = false;
+            if (isset($product_data['product_description'][$attrName])) {
+                $value = $product_data['product_description'][$attrName];
+                $valueExists = true;
+            } elseif (isset($product_data[$attrName])) {
+                $value = $product_data[$attrName];
+                $valueExists = true;
+            }
+            if ($valueExists) {
+                $update[$attrName] = $value;
             }
         }
 
-        if (count($update)) {
+
+        if ($update) {
             $language->replaceDescriptions('product_descriptions',
                 ['product_id' => $product_id],
                 [$languageId => $update]

@@ -210,13 +210,8 @@ class ControllerPagesCatalogProductPromotions extends AController
             ]
         );
 
-        $this->data['active'] = 'promotions';
-        //load tabs controller
-        $tabs_obj = $this->dispatch('pages/catalog/product_tabs', [$this->data]);
-        $this->data['product_tabs'] = $tabs_obj->dispatchGetOutput();
-        unset($tabs_obj);
-
-        $this->addChild('pages/catalog/product_summary', 'summary_form', 'pages/catalog/product_summary.tpl');
+        $this->addTabs('promotions');
+        $this->addSummary();
 
         $this->view->assign('help_url', $this->gen_help_url('product_promotions'));
         if ($this->config->get('config_embed_status')) {

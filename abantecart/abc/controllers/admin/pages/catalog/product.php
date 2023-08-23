@@ -30,6 +30,7 @@ use abc\models\catalog\Product;
 use abc\models\catalog\UrlAlias;
 use abc\models\QueryBuilder;
 use abc\models\system\Store;
+use abc\modules\traits\EditProductTrait;
 use H;
 use Laracasts\Utilities\JavaScript\Transformers\Transformer;
 
@@ -40,6 +41,7 @@ use Laracasts\Utilities\JavaScript\Transformers\Transformer;
  */
 class ControllerPagesCatalogProduct extends AController
 {
+    use EditProductTrait;
     public $error = [];
     /** @var $productInstance Product */
     private $productInstance;
@@ -601,12 +603,8 @@ class ControllerPagesCatalogProduct extends AController
                 }
             }
 
-            $this->data['active'] = 'general';
-            //load tabs controller
-            $tabs_obj = $this->dispatch('pages/catalog/product_tabs', [$this->data]);
-            $this->data['product_tabs'] = $tabs_obj->dispatchGetOutput();
-            unset($tabs_obj);
-            $this->addChild('pages/catalog/product_summary', 'summary_form', 'pages/catalog/product_summary.tpl');
+            $this->addTabs('general');
+            $this->addSummary();
 
             foreach ($product as $fieldName => $filedValue) {
                 $formData['fields_preset']['fields'][$fieldName]['value'] = $filedValue;
@@ -688,40 +686,13 @@ class ControllerPagesCatalogProduct extends AController
 
         $this->loadLanguage('catalog/object_type');
 
-        $this->document->initBreadcrumb(
-            [
-                'href'      => $this->html->getSecureURL('index/home'),
-                'text'      => $this->language->get('text_home'),
-                'separator' => false,
-            ]
-        );
-        $this->document->addBreadcrumb(
-            [
-                'href'      => $this->html->getSecureURL('catalog/product'),
-                'text'      => $this->language->get('heading_title'),
-                'separator' => false,
-            ]
-        );
-        $this->document->addBreadcrumb([
-            'href'      => $this->html->getSecureURL('catalog/product'),
-            'text'      =>
-                ($product_id
-                    ? $this->language->get('text_edit').'&nbsp;'
-                        .$this->language->get('text_product')
-                        .' - '
-                        .$this->data['name']
-                    : $this->language->get('text_insert')
-                ),
-            'separator' => ' :: ',
-            'current'   => true,
-        ]);
+        $this->setBreadCrumbs($product_info);
 
-        $stores = Store::all()->toArray();
-        $this->data['stores'] = ['' => $this->language->get('text_default')];
+        $stores = Store::all()?->toArray();
+        $this->data['stores'] = ['' => $this->language->get('text_default')]
+            + array_column($stores, 'name', 'store_id');
 
-        $this->data['stores'] += array_column($stores, 'name', 'store_id');
-
-        $manufacturers = Manufacturer::all()->toArray();
+        $manufacturers = Manufacturer::all()?->toArray();
         $this->data['manufacturers'] = [0 => $this->language->get('text_none')];
         $this->data['manufacturers'] += array_column($manufacturers, 'name', 'manufacturer_id');
 
@@ -780,14 +751,6 @@ class ControllerPagesCatalogProduct extends AController
             $this->data['product_store'] = array_column($product_info['stores'], 'store_id');
         } else {
             $this->data['product_store'] = [0];
-        }
-
-        if (isset($this->request->post['product_description'])) {
-            $this->data['product_description'] = $this->request->post['product_description'];
-        } elseif ($product_info) {
-            $this->data['product_description'] = $product_info['description'];
-        } else {
-            $this->data['product_description'] = [];
         }
 
         if (isset($this->request->post['featured'])) {
@@ -867,12 +830,10 @@ class ControllerPagesCatalogProduct extends AController
             $this->data['update'] = $this->html->getSecureURL('listing_grid/product/update_field', '&id='.$product_id);
             $form = new AForm('HS');
 
-            $this->data['active'] = 'general';
             //load tabs controller
-            $tabs_obj = $this->dispatch('pages/catalog/product_tabs', [$this->data]);
-            $this->data['product_tabs'] = $tabs_obj->dispatchGetOutput();
-            unset($tabs_obj);
-            $this->addChild('pages/catalog/product_summary', 'summary_form', 'pages/catalog/product_summary.tpl');
+            $this->addTabs('general');
+            $this->addSummary();
+
         }
 
         $form->setForm(
@@ -1091,21 +1052,18 @@ class ControllerPagesCatalogProduct extends AController
 
         $this->data['form']['fields']['data']['quantity'] = $form->getFieldHtml(
             [
-                'type'     => 'input',
+                'type'     => 'number',
                 'name'     => 'quantity',
                 'value'    => (int) $this->data['quantity'],
                 'style'    => 'col-xs-1 small-field',
-                'help_url' => $this->gen_help_url(
-                    'product_inventory'
-                ),
-                'attr'     => ($product_info['has_track_options']
-                    ? 'disabled' : ''),
+                'help_url' => $this->gen_help_url('product_inventory'),
+                'attr'     => ($product_info['has_track_options'] ? 'disabled' : ''),
             ]
         );
 
         $this->data['form']['fields']['data']['minimum'] = $form->getFieldHtml(
             [
-                'type'  => 'input',
+                'type' => 'number',
                 'name'  => 'minimum',
                 'value' => (int) $this->data['minimum'],
                 'style' => 'small-field',
@@ -1114,7 +1072,7 @@ class ControllerPagesCatalogProduct extends AController
 
         $this->data['form']['fields']['data']['maximum'] = $form->getFieldHtml(
             [
-                'type'  => 'input',
+                'type' => 'number',
                 'name'  => 'maximum',
                 'value' => (int) $this->data['maximum'],
                 'style' => 'small-field',
@@ -1252,8 +1210,7 @@ class ControllerPagesCatalogProduct extends AController
                 'type'  => 'checkbox',
                 'name'  => 'ship_individually',
                 'style' => 'btn_switch btn-group-sm',
-                'value' => $this->data['ship_individually']
-                    ?? 0,
+                'value' => $this->data['ship_individually'] ?? 0,
             ]
         );
 
@@ -1261,10 +1218,7 @@ class ControllerPagesCatalogProduct extends AController
             [
                 'type'  => 'input',
                 'name'  => 'shipping_price',
-                'value' => round(
-                    (float) $this->data['shipping_price'],
-                    3
-                ),
+                'value' => round((float)$this->data['shipping_price'], 3),
                 'style' => 'tiny-field',
             ]
         );

@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2023 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -19,35 +19,39 @@
 ------------------------------------------------------------------------------*/
 
 namespace abc\controllers\admin;
-use abc\core\engine\AController;
 
-if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
+use abc\core\ABC;
+use abc\core\engine\AController;
+use abc\models\catalog\Product;
+use abc\modules\traits\EditProductTrait;
+
+if (!class_exists('abc\core\ABC') || !ABC::env('IS_ADMIN')) {
 	header('Location: static_pages/?forbidden='.basename(__FILE__));
 }
 
-class ControllerPagesCatalogProductExtensions extends AController{
-	private $error = array ();
-	public $data = array ();
+class ControllerPagesCatalogProductExtensions extends AController
+{
+    use EditProductTrait;
+
+    private $error = [];
 
 	public function main(){
 
 		//init controller data
 		$this->extensions->hk_InitData($this, __FUNCTION__);
 
+        $productId = (int)$this->request->get['product_id'];
+
 		$this->loadLanguage('catalog/product');
 		$this->document->setTitle($this->language->get('heading_title'));
-		$this->loadModel('catalog/product');
 
-		if (isset($this->request->get['product_id']) && $this->request->is_GET()) {
-			$product_info = $this->model_catalog_product->getProduct($this->request->get['product_id']);
-			if (!$product_info) {
-				$this->session->data['warning'] = $this->language->get('error_product_not_found');
-				abc_redirect($this->html->getSecureURL('catalog/product'));
-			}
-		}
+        $this->data['product_info'] = $productInfo = Product::getProductInfo($productId);
+        if (!$productInfo) {
+            $this->session->data['warning'] = $this->language->get('error_product_not_found');
+            abc_redirect($this->html->getSecureURL('catalog/product'));
+        }
 
-		$this->data['product_description'] = $this->model_catalog_product->getProductDescriptions($this->request->get['product_id']);
-		$this->data['heading_title'] = $this->language->get('text_edit') . '&nbsp;' . $this->language->get('text_product');
+        $this->document->setTitle($productInfo['name'] . ' ' . $this->language->get('tab_extensions'));
 
 		$this->view->assign('error_warning', $this->error['warning']);
 		$this->view->assign('success', $this->session->data['success']);
@@ -55,36 +59,14 @@ class ControllerPagesCatalogProductExtensions extends AController{
 			unset($this->session->data['success']);
 		}
 
-		$this->document->initBreadcrumb(array (
-				'href'      => $this->html->getSecureURL('index/home'),
-				'text'      => $this->language->get('text_home'),
-				'separator' => false
-		));
-		$this->document->addBreadcrumb(array (
-				'href'      => $this->html->getSecureURL('catalog/product'),
-				'text'      => $this->language->get('heading_title'),
-				'separator' => ' :: '
-		));
-		$this->document->addBreadcrumb(array (
-				'href'      => $this->html->getSecureURL('catalog/product/update',
-						'&product_id=' . $this->request->get['product_id']),
-				'text'      => $this->language->get('text_edit') . '&nbsp;' . $this->language->get('text_product') . ' - ' . $this->data['product_description'][$this->session->data['content_language_id']]['name'],
-				'separator' => ' :: '
-		));
-		$this->document->addBreadcrumb(array (
-				'href'      => $this->html->getSecureURL('catalog/product_extensions',
-						'&product_id=' . $this->request->get['product_id']),
-				'text'      => $this->language->get('tab_extensions'),
-				'separator' => ' :: '
-		));
+        $this->setBreadCrumbs(
+            $productInfo,
+            $this->html->getSecureURL('catalog/product_files', '&product_id=' . $productId),
+            $this->language->get('tab_extensions')
+        );
 
-		$this->data['active'] = 'extensions';
-		//load tabs controller
-		$tabs_obj = $this->dispatch('pages/catalog/product_tabs', array ($this->data));
-		$this->data['product_tabs'] = $tabs_obj->dispatchGetOutput();
-		unset($tabs_obj);
-
-		$this->addChild('pages/catalog/product_summary', 'summary_form', 'pages/catalog/product_summary.tpl');
+        $this->addTabs('extensions');
+        $this->addSummary();
 
 		$this->view->assign('help_url', $this->gen_help_url('product_extensions'));
 		$this->view->batchAssign($this->data);
@@ -93,5 +75,4 @@ class ControllerPagesCatalogProductExtensions extends AController{
 		//update controller data
 		$this->extensions->hk_UpdateData($this, __FUNCTION__);
 	}
-
 }

@@ -70,18 +70,11 @@ class ControllerPagesCatalogProductLayout extends AController
             unset($this->session->data['success']);
         }
 
-
         $this->setBreadCrumbs($productInfo, $page_url, $this->language->get('tab_layout'));
-
         $this->document->setTitle($productInfo['name'] . ' ' . $this->language->get('tab_layout'));
-        //active tab
-        $this->data['active'] = 'layout';
-        //load tabs controller
-        $tabs_obj = $this->dispatch('pages/catalog/product_tabs', [$this->data]);
-        $this->data['product_tabs'] = $tabs_obj->dispatchGetOutput();
-        unset($tabs_obj);
 
-        $this->addChild('pages/catalog/product_summary', 'summary_form', 'pages/catalog/product_summary.tpl');
+        $this->addTabs('layout');
+        $this->addSummary();
 
         $templateTextId = $this->request->get['tmpl_id'] ?? $this->config->get('config_storefront_template');
         $layout = new ALayoutManager($templateTextId);

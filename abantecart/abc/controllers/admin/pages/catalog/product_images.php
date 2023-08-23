@@ -67,11 +67,7 @@ class ControllerPagesCatalogProductImages extends AController
         $this->loadModel('tool/image');
         $this->data['no_image'] = $this->model_tool_image->resize('no_image.jpg', 100, 100);
 
-        $this->data['active'] = 'images';
-        //load tabs controller
-        $tabs_obj = $this->dispatch('pages/catalog/product_tabs', [$this->data]);
-        $this->data['product_tabs'] = $tabs_obj->dispatchGetOutput();
-        unset($tabs_obj);
+        $this->addTabs('images');
 
         $this->data['button_add_image'] = $this->html->buildButton(
             [
@@ -122,7 +118,7 @@ class ControllerPagesCatalogProductImages extends AController
         }
         $this->view->batchAssign($this->data);
         $this->view->assign('help_url', $this->gen_help_url('product_media'));
-        $this->addChild('pages/catalog/product_summary', 'summary_form', 'pages/catalog/product_summary.tpl');
+        $this->addSummary();
 
         $this->addChild(
             'responses/common/resource_library/get_resources_html',

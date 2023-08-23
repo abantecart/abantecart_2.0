@@ -77,11 +77,7 @@ class ControllerPagesCatalogProductRelations extends AController
             ]
             + Store::all()?->pluck('name', 'store_id')?->toArray();
 
-        $this->data['active'] = 'relations';
-        //load tabs controller
-        $tabs_obj = $this->dispatch('pages/catalog/product_tabs', [$this->data]);
-        $this->data['product_tabs'] = $tabs_obj->dispatchGetOutput();
-        unset($tabs_obj);
+        $this->addTabs('relations');
 
         $this->data['category_products'] = $this->html->getSecureURL('product/product/category');
         $this->data['related_products'] = $this->html->getSecureURL('product/product/related');
@@ -205,7 +201,7 @@ class ControllerPagesCatalogProductRelations extends AController
                 '&product_id=' . $productId
             );
         }
-        $this->addChild('pages/catalog/product_summary', 'summary_form', 'pages/catalog/product_summary.tpl');
+        $this->addSummary();
         $this->view->assign('help_url', $this->gen_help_url('product_relations'));
         $this->view->batchAssign($this->data);
         $this->processTemplate('pages/catalog/product_relations.tpl');
