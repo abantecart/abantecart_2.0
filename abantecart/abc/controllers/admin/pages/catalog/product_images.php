@@ -24,6 +24,7 @@ use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\models\catalog\Product;
+use abc\modules\traits\EditProductTrait;
 
 if (!class_exists('abc\core\ABC') || !ABC::env('IS_ADMIN')) {
     header('Location: static_pages/?forbidden=' . basename(__FILE__));
@@ -31,6 +32,7 @@ if (!class_exists('abc\core\ABC') || !ABC::env('IS_ADMIN')) {
 
 class ControllerPagesCatalogProductImages extends AController
 {
+    use EditProductTrait;
     public $error = [];
 
     public function main()
@@ -41,10 +43,9 @@ class ControllerPagesCatalogProductImages extends AController
         $productId = $this->request->get['product_id'];
 
         $this->loadLanguage('catalog/product');
-        $this->document->setTitle($this->language->get('heading_title'));
 
-        $this->data['product_info'] = $product_info = Product::getProductInfo($productId);
-        if (!$product_info) {
+        $this->data['product_info'] = $productInfo = Product::getProductInfo($productId);
+        if (!$productInfo) {
             $this->session->data['warning'] = $this->language->get('error_product_not_found');
             abc_redirect($this->html->getSecureURL('catalog/product'));
         }
@@ -55,42 +56,18 @@ class ControllerPagesCatalogProductImages extends AController
             unset($this->session->data['success']);
         }
 
-        $this->document->initBreadcrumb(
-            [
-                'href' => $this->html->getSecureURL('index/home'),
-                'text' => $this->language->get('text_home'),
-            ]
+        $this->setBreadCrumbs(
+            $productInfo,
+            $this->html->getSecureURL('catalog/product_images', '&product_id=' . $productId),
+            $this->language->get('tab_media')
         );
-        $this->document->addBreadcrumb(
-            [
-                'href' => $this->html->getSecureURL('catalog/product'),
-                'text' => $this->language->get('heading_title'),
-            ]
-        );
-        $this->document->addBreadcrumb(
-            [
-                'href' => $this->html->getSecureURL('catalog/product/update', '&product_id=' . $productId),
-                'text' => $this->language->get('text_edit')
-                    . '&nbsp;' . $this->language->get('text_product')
-                    . ' - ' . $product_info['name'],
-            ]
-        );
-        $this->document->addBreadcrumb(
-            [
-                'href'    => $this->html->getSecureURL('catalog/product_images', '&product_id=' . $productId),
-                'text'    => $this->language->get('tab_media'),
-                'current' => true
-            ]
-        );
+
+        $this->document->setTitle($productInfo['name'] . ' ' . $this->language->get('tab_media'));
 
         $this->loadModel('tool/image');
         $this->data['no_image'] = $this->model_tool_image->resize('no_image.jpg', 100, 100);
 
-        $this->data['active'] = 'images';
-        //load tabs controller
-        $tabs_obj = $this->dispatch('pages/catalog/product_tabs', [$this->data]);
-        $this->data['product_tabs'] = $tabs_obj->dispatchGetOutput();
-        unset($tabs_obj);
+        $this->addTabs('images');
 
         $this->data['button_add_image'] = $this->html->buildButton(
             [
@@ -141,7 +118,7 @@ class ControllerPagesCatalogProductImages extends AController
         }
         $this->view->batchAssign($this->data);
         $this->view->assign('help_url', $this->gen_help_url('product_media'));
-        $this->addChild('pages/catalog/product_summary', 'summary_form', 'pages/catalog/product_summary.tpl');
+        $this->addSummary();
 
         $this->addChild(
             'responses/common/resource_library/get_resources_html',
