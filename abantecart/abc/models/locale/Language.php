@@ -160,7 +160,8 @@ class Language extends BaseModel
                 'integer',
                 'required',
                 'sometimes',
-                'min:1'
+                'min:1',
+                'max:2147483647'
             ],
 
             'messages' => [
@@ -182,6 +183,8 @@ class Language extends BaseModel
                     'default_text'   => 'language id must be more 1!',
                     'section'        => 'admin'
                 ],
+                'max' => ['default_text' => 'Language ID must be less than 2147483647']
+
             ],
         ],
         'name'        => [
@@ -350,21 +353,29 @@ class Language extends BaseModel
                 ]
             ]
         ],
-        'sort_order'  => [
-            'checks'   => [
+        'sort_order' => [
+            'checks' => [
                 'integer',
-                'sometimes'
+                'sometimes',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => ['default_text' => 'sort_order is not integer']
+                'integer' => ['default_text' => 'sort_order is not integer'],
+                'min' => ['default_text' => 'sort_order must be greater than zero'],
+                'max' => ['default_text' => 'sort_order must be less than 2147483647']
             ],
         ],
-        'status'      => [
-            'checks'   => [
-                'integer'
+        'status' => [
+            'checks' => [
+                'integer',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => ['default_text' => 'status is not integer']
+                'integer' => ['default_text' => 'status is not integer'],
+                'min' => ['default_text' => 'status must be greater than zero'],
+                'max' => ['default_text' => 'status must be less than 2147483647']
             ],
         ]
     ];

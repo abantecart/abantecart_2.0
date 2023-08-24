@@ -88,7 +88,7 @@ class Content extends BaseModel
             'messages' => [
                 'integer' => ['default_text' => 'Parent ID is not integer'],
                 'exists' => ['default_text' => 'Parent ID absent in contents table!'],
-                'max' => ['default_text' => 'Category ID must be less than 2147483647']
+                'max' => ['default_text' => 'Parent ID must be less than 2147483647']
             ],
         ],
         'content_id' => [

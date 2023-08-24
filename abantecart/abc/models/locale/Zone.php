@@ -71,7 +71,8 @@ class Zone extends BaseModel
                 'integer',
                 'required',
                 'sometimes',
-                'min:1'
+                'min:1',
+                'max:2147483647'
             ],
             'messages' => [
                 'integer' => [
@@ -92,6 +93,7 @@ class Zone extends BaseModel
                     'default_text' => 'Zone id must be more 1!',
                     'section' => 'admin'
                 ],
+                'max' => ['default_text' => 'Zone ID must be less than 2147483647']
             ]
         ],
         'code' => [
@@ -123,7 +125,9 @@ class Zone extends BaseModel
         ],
         'status' => [
             'checks' => [
-                'integer'
+                'integer',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
                 'integer' => [
@@ -132,11 +136,15 @@ class Zone extends BaseModel
                     'default_text' => 'status must be integer!',
                     'section' => 'admin'
                 ],
+                'min' => ['default_text' => 'status must be greater than zero'],
+                'max' => ['default_text' => 'status must be less than 2147483647']
             ]
         ],
         'sort_order' => [
             'checks' => [
-                'integer'
+                'integer',
+                'min:0',
+                'max:2147483647',
             ],
             'messages' => [
                 'integer' => [
@@ -145,6 +153,8 @@ class Zone extends BaseModel
                     'default_text' => 'sort order must be integer!',
                     'section' => 'admin'
                 ],
+                'min' => ['default_text' => 'sort order must be greater than zero'],
+                'max' => ['default_text' => 'sort order must be less than 2147483647']
             ]
         ]
     ];

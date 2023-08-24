@@ -66,7 +66,8 @@ class ZonesToLocation extends BaseModel
                 'integer',
                 'required',
                 'sometimes',
-                'min:1'
+                'min:1',
+                'max:2147483647'
             ],
             'messages' => [
                 'integer' => [
@@ -87,13 +88,16 @@ class ZonesToLocation extends BaseModel
                     'default_text' => 'zone to location id must be more 1!',
                     'section' => 'admin'
                 ],
+                'max' => ['default_text' => 'zone to location id must be less than 2147483647']
             ]
         ],
         'country_id' => [
             'checks' => [
                 'required',
                 'sometimes',
-                'integer'
+                'integer',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
                 'integer' => [
@@ -108,13 +112,17 @@ class ZonesToLocation extends BaseModel
                     'default_text' => 'country id required!',
                     'section' => 'admin'
                 ],
+                'min' => ['default_text' => 'country id must be greater than zero'],
+                'max' => ['default_text' => 'country id must be less than 2147483647']
             ]
         ],
         'zone_id' => [
             'checks' => [
                 'required',
                 'integer',
-                'sometimes'
+                'sometimes',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
                 'integer' => [
@@ -129,13 +137,17 @@ class ZonesToLocation extends BaseModel
                     'default_text' => 'zone id required!',
                     'section' => 'admin'
                 ],
+                'min' => ['default_text' => 'zone id must be greater than zero'],
+                'max' => ['default_text' => 'zone id must be less than 2147483647']
             ]
         ],
         'location_id' => [
             'checks' => [
                 'required',
                 'sometimes',
-                'integer'
+                'integer',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
                 'integer' => [
@@ -150,6 +162,8 @@ class ZonesToLocation extends BaseModel
                     'default_text' => 'location id required!',
                     'section' => 'admin'
                 ],
+                'min' => ['default_text' => 'location id must be greater than zero'],
+                'max' => ['default_text' => 'location id must be less than 2147483647']
             ]
         ]
     ];
