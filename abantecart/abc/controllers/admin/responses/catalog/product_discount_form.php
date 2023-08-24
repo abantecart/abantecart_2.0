@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2022 Belavier Commerce LLC
+  Copyright © 2011-2023 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -20,30 +20,35 @@
 
 namespace abc\controllers\admin;
 
-use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
-use abc\core\view\AView;
+use abc\models\catalog\ProductDescription;
+use abc\models\catalog\ProductDiscount;
+use abc\models\customer\CustomerGroup;
 use H;
-
-if (!class_exists('abc\core\ABC') || !ABC::env('IS_ADMIN')) {
-    header('Location: static_pages/?forbidden=' . basename(__FILE__));
-}
 
 
 class ControllerResponsesCatalogProductDiscountForm extends AController
 {
+    public $data = [
+        'fields' => [
+            'customer_group_id',
+            'quantity',
+            'priority',
+            'price',
+            'date_start',
+            'date_end'
+        ]
+    ];
     public $error;
 
     public function insert()
     {
-
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
         $this->loadLanguage('catalog/product');
         $this->document->setTitle($this->language->get('heading_title'));
-        $this->loadModel('catalog/product');
         $this->_getForm();
         //update controller data
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
@@ -57,102 +62,82 @@ class ControllerResponsesCatalogProductDiscountForm extends AController
 
         $this->loadLanguage('catalog/product');
         $this->document->setTitle($this->language->get('heading_title'));
-        $this->loadModel('catalog/product');
-
         $this->_getForm();
-
         //update controller data
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
     }
 
 
-    private function _getForm()
+    protected function _getForm()
     {
 
-        $view = new AView($this->registry, 0);
+        $productId = (int)$this->request->get['product_id'];
+        $discountId = (int)$this->request->get['product_discount_id'];
 
-        $view->batchAssign($this->language->getASet('catalog/product'));
+        $this->view->batchAssign($this->language->getASet('catalog/product'));
 
-        $view->assign('error_warning', $this->error['warning']);
-        $view->assign('success', $this->session->data['success']);
+        $this->view->assign('error_warning', $this->error['warning']);
+        $this->view->assign('success', $this->session->data['success']);
         if (isset($this->session->data['success'])) {
             unset($this->session->data['success']);
         }
 
-        $this->data = [];
         $this->data['error'] = $this->error;
-        $this->data['cancel'] = $this->html->getSecureURL('catalog/product_promotions', '&product_id=' . $this->request->get['product_id']);
+        $this->data['cancel'] = $this->html->getSecureURL('catalog/product_promotions', '&product_id=' . $productId);
 
         $this->data['active'] = 'promotions';
-
-        $this->data['product_description'] = $this->model_catalog_product->getProductDescriptions($this->request->get['product_id']);
+        $productName = ProductDescription::where('product_id', $productId)
+            ->where('language_id', $this->language->getLanguageID())
+            ->first()->name;
         $this->data['heading_title'] = $this->language->get('text_edit')
-            . '&nbsp;'
-            . $this->language->get('text_product')
             . ' - '
-            . $this->data['product_description'][$this->session->data['content_language_id']]['name'];
+            . $productName;
 
 
-        if (isset($this->request->get['product_discount_id']) && $this->request->is_GET()) {
-            $discount_info = $this->model_catalog_product->getProductDiscount($this->request->get['product_discount_id']);
-            if ($discount_info['date_start'] == '0000-00-00') $discount_info['date_start'] = '';
-            if ($discount_info['date_end'] == '0000-00-00') $discount_info['date_end'] = '';
-        }
-
-        $this->loadModel('sale/customer_group');
-        $results = $this->model_sale_customer_group->getCustomerGroups();
-        $this->data['customer_groups'] = [];
-        foreach ($results as $r) {
-            $this->data['customer_groups'][$r['customer_group_id']] = $r['name'];
-        }
-
-        $fields = ['customer_group_id', 'quantity', 'priority', 'price', 'date_start', 'date_end',];
-        foreach ($fields as $f) {
-            if (isset ($this->request->post [$f])) {
-                $this->data [$f] = $this->request->post [$f];
-                if (in_array($f, ['date_start', 'date_end'])) {
-                    $this->data [$f] = H::dateDisplay2ISO($this->data [$f], $this->language->get('date_format_short'));
+        if ($discountId) {
+            $discountInfo = ProductDiscount::find($discountId)?->toArray();
+            foreach (['date_start', 'date_end'] as $dateName) {
+                if ($discountInfo[$dateName] == '0000-00-00') {
+                    $discountInfo[$dateName] = '';
+                } else {
+                    $discountInfo[$dateName] = H::dateISO2Display(
+                        $discountInfo[$dateName],
+                        $this->language->get('date_format_short'));
                 }
-            } elseif (isset($discount_info)) {
-                $this->data[$f] = $discount_info[$f];
-            } else {
-                $this->data[$f] = '';
             }
+            $this->data = array_merge($this->data, (array)$discountInfo);
         }
 
-        if (!isset($this->request->get['product_discount_id'])) {
+        $this->data['customer_groups'] = CustomerGroup::all()?->pluck('name', 'customer_group_id')?->toArray();
+
+        if (!$discountId) {
             $this->data['action'] = $this->html->getSecureURL(
                 'catalog/product_promotions',
-                '&product_id=' . $this->request->get['product_id']);
+                '&product_id=' . $this->request->get['product_id']
+            );
             $this->data['form_title'] = $this->language->get('text_insert') . '&nbsp;' . $this->language->get('entry_discount');
             $this->data['update'] = '';
             $form = new AForm('ST');
         } else {
             $this->data['action'] = $this->html->getSecureURL(
                 'catalog/product_promotions',
-                '&product_id=' . $this->request->get['product_id'] . '&product_discount_id=' . $this->request->get['product_discount_id']);
+                '&product_id=' . $productId . '&product_discount_id=' . $discountId
+            );
             $this->data['form_title'] = $this->language->get('text_edit')
-                . '&nbsp;'
-                . $this->language->get('entry_discount');
+                . '&nbsp;' . $this->language->get('entry_discount');
             $this->data['update'] = $this->html->getSecureURL(
                 'listing_grid/product/update_discount_field',
-                '&id=' . $this->request->get['product_discount_id']);
+                '&id=' . $discountId
+            );
             $form = new AForm('HS');
-
         }
-
-        $this->document->addBreadcrumb(
-            [
-                'href' => $this->data['action'],
-                'text' => $this->data['form_title'],
-                'separator' => ' :: '
-            ]);
 
         $form->setForm(
             [
                 'form_name' => 'productFrm',
                 'update' => $this->data['update'],
-            ]);
+            ]
+        );
 
         $this->data['form']['id'] = 'productFrm';
         $this->data['form']['form_open'] = $form->getFieldHtml(
@@ -161,13 +146,15 @@ class ControllerResponsesCatalogProductDiscountForm extends AController
                     'name' => 'productFrm',
                     'action' => $this->data['action'],
                     'attr' => 'data-confirm-exit="true"  class="aform form-horizontal"',
-                ]) .
+                ]
+            ) .
             $form->getFieldHtml(
                 [
-                    'type' => 'hidden',
-                    'name' => 'promotion_type',
+                    'type'  => 'hidden',
+                    'name'  => 'promotion_type',
                     'value' => 'discount'
-                ]);
+                ]
+            );
 
         $this->data['form']['submit'] = $form->getFieldHtml(
             [
@@ -175,23 +162,25 @@ class ControllerResponsesCatalogProductDiscountForm extends AController
                 'name' => 'submit',
                 'text' => $this->language->get('button_save'),
                 'style' => 'button1',
-            ]);
+            ]
+        );
         $this->data['form']['cancel'] = $form->getFieldHtml(
             [
                 'type' => 'button',
                 'name' => 'cancel',
                 'text' => $this->language->get('button_cancel'),
                 'style' => 'button2',
-            ]);
-
+            ]
+        );
 
         $this->data['form']['fields']['customer_group'] = $form->getFieldHtml(
             [
-                'type' => 'selectbox',
-                'name' => 'customer_group_id',
+                'type'  => 'selectbox',
+                'name'  => 'customer_group_id',
                 'value' => $this->data['customer_group_id'],
                 'options' => $this->data['customer_groups'],
-            ]);
+            ]
+        );
 
         $this->data['form']['fields']['quantity'] = $form->getFieldHtml(
             [
@@ -199,48 +188,53 @@ class ControllerResponsesCatalogProductDiscountForm extends AController
                 'name' => 'quantity',
                 'value' => $this->data['quantity'],
                 'style' => 'small-field',
-            ]);
-        $this->data['form']['fields']['priority'] = $form->getFieldHtml([
-            'type' => 'input',
-            'name' => 'priority',
-            'value' => $this->data['priority'],
-            'style' => 'small-field',
-        ]);
+            ]
+        );
+        $this->data['form']['fields']['priority'] = $form->getFieldHtml(
+            [
+                'type'  => 'input',
+                'name'  => 'priority',
+                'value' => $this->data['priority'],
+                'style' => 'small-field',
+            ]
+        );
         $this->data['form']['fields']['price'] = $form->getFieldHtml(
             [
-                'type' => 'input',
-                'name' => 'price',
+                'type'  => 'input',
+                'name'  => 'price',
                 'value' => H::moneyDisplayFormat($this->data['price']),
                 'style' => 'tiny-field'
-            ]);
+            ]
+        );
 
         $this->data['js_date_format'] = H::format4Datepicker($this->language->get('date_format_short'));
         $this->data['form']['fields']['date_start'] = $form->getFieldHtml(
             [
-                'type' => 'date',
-                'name' => 'date_start',
-                'value' => H::dateISO2Display($this->data['date_start'], $this->language->get('date_format_short')),
-                'default' => '',
+                'type'      => 'date',
+                'name'      => 'date_start',
+                'value'     => H::dateISO2Display($this->data['date_start'], $this->language->get('date_format_short')),
+                'default'   => '',
                 'dateformat' => H::format4Datepicker($this->language->get('date_format_short')),
                 'highlight' => 'future',
-                'style' => 'small-field',
-            ]);
+                'style'     => 'small-field',
+            ]
+        );
+
         $this->data['form']['fields']['date_end'] = $form->getFieldHtml(
             [
-                'type' => 'date',
-                'name' => 'date_end',
-                'value' => H::dateISO2Display($this->data['date_end'], $this->language->get('date_format_short')),
-                'default' => '',
+                'type'      => 'date',
+                'name'      => 'date_end',
+                'value'     => H::dateISO2Display($this->data['date_end'], $this->language->get('date_format_short')),
+                'default'   => '',
                 'dateformat' => H::format4Datepicker($this->language->get('date_format_short')),
                 'highlight' => 'future',
-                'style' => 'small-field',
-            ]);
+                'style'     => 'small-field',
+            ]
+        );
 
-        $view->assign('help_url', $this->gen_help_url('product_discount_edit'));
-        $view->batchAssign($this->data);
-        $this->data['response'] = $view->fetch('responses/catalog/product_promotion_form.tpl');
+        $this->view->assign('help_url', $this->gen_help_url('product_discount_edit'));
+        $this->view->batchAssign($this->data);
+        $this->data['response'] = $this->view->fetch('responses/catalog/product_promotion_form.tpl');
         $this->response->setOutput($this->data['response']);
     }
-
-
 }
