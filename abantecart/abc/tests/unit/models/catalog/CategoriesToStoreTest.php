@@ -12,8 +12,8 @@ class CategoriesToStoreTest extends TestCase
     {
         $categoryToStore = new CategoriesToStore(
             [
-                'category_id'=>-1,
-                'store_id'             => -1,
+                'category_id' => -1,
+                'store_id' => -1,
 
             ]
         );
@@ -21,7 +21,7 @@ class CategoriesToStoreTest extends TestCase
         try {
             $categoryToStore->validate();
         } catch (ValidationException $e) {
-            $errors =  $categoryToStore->errors()['validation'];
+            $errors = $categoryToStore->errors()['validation'];
             //var_dump($errors);
         }
 
@@ -30,15 +30,15 @@ class CategoriesToStoreTest extends TestCase
 
         $categoryToStore = new CategoriesToStore(
             [
-                'category_id'=>1,
-                'store_id'=> 1,
+                'category_id' => 1,
+                'store_id' => 1,
             ]
         );
         $errors = [];
         try {
             $categoryToStore->validate();
         } catch (ValidationException $e) {
-            $errors =  $categoryToStore->errors()['validation'];
+            $errors = $categoryToStore->errors()['validation'];
             //var_dump($errors);
         }
         $this->assertCount(0, $errors);

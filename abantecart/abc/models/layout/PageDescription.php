@@ -66,7 +66,7 @@ class PageDescription extends BaseModel
     protected $rules = [
         /** @see validate() */
         'language_id' => [
-            'checks'   => [
+            'checks' => [
                 'int',
                 'required',
                 'sometimes',
@@ -75,25 +75,25 @@ class PageDescription extends BaseModel
             ],
             'messages' => [
                 'int' => ['default_text' => 'Language ID is not integer!'],
-                'max'=>['default_text'=>'Language ID must be less than 2147483647'],
-                'min'=>['default_text'=> 'Language ID value must be greater than zero'],
-                'required'=>['default_text'=>'Language ID required']
+                'max' => ['default_text' => 'Language ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Language ID value must be greater than zero'],
+                'required' => ['default_text' => 'Language ID required']
             ],
         ],
         'page_id' => [
-            'checks'   => [
+            'checks' => [
                 'int',
                 'min:0',
                 'max:2147483647'
             ],
             'messages' => [
                 'int' => ['default_text' => 'Page ID is not integer!'],
-                'max'=>['default_text'=>'Page ID must be less than 2147483647'],
-                'min'=>['default_text'=> 'Page ID value must be greater than zero'],
+                'max' => ['default_text' => 'Page ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Page ID value must be greater than zero'],
             ],
         ],
-        'name'        => [
-            'checks'   => [
+        'name' => [
+            'checks' => [
                 'string',
                 'required',
                 'sometimes',
@@ -103,8 +103,8 @@ class PageDescription extends BaseModel
                 '*' => ['default_text' => 'Page Name is empty or length more than 255 chars!'],
             ],
         ],
-        'title'       => [
-            'checks'   => [
+        'title' => [
+            'checks' => [
                 'string',
                 'required',
                 'sometimes',
@@ -114,8 +114,8 @@ class PageDescription extends BaseModel
                 '*' => ['default_text' => 'Page Title is empty or length more than 255 chars!'],
             ],
         ],
-        'seo_url'     => [
-            'checks'   => [
+        'seo_url' => [
+            'checks' => [
                 'string',
                 'max:100'
             ],
@@ -124,7 +124,7 @@ class PageDescription extends BaseModel
             ],
         ],
         'description' => [
-            'checks'   => [
+            'checks' => [
                 'string',
                 'max:255'
             ],
@@ -132,8 +132,8 @@ class PageDescription extends BaseModel
                 '*' => ['default_text' => 'Page Description more than 255 chars!'],
             ],
         ],
-        'content'     => [
-            'checks'   => [
+        'content' => [
+            'checks' => [
                 'string',
                 'max:1500'
             ],

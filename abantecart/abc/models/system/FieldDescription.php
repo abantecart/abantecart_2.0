@@ -59,8 +59,8 @@ class FieldDescription extends BaseModel
 
     protected $rules = [
         /** @see validate() */
-        'field_id'  => [
-            'checks'   => [
+        'field_id' => [
+            'checks' => [
                 'integer',
                 'exists:order_data_types',
                 'min:0',
@@ -68,13 +68,13 @@ class FieldDescription extends BaseModel
             ],
             'messages' => [
                 'integer' => ['default_text' => ':attribute is not integer!'],
-                'max'=>['default_text'=>':attribute must be less than 2147483647'],
-                'min'=>['default_text'=> ':attribute value must be greater than zero'],
-                'exists'=>['default_text'=>':attribute not exists in order_data_types table']
+                'max' => ['default_text' => ':attribute must be less than 2147483647'],
+                'min' => ['default_text' => ':attribute value must be greater than zero'],
+                'exists' => ['default_text' => ':attribute not exists in order_data_types table']
             ],
         ],
         'language_id' => [
-            'checks'   => [
+            'checks' => [
                 'integer',
                 'required',
                 'exists:orders',
@@ -83,10 +83,10 @@ class FieldDescription extends BaseModel
             ],
             'messages' => [
                 'integer' => ['default_text' => ':attribute is not integer!'],
-                'max'=>['default_text'=>':attribute must be less than 2147483647'],
-                'min'=>['default_text'=> ':attribute value must be greater than zero'],
-                'exists'=>['default_text'=>':attribute not exists in order_data_types table'],
-                'required'=>['default_text'=>':attribute required']
+                'max' => ['default_text' => ':attribute must be less than 2147483647'],
+                'min' => ['default_text' => ':attribute value must be greater than zero'],
+                'exists' => ['default_text' => ':attribute not exists in order_data_types table'],
+                'required' => ['default_text' => ':attribute required']
             ],
         ],
     ];

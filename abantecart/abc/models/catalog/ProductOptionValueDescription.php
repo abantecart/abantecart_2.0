@@ -76,7 +76,7 @@ class ProductOptionValueDescription extends BaseModel
     protected $rules = [
         /** @see validate() */
         'product_option_value_id' => [
-            'checks'   => [
+            'checks' => [
                 'integer',
                 'required',
                 'exists:product_option_values',
@@ -84,12 +84,12 @@ class ProductOptionValueDescription extends BaseModel
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Product Option Value ID is not Integer']],
-                'max'=>['default_text'=>'Product Option Value ID must be less than 2147483647'],
-                'exist'=>['default_text'=>'Product Option Value ID absent in product_option_values table!']
+            'max' => ['default_text' => 'Product Option Value ID must be less than 2147483647'],
+            'exist' => ['default_text' => 'Product Option Value ID absent in product_option_values table!']
         ],
 
         'product_id' => [
-            'checks'   => [
+            'checks' => [
                 'integer',
                 'required',
                 'exists:products',
@@ -97,13 +97,13 @@ class ProductOptionValueDescription extends BaseModel
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Product ID is not Integer or absent in products table!'],
-                'max'=>['default_text'=>'Product Option Value ID must be less than 2147483647'],
-                'exist'=>['default_text'=>'Product Option Value ID absent in product_option_values table!']
+                'max' => ['default_text' => 'Product Option Value ID must be less than 2147483647'],
+                'exist' => ['default_text' => 'Product Option Value ID absent in product_option_values table!']
             ],
         ],
 
         'language_id' => [
-            'checks'   => [
+            'checks' => [
                 'integer',
                 'required',
                 'exists:languages',
@@ -111,13 +111,13 @@ class ProductOptionValueDescription extends BaseModel
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Language ID is not Integer or absent in languages table!'],
-                'max'=>['default_text'=>'Language ID must be less than 2147483647'],
-                'exist'=>['default_text'=>'Language ID absent in languages table!']
+                'max' => ['default_text' => 'Language ID must be less than 2147483647'],
+                'exist' => ['default_text' => 'Language ID absent in languages table!']
             ],
         ],
 
         'name' => [
-            'checks'   => [
+            'checks' => [
                 'string',
                 'sometimes',
                 'required',

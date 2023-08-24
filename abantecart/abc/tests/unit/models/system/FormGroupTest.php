@@ -13,9 +13,9 @@ class FormGroupTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'form_id'           => false,
-                'sort_order'            => false,
-                'status'                => false,
+                'form_id' => false,
+                'sort_order' => false,
+                'status' => false,
             ];
             $form->validate($data);
         } catch (ValidationException $e) {
@@ -27,9 +27,9 @@ class FormGroupTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'form_id'           => 1,
-                'sort_order'            => 1,
-                'status'                => 1,
+                'form_id' => 1,
+                'sort_order' => 1,
+                'status' => 1,
             ];
             $form->validate($data);
         } catch (ValidationException $e) {

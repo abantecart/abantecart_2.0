@@ -14,8 +14,8 @@ class ContentsToStoreTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'content_id'           => false,
-                'store_id'                  => false,
+                'content_id' => false,
+                'store_id' => false,
             ];
             $content->validate($data);
         } catch (ValidationException $e) {
@@ -26,8 +26,8 @@ class ContentsToStoreTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'content_id'           => 1,
-                'store_id'             => 36,
+                'content_id' => 1,
+                'store_id' => 36,
             ];
             $content->validate($data);
         } catch (ValidationException $e) {

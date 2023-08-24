@@ -13,8 +13,8 @@ class TaxRateDescriptionTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'tax_rate_id'           => false,
-                'language_id'                  => false,
+                'tax_rate_id' => false,
+                'language_id' => false,
             ];
             $tax->validate($data);
         } catch (ValidationException $e) {
@@ -26,8 +26,8 @@ class TaxRateDescriptionTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'tax_rate_id'           => 1,
-                'language_id'  => 1,
+                'tax_rate_id' => 1,
+                'language_id' => 1,
             ];
             $tax->validate($data);
         } catch (ValidationException $e) {

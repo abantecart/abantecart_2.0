@@ -65,28 +65,28 @@ class Extension extends BaseModel
 
     protected $rules = [
         /** @see validate() */
-        'status'  => [
-            'checks'   => [
+        'status' => [
+            'checks' => [
                 'integer',
                 'min:0',
                 'max:2147483647'
             ],
             'messages' => [
                 'integer' => ['default_text' => ':attribute is not integer!'],
-                'max'=>['default_text'=>':attribute must be less than 2147483647'],
-                'min'=>['default_text'=> ':attribute value must be greater than zero'],
+                'max' => ['default_text' => ':attribute must be less than 2147483647'],
+                'min' => ['default_text' => ':attribute value must be greater than zero'],
             ],
         ],
         'priority' => [
-            'checks'   => [
+            'checks' => [
                 'integer',
                 'min:0',
                 'max:2147483647'
             ],
             'messages' => [
                 'integer' => ['default_text' => ':attribute is not integer!'],
-                'max'=>['default_text'=>':attribute must be less than 2147483647'],
-                'min'=>['default_text'=> ':attribute value must be greater than zero'],
+                'max' => ['default_text' => ':attribute must be less than 2147483647'],
+                'min' => ['default_text' => ':attribute value must be greater than zero'],
             ],
         ],
     ];

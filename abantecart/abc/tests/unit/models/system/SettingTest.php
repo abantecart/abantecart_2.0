@@ -13,7 +13,7 @@ class SettingTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'store_id'           => false,
+                'store_id' => false,
             ];
             $setting->validate($data);
         } catch (ValidationException $e) {
@@ -25,7 +25,7 @@ class SettingTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'store_id'           => 1,
+                'store_id' => 1,
             ];
             $setting->validate($data);
         } catch (ValidationException $e) {

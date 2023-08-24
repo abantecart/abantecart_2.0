@@ -60,8 +60,8 @@ class BlockLayout extends BaseModel
     ];
     protected $rules = [
         /** @see validate() */
-        'layout_id'          => [
-            'checks'   => [
+        'layout_id' => [
+            'checks' => [
                 'int',
                 'required',
                 'sometimes',
@@ -70,13 +70,13 @@ class BlockLayout extends BaseModel
             ],
             'messages' => [
                 'int' => ['default_text' => 'Layout ID is not integer!'],
-                'max'=>['default_text'=>'Layout ID must be less than 2147483647'],
-                'min'=>['default_text'=> 'Layout ID value must be greater than zero'],
-                'required'=>['default_text'=>'Layout ID required']
+                'max' => ['default_text' => 'Layout ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Layout ID value must be greater than zero'],
+                'required' => ['default_text' => 'Layout ID required']
             ],
         ],
-        'block_id'           => [
-            'checks'   => [
+        'block_id' => [
+            'checks' => [
                 'int',
                 'required',
                 'sometimes',
@@ -85,49 +85,49 @@ class BlockLayout extends BaseModel
             ],
             'messages' => [
                 'int' => ['default_text' => 'Block ID is not integer!'],
-                'max'=>['default_text'=>'Block ID must be less than 2147483647'],
-                'min'=>['default_text'=> 'Block ID value must be greater than zero'],
-                'required'=>['default_text'=>'Block ID required']
+                'max' => ['default_text' => 'Block ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Block ID value must be greater than zero'],
+                'required' => ['default_text' => 'Block ID required']
             ],
         ],
-        'custom_block_id'    => [
-            'checks'   => [
+        'custom_block_id' => [
+            'checks' => [
                 'int',
                 'min:0',
                 'max:2147483647'
             ],
             'messages' => [
                 'int' => ['default_text' => 'Custom Block ID is not integer!'],
-                'max'=>['default_text'=>'Custom Block ID must be less than 2147483647'],
-                'min'=>['default_text'=> 'Custom Block ID value must be greater than zero'],
+                'max' => ['default_text' => 'Custom Block ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Custom Block ID value must be greater than zero'],
             ],
         ],
         'parent_instance_id' => [
-            'checks'   => [
+            'checks' => [
                 'int',
                 'min:0',
                 'max:2147483647'
             ],
             'messages' => [
                 'int' => ['default_text' => 'Parent Instance ID is not integer!'],
-                'max'=>['default_text'=>'Parent Instance ID must be less than 2147483647'],
-                'min'=>['default_text'=> 'Parent Instance ID value must be greater than zero'],
+                'max' => ['default_text' => 'Parent Instance ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Parent Instance ID value must be greater than zero'],
             ],
         ],
-        'position'           => [
-            'checks'   => [
+        'position' => [
+            'checks' => [
                 'int',
                 'min:0',
                 'max:2147483647'
             ],
             'messages' => [
                 '*' => ['default_text' => 'Position is not integer!'],
-                'max'=>['default_text'=>'Position must be less than 2147483647'],
-                'min'=>['default_text'=> 'Position value must be greater than zero'],
+                'max' => ['default_text' => 'Position must be less than 2147483647'],
+                'min' => ['default_text' => 'Position value must be greater than zero'],
             ],
         ],
-        'status'             => [
-            'checks'   => [
+        'status' => [
+            'checks' => [
                 'bool',
             ],
             'messages' => [

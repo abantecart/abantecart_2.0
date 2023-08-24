@@ -1,37 +1,37 @@
 <?php
 
 
-use abc\models\system\Message;
-use Illuminate\Validation\ValidationException;
+use abc\models\user\AntMessage;
 use PHPUnit\Framework\TestCase;
+use Illuminate\Validation\ValidationException;
 
-class MessageTest extends TestCase
+
+class AntMessageTest extends TestCase
 {
-    public function testMessageValidation()
+    public function testAntMessageValidation()
     {
-        $massage = new Message();
+        $ant = new AntMessage();
         $errors = [];
         try {
             $data = [
+                'priority' => false,
                 'viewed' => false,
-                'repeated' => false,
             ];
-            $massage->validate($data);
+            $ant->validate($data);
         } catch (ValidationException $e) {
-            $errors = $massage->errors()['validation'];
-            //var_Dump($errors);
+            $errors = $ant->errors()['validation'];
         }
         $this->assertCount(2, $errors);
 
         $errors = [];
         try {
             $data = [
+                'priority' => 1,
                 'viewed' => 1,
-                'repeated' => 1,
             ];
-            $massage->validate($data);
+            $ant->validate($data);
         } catch (ValidationException $e) {
-            $errors = $massage->errors()['validation'];
+            $errors = $ant->errors()['validation'];
             //var_Dump($errors);
         }
         $this->assertCount(0, $errors);

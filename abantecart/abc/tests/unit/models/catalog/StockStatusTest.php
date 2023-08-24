@@ -14,8 +14,8 @@ class StockStatusTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'stock_status_id'           => false,
-                'language_id'                  => false,
+                'stock_status_id' => false,
+                'language_id' => false,
             ];
             $stock->validate($data);
         } catch (ValidationException $e) {
@@ -26,8 +26,8 @@ class StockStatusTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'stock_status_id'           => 1,
-                'language_id'                  => 1,
+                'stock_status_id' => 1,
+                'language_id' => 1,
             ];
             $stock->validate($data);
         } catch (ValidationException $e) {

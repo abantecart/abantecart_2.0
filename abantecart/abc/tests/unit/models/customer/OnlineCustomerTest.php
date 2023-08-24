@@ -12,7 +12,7 @@ class OnlineCustomerTest extends TestCase
     {
         $customer = new OnlineCustomer(
             [
-                'customer_id'=>-1,
+                'customer_id' => -1,
 
             ]
         );
@@ -20,7 +20,7 @@ class OnlineCustomerTest extends TestCase
         try {
             $customer->validate();
         } catch (ValidationException $e) {
-            $errors =  $customer->errors()['validation'];
+            $errors = $customer->errors()['validation'];
             //var_dump($errors);
         }
 
@@ -29,14 +29,14 @@ class OnlineCustomerTest extends TestCase
 
         $customer = new OnlineCustomer(
             [
-                'customer_id'=>1,
+                'customer_id' => 1,
             ]
         );
         $errors = [];
         try {
             $customer->validate();
         } catch (ValidationException $e) {
-            $errors =  $customer->errors()['validation'];
+            $errors = $customer->errors()['validation'];
             //var_dump($errors);
         }
         $this->assertCount(0, $errors);

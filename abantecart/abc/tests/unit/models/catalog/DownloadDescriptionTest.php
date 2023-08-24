@@ -14,8 +14,8 @@ class DownloadDescriptionTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'download_id'           => false,
-                'language_id'                  => false,
+                'download_id' => false,
+                'language_id' => false,
             ];
             $download->validate($data);
         } catch (ValidationException $e) {
@@ -27,8 +27,8 @@ class DownloadDescriptionTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'download_id'           => 1,
-                'language_id'                  => 1,
+                'download_id' => 1,
+                'language_id' => 1,
             ];
             $download->validate($data);
         } catch (ValidationException $e) {

@@ -13,9 +13,9 @@ class DatasetValueTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'dataset_column_id'           => false,
-                'value_integer'             => false,
-                'row_id'                  => false,
+                'dataset_column_id' => false,
+                'value_integer' => false,
+                'row_id' => false,
             ];
             $dataset->validate($data);
         } catch (ValidationException $e) {
@@ -26,9 +26,9 @@ class DatasetValueTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'dataset_column_id'           => 1,
-                'value_integer'             => 1,
-                'row_id'  => 1,
+                'dataset_column_id' => 1,
+                'value_integer' => 1,
+                'row_id' => 1,
             ];
             $dataset->validate($data);
         } catch (ValidationException $e) {

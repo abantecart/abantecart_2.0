@@ -112,7 +112,7 @@ class Category extends BaseModel
     protected $rules = [
         /** @see validate() */
         'category_id' => [
-            'checks'   => [
+            'checks' => [
                 'integer',
                 'sometimes',
                 'required',
@@ -121,13 +121,13 @@ class Category extends BaseModel
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Category ID is not integer!'],
-                'max'=>['default_text'=>'Category ID must be less than 2147483647'],
-                'min'=>['default_text'=> 'Category ID value must be greater than zero'],
-                'required'=>['default_text'=>'Category ID required']
+                'max' => ['default_text' => 'Category ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Category ID value must be greater than zero'],
+                'required' => ['default_text' => 'Category ID required']
             ],
         ],
-        'parent_id'   => [
-            'checks'   => [
+        'parent_id' => [
+            'checks' => [
                 'integer',
                 'nullable',
                 'exists:categories,category_id',
@@ -135,12 +135,12 @@ class Category extends BaseModel
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Parent ID is not integer!'],
-                'max'=>['default_text'=>'Parent ID must be less than 2147483647'],
-                'exists'=>['default_text'=> 'Parent ID not absent in categories table']
+                'max' => ['default_text' => 'Parent ID must be less than 2147483647'],
+                'exists' => ['default_text' => 'Parent ID not absent in categories table']
             ],
         ],
-        'uuid'        => [
-            'checks'   => [
+        'uuid' => [
+            'checks' => [
                 'string',
                 'nullable',
             ],
@@ -148,8 +148,8 @@ class Category extends BaseModel
                 '*' => ['default_text' => 'UUID is not a string!'],
             ],
         ],
-        'path'        => [
-            'checks'   => [
+        'path' => [
+            'checks' => [
                 'string',
                 'sometimes',
                 'required',
@@ -161,60 +161,60 @@ class Category extends BaseModel
         ],
 
         'total_products_count' => [
-            'checks'   => [
+            'checks' => [
                 'integer',
                 'min:0',
                 'max:2147483647'
             ],
             'messages' => [
                 'integer' => ['default_text' => ':attribute is not integer!'],
-                'min'=>['default_text' =>':attribute value must be greater than zero'],
-                'max'=>['default_text' =>':attribute must be less than 2147483647']
+                'min' => ['default_text' => ':attribute value must be greater than zero'],
+                'max' => ['default_text' => ':attribute must be less than 2147483647']
             ],
         ],
 
         'active_products_count' => [
-            'checks'   => [
+            'checks' => [
                 'integer',
                 'min:0',
                 'max:2147483647'
             ],
             'messages' => [
                 'integer' => ['default_text' => ':attribute is not integer!'],
-                'min'=>['default_text' =>':attribute value must be greater than zero'],
-                'max'=>['default_text' =>':attribute must be less than 2147483647']
+                'min' => ['default_text' => ':attribute value must be greater than zero'],
+                'max' => ['default_text' => ':attribute must be less than 2147483647']
             ],
         ],
 
         'children_count' => [
-            'checks'   => [
+            'checks' => [
                 'integer',
                 'min:0',
                 'max:2147483647'
             ],
             'messages' => [
                 'integer' => ['default_text' => ':attribute is not integer!'],
-                'min'=>['default_text' =>':attribute value must be greater than zero'],
-                'max'=>['default_text' =>':attribute must be less than 2147483647']
+                'min' => ['default_text' => ':attribute value must be greater than zero'],
+                'max' => ['default_text' => ':attribute must be less than 2147483647']
             ],
         ],
 
         'sort_order' => [
-            'checks'   => [
+            'checks' => [
                 'integer',
                 'min:0',
                 'max:2147483647'
             ],
             'messages' => [
                 'integer' => ['default_text' => ':attribute is not integer!'],
-                'min'=>['default_text' =>':attribute value must be greater than zero'],
-                'max'=>['default_text' =>':attribute must be less than 2147483647']
+                'min' => ['default_text' => ':attribute value must be greater than zero'],
+                'max' => ['default_text' => ':attribute must be less than 2147483647']
 
             ],
         ],
 
         'status' => [
-            'checks'   => [
+            'checks' => [
                 'boolean',
             ],
             'messages' => [

@@ -14,8 +14,8 @@ class DatasetDefinitionTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'dataset_id'           => false,
-                'dataset_column_sort_order'                  => false,
+                'dataset_id' => false,
+                'dataset_column_sort_order' => false,
             ];
             $dataset->validate($data);
         } catch (ValidationException $e) {
@@ -26,8 +26,8 @@ class DatasetDefinitionTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'dataset_id'           => 1,
-                'dataset_column_sort_order'             => 36,
+                'dataset_id' => 1,
+                'dataset_column_sort_order' => 36,
             ];
             $dataset->validate($data);
         } catch (ValidationException $e) {

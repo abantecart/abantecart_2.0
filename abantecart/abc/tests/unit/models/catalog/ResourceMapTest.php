@@ -14,9 +14,9 @@ class ResourceMapTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'resource_id'           => false,
-                'object_id'                  => false,
-                'sort_order'             => false,
+                'resource_id' => false,
+                'object_id' => false,
+                'sort_order' => false,
             ];
             $resource->validate($data);
         } catch (ValidationException $e) {
@@ -27,9 +27,9 @@ class ResourceMapTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'resource_id'           => 1,
-                'object_id'                  =>1,
-                'sort_order'            => 1,
+                'resource_id' => 1,
+                'object_id' => 1,
+                'sort_order' => 1,
             ];
             $resource->validate($data);
         } catch (ValidationException $e) {

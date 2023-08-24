@@ -14,7 +14,7 @@ class DatasetPropertyTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'dataset_id'           => false,
+                'dataset_id' => false,
             ];
             $dataset->validate($data);
         } catch (ValidationException $e) {
@@ -25,7 +25,7 @@ class DatasetPropertyTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'dataset_id'           => 1,
+                'dataset_id' => 1,
 
             ];
             $dataset->validate($data);

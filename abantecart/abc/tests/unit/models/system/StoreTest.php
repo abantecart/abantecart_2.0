@@ -13,7 +13,7 @@ class StoreTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'status'           => false,
+                'status' => false,
             ];
             $store->validate($data);
         } catch (ValidationException $e) {
@@ -25,7 +25,7 @@ class StoreTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'status'           => 1,
+                'status' => 1,
             ];
             $store->validate($data);
         } catch (ValidationException $e) {

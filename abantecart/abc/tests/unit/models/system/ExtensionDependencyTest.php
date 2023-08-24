@@ -13,8 +13,8 @@ class ExtensionDependencyTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'extension_id'           => false,
-                'extension_parent_id'                  => false,
+                'extension_id' => false,
+                'extension_parent_id' => false,
             ];
             $extension->validate($data);
         } catch (ValidationException $e) {
@@ -25,8 +25,8 @@ class ExtensionDependencyTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'extension_id'           => 1,
-                'extension_parent_id'  => 1,
+                'extension_id' => 1,
+                'extension_parent_id' => 1,
             ];
             $extension->validate($data);
         } catch (ValidationException $e) {

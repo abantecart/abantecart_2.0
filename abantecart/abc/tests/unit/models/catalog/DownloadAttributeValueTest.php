@@ -14,8 +14,8 @@ class DownloadAttributeValueTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'attribute_id'           => false,
-                'download_id'                  => false,
+                'attribute_id' => false,
+                'download_id' => false,
             ];
             $download->validate($data);
         } catch (ValidationException $e) {
@@ -27,8 +27,8 @@ class DownloadAttributeValueTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'download_id'           => 1,
-                'attribute_id'                  => 1,
+                'download_id' => 1,
+                'attribute_id' => 1,
             ];
             $download->validate($data);
         } catch (ValidationException $e) {

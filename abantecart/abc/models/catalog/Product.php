@@ -237,9 +237,9 @@ class Product extends BaseModel
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Product ID is not Integer!'],
-                'min'=>['default_text'=> 'Product ID value must be greater than zero'],
-                'max'=>['default_text'=>'Product ID must be less than 2147483647']
-                ],
+                'min' => ['default_text' => 'Product ID value must be greater than zero'],
+                'max' => ['default_text' => 'Product ID must be less than 2147483647']
+            ],
         ],
 
         'uuid' => [
@@ -250,28 +250,28 @@ class Product extends BaseModel
             ],
             'messages' => [
                 '*' => [
-                    'default_text' => 'Invalid UUID Format! Please follow pattern ' . Uuid::VALID_PATTERN,
+                    'default_text' => 'Invalid UUID Format! Please follow pattern '.Uuid::VALID_PATTERN,
                 ],
             ],
         ],
 
         'model' => [
-            'checks'   => [
+            'checks' => [
                 'string',
                 'between:1,64',
             ],
             'messages' => [
                 '*' => [
-                    'language_key'   => 'error_model',
+                    'language_key' => 'error_model',
                     'language_block' => 'catalog/product',
-                    'default_text'   => 'Product Model must be less than 64 characters! Recommended 5-25 characters',
-                    'section'        => 'admin',
+                    'default_text' => 'Product Model must be less than 64 characters! Recommended 5-25 characters',
+                    'section' => 'admin',
                 ],
             ],
         ],
 
         'sku' => [
-            'checks'   => [
+            'checks' => [
                 'string',
                 'between:1,64',
             ],
@@ -283,7 +283,7 @@ class Product extends BaseModel
         ],
 
         'location' => [
-            'checks'   => [
+            'checks' => [
                 'string',
                 'between:1,128',
             ],
@@ -294,20 +294,20 @@ class Product extends BaseModel
             ],
         ],
 
-        'quantity'       => [
-            'checks'   => [
+        'quantity' => [
+            'checks' => [
                 'integer',
                 'min:0',
                 'max:2147483647'
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Product Quantity must be an integer!',],
-                'min'=>['default_text'=> 'Product Quantity value must be greater than zero'],
-                'max'=>['default_text'=>'Product Quantity must be less than 2147483647']
+                'min' => ['default_text' => 'Product Quantity value must be greater than zero'],
+                'max' => ['default_text' => 'Product Quantity must be less than 2147483647']
             ],
         ],
         'stock_checkout' => [
-            'checks'   => [
+            'checks' => [
                 'string',
                 'nullable',
                 'in:0,1',
@@ -330,9 +330,9 @@ class Product extends BaseModel
             ],
             'messages' => [
                 'integer' => ['default_text' => ':attribute is not integer or not presents in stock_statuses table!',],
-                'min'=>['default_text'=> ':attribute value must be greater than zero'],
-                'max'=>['default_text'=>':attribute must be less than 2147483647'],
-                'required'=>['default_text'=>':attribute required']
+                'min' => ['default_text' => ':attribute value must be greater than zero'],
+                'max' => ['default_text' => ':attribute must be less than 2147483647'],
+                'required' => ['default_text' => ':attribute required']
             ],
         ],
 
@@ -347,15 +347,15 @@ class Product extends BaseModel
             ],
             'messages' => [
                 'integer' => ['default_text' => ':attribute is not integer',],
-                'exists'=>['default_text'=>':attribute not presents in Manufacturers table!'],
-                'min'=>['default_text'=> ':attribute value must be greater than zero'],
-                'max'=>['default_text'=>':attribute must be less than 2147483647'],
-                'required'=>['default_text'=>':attribute required']
+                'exists' => ['default_text' => ':attribute not presents in Manufacturers table!'],
+                'min' => ['default_text' => ':attribute value must be greater than zero'],
+                'max' => ['default_text' => ':attribute must be less than 2147483647'],
+                'required' => ['default_text' => ':attribute required']
             ],
         ],
 
         'shipping' => [
-            'checks'   => [
+            'checks' => [
                 'boolean',
             ],
             'messages' => [
@@ -366,7 +366,7 @@ class Product extends BaseModel
         ],
 
         'ship_individually' => [
-            'checks'   => [
+            'checks' => [
                 'boolean',
             ],
             'messages' => [
@@ -375,8 +375,8 @@ class Product extends BaseModel
                 ],
             ],
         ],
-        'free_shipping'     => [
-            'checks'   => [
+        'free_shipping' => [
+            'checks' => [
                 'boolean',
             ],
             'messages' => [
@@ -385,8 +385,8 @@ class Product extends BaseModel
                 ],
             ],
         ],
-        'shipping_price'    => [
-            'checks'   => [
+        'shipping_price' => [
+            'checks' => [
                 'numeric',
             ],
             'messages' => [
@@ -395,8 +395,8 @@ class Product extends BaseModel
                 ],
             ],
         ],
-        'price'             => [
-            'checks'   => [
+        'price' => [
+            'checks' => [
                 'numeric',
             ],
             'messages' => [
@@ -417,10 +417,10 @@ class Product extends BaseModel
             ],
             'messages' => [
                 'integer' => ['default_text' => ':attribute is not integer!',],
-                'exists'=>['default_text' =>':attribute not presents in tax_classes table!'],
-                'max'=>['default_text'=>':attribute must be less than 2147483647'],
-                'min'=>['default_text'=> ':attribute value must be greater than zero'],
-                'required'=>['default_text'=>':attribute ID required']
+                'exists' => ['default_text' => ':attribute not presents in tax_classes table!'],
+                'max' => ['default_text' => ':attribute must be less than 2147483647'],
+                'min' => ['default_text' => ':attribute value must be greater than zero'],
+                'required' => ['default_text' => ':attribute ID required']
             ],
         ],
 
@@ -445,10 +445,10 @@ class Product extends BaseModel
             ],
             'messages' => [
                 'integer' => ['default_text' => ':attribute is not integer!',],
-                'exists'=>['default_text'=>':attribute not presents in weight_classes table'],
-                'max'=>['default_text'=>':attribute must be less than 2147483647'],
-                'required'=>['default_text'=>':attribute required'],
-                'min'=>['default_text'=> ':attribute value must be greater than zero'],
+                'exists' => ['default_text' => ':attribute not presents in weight_classes table'],
+                'max' => ['default_text' => ':attribute must be less than 2147483647'],
+                'required' => ['default_text' => ':attribute required'],
+                'min' => ['default_text' => ':attribute value must be greater than zero'],
             ],
         ],
 
@@ -494,13 +494,13 @@ class Product extends BaseModel
             ],
             'messages' => [
                 'integer' => ['default_text' => ':attribute is not integer'],
-                'exists'=>['default_text' =>':attribute not presents in length_classes table!'],
-                'max'=>['default_text'=>':attribute must be less than 2147483647']
+                'exists' => ['default_text' => ':attribute not presents in length_classes table!'],
+                'max' => ['default_text' => ':attribute must be less than 2147483647']
             ],
         ],
 
         'status' => [
-            'checks'   => [
+            'checks' => [
                 'boolean',
             ],
             'messages' => [
@@ -511,7 +511,7 @@ class Product extends BaseModel
         ],
 
         'featured' => [
-            'checks'   => [
+            'checks' => [
                 'boolean',
             ],
             'messages' => [
@@ -521,28 +521,28 @@ class Product extends BaseModel
             ],
         ],
 
-        'viewed'     => [
-            'checks'   => [
+        'viewed' => [
+            'checks' => [
                 'integer',
                 'min:0',
                 'max:2147483647'
             ],
             'messages' => [
                 'integer' => ['default_text' => ':attribute is not integer!'],
-                'min'=>['default_text'=> ':attribute value must be greater than zero'],
-                'max'=>['default_text'=>':attribute must be less than 2147483647']
+                'min' => ['default_text' => ':attribute value must be greater than zero'],
+                'max' => ['default_text' => ':attribute must be less than 2147483647']
             ],
         ],
         'sort_order' => [
-            'checks'   => [
+            'checks' => [
                 'integer',
                 'min:0',
                 'max:2147483647'
             ],
             'messages' => [
                 'integer' => ['default_text' => ':attribute is not integer!'],
-                'min'=>['default_text'=> ':attribute value must be greater than zero'],
-                'max'=>['default_text'=>':attribute must be less than 2147483647']
+                'min' => ['default_text' => ':attribute value must be greater than zero'],
+                'max' => ['default_text' => ':attribute must be less than 2147483647']
             ],
         ],
 
@@ -565,8 +565,8 @@ class Product extends BaseModel
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Minimal Quantity is not integer!'],
-                'min'=>['default_text'=> ':attribute value must be greater than zero'],
-                'max'=>['default_text'=>':attribute must be less than 2147483647']
+                'min' => ['default_text' => ':attribute value must be greater than zero'],
+                'max' => ['default_text' => ':attribute must be less than 2147483647']
             ],
         ],
 
@@ -578,8 +578,8 @@ class Product extends BaseModel
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Maximum Quantity is not integer or less than minimal.'],
-                'max'=>['default_text'=>':attribute must be less than 2147483647'],
-                'gte'=>['default_text'=> ':attribute must be greater than minimum']
+                'max' => ['default_text' => ':attribute must be less than 2147483647'],
+                'gte' => ['default_text' => ':attribute must be greater than minimum']
             ],
         ],
 
@@ -613,7 +613,7 @@ class Product extends BaseModel
             ],
             'messages' => [
                 'integer' => ['default_text' => ':attribute is not integer!'],
-                'max'=>['default_text'=>':attribute must be less than 2147483647']
+                'max' => ['default_text' => ':attribute must be less than 2147483647']
             ],
         ],
     ];

@@ -39,9 +39,9 @@ class TaskDetail extends BaseModel
     protected $primaryKey = 'task_id';
 
     protected $casts = [
-        'created_by'    => 'int',
-        'settings'      => Serialized::class,
-        'date_added'    => 'datetime',
+        'created_by' => 'int',
+        'settings' => Serialized::class,
+        'date_added' => 'datetime',
         'date_modified' => 'datetime'
     ];
 
@@ -53,16 +53,16 @@ class TaskDetail extends BaseModel
 
     protected $rules = [
         /** @see validate() */
-        'created_by'  => [
-            'checks'   => [
+        'created_by' => [
+            'checks' => [
                 'integer',
                 'min:0',
                 'max:2147483647'
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Created By is not integer!'],
-                'max'=>['default_text'=>'Created By must be less than 2147483647'],
-                'min'=>['default_text'=> 'Created By value must be greater than zero'],
+                'max' => ['default_text' => 'Created By must be less than 2147483647'],
+                'min' => ['default_text' => 'Created By value must be greater than zero'],
             ],
         ]
     ];

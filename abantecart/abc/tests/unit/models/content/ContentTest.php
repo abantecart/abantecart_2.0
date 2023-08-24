@@ -13,9 +13,9 @@ class ContentTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'content_id'           => false,
-                'parent_id'                  => false,
-                'sort_order'             => false,
+                'content_id' => false,
+                'parent_id' => false,
+                'sort_order' => false,
             ];
             $content->validate($data);
         } catch (ValidationException $e) {
@@ -26,14 +26,14 @@ class ContentTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'content_id'           => 1,
-                'parent_id'             => 36,
-                'sort_order'            => 1,
+                'content_id' => 1,
+                'parent_id' => 36,
+                'sort_order' => 1,
             ];
             $content->validate($data);
         } catch (ValidationException $e) {
             $errors = $content->errors()['validation'];
-           // var_Dump($errors);
+            // var_Dump($errors);
         }
         $this->assertCount(0, $errors);
     }

@@ -15,12 +15,12 @@ class GlobalAttributesTypeTest extends TestCase
         try {
             $data = [
                 'sort_order' => false,
-                'status'  => false,
+                'status' => false,
             ];
             $attr->validate($data);
         } catch (ValidationException $e) {
             $errors = $attr->errors()['validation'];
-           // var_Dump($errors);
+            // var_Dump($errors);
         }
         $this->assertCount(2, $errors);
 
@@ -28,8 +28,8 @@ class GlobalAttributesTypeTest extends TestCase
         try {
             $data = [
                 'sort_order' => 1,
-                'status'  => 1,
-                ];
+                'status' => 1,
+            ];
             $attr->validate($data);
         } catch (ValidationException $e) {
             $errors = $attr->errors()['validation'];

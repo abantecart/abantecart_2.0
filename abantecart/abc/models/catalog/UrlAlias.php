@@ -37,7 +37,7 @@ class UrlAlias extends BaseModel
     protected $rules = [
         /** @see validate() */
         'language_id' => [
-            'checks'   => [
+            'checks' => [
                 'integer',
                 'required',
                 'exists:languages',
@@ -46,10 +46,10 @@ class UrlAlias extends BaseModel
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Language ID is not Integer!'],
-                'exists'=>['default_text'=>'Language ID absent in languages table!'],
-                'max'=>['default_text'=>'Language ID must be less than 2147483647'],
-                'min'=>['default_text'=> 'Language ID value must be greater than zero'],
-                'required'=>['default_text'=>'Language ID required']
+                'exists' => ['default_text' => 'Language ID absent in languages table!'],
+                'max' => ['default_text' => 'Language ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Language ID value must be greater than zero'],
+                'required' => ['default_text' => 'Language ID required']
             ],
         ],
     ];

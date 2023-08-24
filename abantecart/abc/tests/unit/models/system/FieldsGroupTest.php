@@ -13,9 +13,9 @@ class FieldsGroupTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'field_id'           => false,
-                'group_id'                  => false,
-                'sort_order'             => false,
+                'field_id' => false,
+                'group_id' => false,
+                'sort_order' => false,
             ];
             $field->validate($data);
         } catch (ValidationException $e) {
@@ -26,9 +26,9 @@ class FieldsGroupTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'field_id'           => 1,
-                'group_id'  => 1,
-                'sort_order'            => 1,
+                'field_id' => 1,
+                'group_id' => 1,
+                'sort_order' => 1,
             ];
             $field->validate($data);
         } catch (ValidationException $e) {

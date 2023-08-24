@@ -13,10 +13,10 @@ class TaxRateTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'location_id'           => false,
-                'zone_id'                  => false,
-                'tax_class_id'             => false,
-                'priority'                  => false,
+                'location_id' => false,
+                'zone_id' => false,
+                'tax_class_id' => false,
+                'priority' => false,
             ];
             $tax->validate($data);
         } catch (ValidationException $e) {
@@ -28,9 +28,9 @@ class TaxRateTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'location_id'           => 1,
-                'zone_id'             => 1,
-                'tax_class_id'  => 1,
+                'location_id' => 1,
+                'zone_id' => 1,
+                'tax_class_id' => 1,
                 'priority' => 1,
 
             ];

@@ -14,7 +14,7 @@ class DatasetColumnPropertyTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'dataset_column_id'           => false,
+                'dataset_column_id' => false,
             ];
             $dataset->validate($data);
         } catch (ValidationException $e) {
@@ -25,7 +25,7 @@ class DatasetColumnPropertyTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'dataset_column_id'           => 1,
+                'dataset_column_id' => 1,
             ];
             $dataset->validate($data);
         } catch (ValidationException $e) {

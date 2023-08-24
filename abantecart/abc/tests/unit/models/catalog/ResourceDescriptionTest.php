@@ -14,8 +14,8 @@ class ResourceDescriptionTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'resource_id'           => false,
-                'language_id'                  => false,
+                'resource_id' => false,
+                'language_id' => false,
             ];
             $resource->validate($data);
         } catch (ValidationException $e) {
@@ -26,8 +26,8 @@ class ResourceDescriptionTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'resource_id'           => 1,
-                'language_id'  => 1,
+                'resource_id' => 1,
+                'language_id' => 1,
 
             ];
             $resource->validate($data);

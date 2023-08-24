@@ -14,8 +14,8 @@ class ResourceLibraryTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'type_id'           => false,
-                'stage_id'                  => false,
+                'type_id' => false,
+                'stage_id' => false,
             ];
             $resource->validate($data);
         } catch (ValidationException $e) {
@@ -26,8 +26,8 @@ class ResourceLibraryTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'type_id'           => 1,
-                'stage_id'  => 1,
+                'type_id' => 1,
+                'stage_id' => 1,
             ];
             $resource->validate($data);
         } catch (ValidationException $e) {

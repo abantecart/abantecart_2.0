@@ -57,7 +57,7 @@ class ContentsToStore extends BaseModel
     protected $rules = [
         /** @see validate() */
         'content_id' => [
-            'checks'   => [
+            'checks' => [
                 'integer',
                 'sometimes',
                 'required',
@@ -66,13 +66,13 @@ class ContentsToStore extends BaseModel
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Content ID is not integer!'],
-                'max'=>['default_text'=>'Content ID must be less than 2147483647'],
-                'min'=>['default_text'=> 'Content ID value must be greater than zero'],
-                'required'=>['default_text'=>'Content ID required']
+                'max' => ['default_text' => 'Content ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Content ID value must be greater than zero'],
+                'required' => ['default_text' => 'Content ID required']
             ],
         ],
-        'store_id'=> [
-            'checks'   => [
+        'store_id' => [
+            'checks' => [
                 'integer',
                 'sometimes',
                 'required',
@@ -81,9 +81,9 @@ class ContentsToStore extends BaseModel
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Store ID is not integer!'],
-                'max'=>['default_text'=>'Store ID must be less than 2147483647'],
-                'min'=>['default_text'=> 'Store ID value must be greater than zero'],
-                'required'=>['default_text'=>'Store ID required']
+                'max' => ['default_text' => 'Store ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Store ID value must be greater than zero'],
+                'required' => ['default_text' => 'Store ID required']
             ],
         ],
     ];

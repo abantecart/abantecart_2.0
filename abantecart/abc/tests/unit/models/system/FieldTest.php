@@ -13,9 +13,9 @@ class FieldTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'form_id'           => false,
-                'sort_order'                  => false,
-                'status'             => false,
+                'form_id' => false,
+                'sort_order' => false,
+                'status' => false,
             ];
             $field->validate($data);
         } catch (ValidationException $e) {
@@ -26,8 +26,8 @@ class FieldTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'form_id'           => 1,
-                'sort_order'  => 1,
+                'form_id' => 1,
+                'sort_order' => 1,
                 'status' => 1,
             ];
             $field->validate($data);

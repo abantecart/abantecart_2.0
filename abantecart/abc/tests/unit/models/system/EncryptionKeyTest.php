@@ -13,7 +13,7 @@ class EncryptionKeyTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'status'           => false,
+                'status' => false,
             ];
             $encription->validate($data);
         } catch (ValidationException $e) {
@@ -24,7 +24,7 @@ class EncryptionKeyTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'status'           => 1,
+                'status' => 1,
             ];
             $encription->validate($data);
         } catch (ValidationException $e) {

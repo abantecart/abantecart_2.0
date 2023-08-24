@@ -13,7 +13,7 @@ class TaskDetailTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'created_by'           => false,
+                'created_by' => false,
             ];
             $task->validate($data);
         } catch (ValidationException $e) {
@@ -25,7 +25,7 @@ class TaskDetailTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'created_by'           => 1,
+                'created_by' => 1,
             ];
             $task->validate($data);
         } catch (ValidationException $e) {

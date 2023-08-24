@@ -60,20 +60,20 @@ class StockStatus extends BaseModel
     ];
     protected $rules = [
         /** @see validate() */
-        'stock_status_id'  => [
-            'checks'   => [
+        'stock_status_id' => [
+            'checks' => [
                 'integer',
                 'min:0',
                 'max:2147483647'
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Stock Status ID is not Integer!'],
-                'min'=>['default_text'=> 'Stock Status ID value must be greater than zero'],
-                'max'=>['default_text'=>'Stock Status ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Stock Status ID value must be greater than zero'],
+                'max' => ['default_text' => 'Stock Status ID must be less than 2147483647'],
             ],
         ],
         'language_id' => [
-            'checks'   => [
+            'checks' => [
                 'integer',
                 'required',
                 'exists:languages',
@@ -82,10 +82,10 @@ class StockStatus extends BaseModel
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Language ID is not Integer!'],
-                'exists'=>['default_text'=>'Language ID absent in languages table!'],
-                'max'=>['default_text'=>'Language ID must be less than 2147483647'],
-                'min'=>['default_text'=> 'Category ID value must be greater than zero'],
-                'required'=>['default_text'=>'Category ID required']
+                'exists' => ['default_text' => 'Language ID absent in languages table!'],
+                'max' => ['default_text' => 'Language ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Category ID value must be greater than zero'],
+                'required' => ['default_text' => 'Category ID required']
             ],
         ],
     ];

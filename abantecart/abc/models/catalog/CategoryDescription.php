@@ -80,20 +80,20 @@ class CategoryDescription extends BaseModel
 
     protected $rules = [
         /** @see validate() */
-        'language_id'      => [
-            'checks'   => [
+        'language_id' => [
+            'checks' => [
                 'integer',
                 'min:0',
                 'max:2147483647'
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Language ID is not Integer!'],
-                'min'=>['default_text' =>'Language ID value must be greater than zero'],
-                'max'=>['default_text' =>'Language ID must be less than 2147483647']
+                'min' => ['default_text' => 'Language ID value must be greater than zero'],
+                'max' => ['default_text' => 'Language ID must be less than 2147483647']
             ],
         ],
-        'name'             => [
-            'checks'   => [
+        'name' => [
+            'checks' => [
                 'string',
                 'required',
                 'max:255',
@@ -104,8 +104,8 @@ class CategoryDescription extends BaseModel
                 ],
             ],
         ],
-        'meta_keywords'    => [
-            'checks'   => [
+        'meta_keywords' => [
+            'checks' => [
                 'string',
                 'max:255',
             ],
@@ -116,7 +116,7 @@ class CategoryDescription extends BaseModel
             ],
         ],
         'meta_description' => [
-            'checks'   => [
+            'checks' => [
                 'string',
                 'max:255',
             ],

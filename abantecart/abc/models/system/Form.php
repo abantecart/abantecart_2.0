@@ -61,16 +61,16 @@ class Form extends BaseModel
 
     protected $rules = [
         /** @see validate() */
-        'status'  => [
-            'checks'   => [
+        'status' => [
+            'checks' => [
                 'integer',
                 'min:0',
                 'max:2147483647'
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Status is not integer!'],
-                'max'=>['default_text'=>'Status must be less than 2147483647'],
-                'min'=>['default_text'=> 'Status value must be greater than zero'],
+                'max' => ['default_text' => 'Status must be less than 2147483647'],
+                'min' => ['default_text' => 'Status value must be greater than zero'],
             ],
         ]
     ];

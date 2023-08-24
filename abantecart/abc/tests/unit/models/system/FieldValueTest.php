@@ -13,8 +13,8 @@ class FieldValueTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'field_id'           => false,
-                'language_id'                  => false,
+                'field_id' => false,
+                'language_id' => false,
             ];
             $field->validate($data);
         } catch (ValidationException $e) {
@@ -25,8 +25,8 @@ class FieldValueTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'field_id'           => 1,
-                'language_id'  => 1,
+                'field_id' => 1,
+                'language_id' => 1,
             ];
             $field->validate($data);
         } catch (ValidationException $e) {

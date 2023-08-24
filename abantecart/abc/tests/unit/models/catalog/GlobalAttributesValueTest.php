@@ -14,8 +14,8 @@ class GlobalAttributesValueTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'attribute_id'           => false,
-                'sort_order'             => false,
+                'attribute_id' => false,
+                'sort_order' => false,
             ];
             $attr->validate($data);
         } catch (ValidationException $e) {
@@ -26,8 +26,8 @@ class GlobalAttributesValueTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'attribute_id'           => 1,
-                'sort_order'            => 1,
+                'attribute_id' => 1,
+                'sort_order' => 1,
             ];
             $attr->validate($data);
         } catch (ValidationException $e) {

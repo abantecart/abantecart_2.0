@@ -14,7 +14,7 @@ class UrlAliasTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'language_id'           => false,
+                'language_id' => false,
             ];
             $url->validate($data);
         } catch (ValidationException $e) {
@@ -25,7 +25,7 @@ class UrlAliasTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'language_id'           => 1,
+                'language_id' => 1,
             ];
             $url->validate($data);
         } catch (ValidationException $e) {

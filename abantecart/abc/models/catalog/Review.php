@@ -64,52 +64,52 @@ class Review extends BaseModel
     ];
     protected $rules = [
         /** @see validate() */
-        'product_id'  => [
-            'checks'   => [
+        'product_id' => [
+            'checks' => [
                 'integer',
                 'min:0',
                 'max:2147483647'
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Product ID is not Integer!'],
-                'min'=>['default_text'=> 'Product ID value must be greater than zero'],
-                'max'=>['default_text'=>'Product ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Product ID value must be greater than zero'],
+                'max' => ['default_text' => 'Product ID must be less than 2147483647'],
             ],
         ],
         'rating' => [
-            'checks'   => [
+            'checks' => [
                 'integer',
                 'min:0',
                 'max:2147483647'
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Rating is not Integer!'],
-                'min'=>['default_text'=> 'Rating value must be greater than zero'],
-                'max'=>['default_text'=>'Rating must be less than 2147483647'],
+                'min' => ['default_text' => 'Rating value must be greater than zero'],
+                'max' => ['default_text' => 'Rating must be less than 2147483647'],
             ],
         ],
         'status' => [
-            'checks'   => [
+            'checks' => [
                 'integer',
                 'min:0',
                 'max:2147483647'
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Status is not Integer!'],
-                'min'=>['default_text'=> 'Status value must be greater than zero'],
-                'max'=>['default_text'=>'Status must be less than 2147483647'],
+                'min' => ['default_text' => 'Status value must be greater than zero'],
+                'max' => ['default_text' => 'Status must be less than 2147483647'],
             ],
         ],
         'customer_id' => [
-            'checks'   => [
+            'checks' => [
                 'integer',
                 'min:0',
                 'max:2147483647'
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Customer ID is not Integer!'],
-                'min'=>['default_text'=> 'Customer ID value must be greater than zero'],
-                'max'=>['default_text'=>'Customer ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Customer ID value must be greater than zero'],
+                'max' => ['default_text' => 'Customer ID must be less than 2147483647'],
             ],
         ],
     ];

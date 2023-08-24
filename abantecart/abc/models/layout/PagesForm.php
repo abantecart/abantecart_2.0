@@ -48,7 +48,7 @@ class PagesForm extends BaseModel
     protected $rules = [
         /** @see validate() */
         'page_id' => [
-            'checks'   => [
+            'checks' => [
                 'int',
                 'required',
                 'sometimes',
@@ -57,13 +57,13 @@ class PagesForm extends BaseModel
             ],
             'messages' => [
                 'int' => ['default_text' => 'Page ID is not integer!'],
-                'max'=>['default_text'=>'Page ID must be less than 2147483647'],
-                'min'=>['default_text'=> 'Page ID value must be greater than zero'],
-                'required'=>['default_text'=>'Page ID required']
+                'max' => ['default_text' => 'Page ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Page ID value must be greater than zero'],
+                'required' => ['default_text' => 'Page ID required']
             ]
         ],
         'form_id' => [
-            'checks'   => [
+            'checks' => [
                 'int',
                 'required',
                 'sometimes',
@@ -72,9 +72,9 @@ class PagesForm extends BaseModel
             ],
             'messages' => [
                 'int' => ['default_text' => 'Form ID is not integer!'],
-                'max'=>['default_text'=>'Form ID must be less than 2147483647'],
-                'min'=>['default_text'=> 'Form ID value must be greater than zero'],
-                'required'=>['default_text'=>'Form ID required']
+                'max' => ['default_text' => 'Form ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Form ID value must be greater than zero'],
+                'required' => ['default_text' => 'Form ID required']
             ]
         ],
     ];

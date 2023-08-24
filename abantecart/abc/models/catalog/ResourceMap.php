@@ -67,40 +67,40 @@ class ResourceMap extends BaseModel
     ];
     protected $rules = [
         /** @see validate() */
-        'resource_id'  => [
-            'checks'   => [
+        'resource_id' => [
+            'checks' => [
                 'integer',
                 'min:0',
                 'max:2147483647'
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Resource ID is not Integer!'],
-                'min'=>['default_text'=> 'Resource ID value must be greater than zero'],
-                'max'=>['default_text'=>'Resource ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Resource ID value must be greater than zero'],
+                'max' => ['default_text' => 'Resource ID must be less than 2147483647'],
             ],
         ],
         'object_id' => [
-            'checks'   => [
+            'checks' => [
                 'integer',
                 'min:0',
                 'max:2147483647'
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Object ID is not Integer!'],
-                'min'=>['default_text'=> 'Object ID value must be greater than zero'],
-                'max'=>['default_text'=>'Object ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Object ID value must be greater than zero'],
+                'max' => ['default_text' => 'Object ID must be less than 2147483647'],
             ],
         ],
-        'sort_order'=> [
-            'checks'   => [
+        'sort_order' => [
+            'checks' => [
                 'integer',
                 'min:0',
                 'max:2147483647'
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Sort Order is not Integer!'],
-                'min'=>['default_text'=> 'Sort Order value must be greater than zero'],
-                'max'=>['default_text'=>'Sort Order must be less than 2147483647'],
+                'min' => ['default_text' => 'Sort Order value must be greater than zero'],
+                'max' => ['default_text' => 'Sort Order must be less than 2147483647'],
             ],
         ],
     ];

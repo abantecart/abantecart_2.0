@@ -96,8 +96,8 @@ class ProductOption extends BaseModel
 
     protected $rules = [
         /** @see validate() */
-        'product_id'   => [
-            'checks'   => [
+        'product_id' => [
+            'checks' => [
                 'integer',
                 'required',
                 'exists:products',
@@ -106,14 +106,14 @@ class ProductOption extends BaseModel
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Product ID is not Integer!'],
-                'exists'=>['default_text' =>'Product ID absent in products table!'],
-                'max'=>['default_text'=>'Product ID must be less than 2147483647'],
-                'min'=>['default_text'=> 'Product ID value must be greater than zero'],
-                'required'=>['default_text'=>'Product ID required']
+                'exists' => ['default_text' => 'Product ID absent in products table!'],
+                'max' => ['default_text' => 'Product ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Product ID value must be greater than zero'],
+                'required' => ['default_text' => 'Product ID required']
             ],
         ],
         'attribute_id' => [
-            'checks'   => [
+            'checks' => [
                 'integer',
                 'nullable',
                 'exists:global_attributes',
@@ -122,14 +122,14 @@ class ProductOption extends BaseModel
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Attribute ID is not Integer'],
-                'exists'=>['default_text' =>'Attribute ID not presents in global_attributes table!'],
-                'max'=>['default_text' =>'Attribute ID must be less than 2147483647'],
-                'min'=>['default_text'=> 'Attribute ID value must be greater than zero'],
-                'required'=>['default_text'=>'Attribute ID required']
+                'exists' => ['default_text' => 'Attribute ID not presents in global_attributes table!'],
+                'max' => ['default_text' => 'Attribute ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Attribute ID value must be greater than zero'],
+                'required' => ['default_text' => 'Attribute ID required']
             ],
         ],
-        'group_id'     => [
-            'checks'   => [
+        'group_id' => [
+            'checks' => [
                 'integer',
                 'nullable',
                 'min:0',
@@ -137,24 +137,24 @@ class ProductOption extends BaseModel
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Group ID is not integer!'],
-                'max'=>['default_text' =>'Group ID must be less than 2147483647'],
-                'min'=>['default_text'=> 'Group ID value must be greater than zero'],
+                'max' => ['default_text' => 'Group ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Group ID value must be greater than zero'],
             ],
         ],
-        'sort_order'   => [
-            'checks'   => [
+        'sort_order' => [
+            'checks' => [
                 'integer',
                 'min:0',
                 'max:2147483647'
             ],
             'messages' => [
                 'integer' => ['default_text' => ':attribute is not integer!'],
-                'min'=>['default_text'=> ':attribute value must be greater than zero'],
-                'max'=>['default_text'=>':attribute must be less than 2147483647'],
+                'min' => ['default_text' => ':attribute value must be greater than zero'],
+                'max' => ['default_text' => ':attribute must be less than 2147483647'],
             ],
         ],
-        'status'       => [
-            'checks'   => [
+        'status' => [
+            'checks' => [
                 'boolean',
             ],
             'messages' => [
@@ -165,7 +165,7 @@ class ProductOption extends BaseModel
         ],
 
         'element_type' => [
-            'checks'   => [
+            'checks' => [
                 'string',
                 'size:1',
                 /** @see __construct() method */
@@ -178,7 +178,7 @@ class ProductOption extends BaseModel
         ],
 
         'required' => [
-            'checks'   => [
+            'checks' => [
                 'boolean',
             ],
             'messages' => [
@@ -189,7 +189,7 @@ class ProductOption extends BaseModel
         ],
 
         'regexp_pattern' => [
-            'checks'   => [
+            'checks' => [
                 'string',
                 'nullable',
             ],

@@ -51,7 +51,7 @@ class PagesLayout extends BaseModel
     protected $rules = [
         /** @see validate() */
         'layout_id' => [
-            'checks'   => [
+            'checks' => [
                 'integer',
                 'required',
                 'sometimes',
@@ -60,13 +60,13 @@ class PagesLayout extends BaseModel
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Layout ID is not integer!'],
-                'max'=>['default_text'=>'Layout ID must be less than 2147483647'],
-                'min'=>['default_text'=> 'Layout ID value must be greater than zero'],
-                'required'=>['default_text'=>'Layout ID required']
+                'max' => ['default_text' => 'Layout ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Layout ID value must be greater than zero'],
+                'required' => ['default_text' => 'Layout ID required']
             ],
         ],
-        'page_id'   => [
-            'checks'   => [
+        'page_id' => [
+            'checks' => [
                 'integer',
                 'required',
                 'sometimes',
@@ -75,9 +75,9 @@ class PagesLayout extends BaseModel
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Page ID is not integer!'],
-                'max'=>['default_text'=>'Page ID must be less than 2147483647'],
-                'min'=>['default_text'=> 'Page ID value must be greater than zero'],
-                'required'=>['default_text'=>'Page ID required']
+                'max' => ['default_text' => 'Page ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Page ID value must be greater than zero'],
+                'required' => ['default_text' => 'Page ID required']
             ],
         ]
     ];

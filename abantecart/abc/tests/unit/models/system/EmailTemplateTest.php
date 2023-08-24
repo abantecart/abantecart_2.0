@@ -13,7 +13,7 @@ class EmailTemplateTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'language_id'           => false,
+                'language_id' => false,
             ];
             $template->validate($data);
         } catch (ValidationException $e) {
@@ -24,7 +24,7 @@ class EmailTemplateTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'language_id'           => 1,
+                'language_id' => 1,
 
             ];
             $template->validate($data);

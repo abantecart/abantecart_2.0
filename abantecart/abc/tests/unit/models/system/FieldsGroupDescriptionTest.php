@@ -13,8 +13,8 @@ class FieldsGroupDescriptionTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'group_id'           => false,
-                'language_id'                  => false,
+                'group_id' => false,
+                'language_id' => false,
             ];
             $fields->validate($data);
         } catch (ValidationException $e) {
@@ -25,7 +25,7 @@ class FieldsGroupDescriptionTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'group_id'           => 1,
+                'group_id' => 1,
                 'language_id' => 1,
             ];
             $fields->validate($data);

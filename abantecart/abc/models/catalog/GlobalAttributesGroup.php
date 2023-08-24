@@ -49,28 +49,28 @@ class GlobalAttributesGroup extends BaseModel
 
     protected $rules = [
         /** @see validate() */
-        'sort_order'      => [
-            'checks'   => [
+        'sort_order' => [
+            'checks' => [
                 'integer',
                 'min:0',
                 'max:2147483647'
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Sort Order is not Integer!'],
-                'min'=>['default_text' =>'Sort Order value must be greater than zero'],
-                'max'=>['default_text' =>'Sort Order must be less than 2147483647']
+                'min' => ['default_text' => 'Sort Order value must be greater than zero'],
+                'max' => ['default_text' => 'Sort Order must be less than 2147483647']
             ],
         ],
-        'status'      => [
-            'checks'   => [
+        'status' => [
+            'checks' => [
                 'integer',
                 'min:0',
                 'max:2147483647'
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Status is not Integer!'],
-                'min'=>['default_text' =>'Status value must be greater than zero'],
-                'max'=>['default_text' =>'Status must be less than 2147483647']
+                'min' => ['default_text' => 'Status value must be greater than zero'],
+                'max' => ['default_text' => 'Status must be less than 2147483647']
             ],
         ]
     ];

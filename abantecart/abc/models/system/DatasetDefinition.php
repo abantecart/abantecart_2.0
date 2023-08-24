@@ -55,28 +55,28 @@ class DatasetDefinition extends BaseModel
 
     protected $rules = [
         /** @see validate() */
-        'dataset_id'  => [
-            'checks'   => [
+        'dataset_id' => [
+            'checks' => [
                 'integer',
                 'min:0',
                 'max:2147483647'
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Dataset ID is not integer!'],
-                'max'=>['default_text'=>'Dataset ID must be less than 2147483647'],
-                'min'=>['default_text'=> 'Dataset ID value must be greater than zero'],
+                'max' => ['default_text' => 'Dataset ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Dataset ID value must be greater than zero'],
             ],
         ],
         'dataset_column_sort_order' => [
-            'checks'   => [
+            'checks' => [
                 'integer',
                 'min:0',
                 'max:2147483647'
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Dataset Column Sort Order is not integer!'],
-                'max'=>['default_text'=>'Dataset Column Sort Order must be less than 2147483647'],
-                'min'=>['default_text'=> 'Dataset Column Sort Order value must be greater than zero'],
+                'max' => ['default_text' => 'Dataset Column Sort Order must be less than 2147483647'],
+                'min' => ['default_text' => 'Dataset Column Sort Order value must be greater than zero'],
             ],
         ],
     ];

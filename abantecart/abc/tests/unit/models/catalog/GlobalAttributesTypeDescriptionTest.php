@@ -14,8 +14,8 @@ class GlobalAttributesTypeDescriptionTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'attribute_type_id'           => false,
-                'language_id'                  => false,
+                'attribute_type_id' => false,
+                'language_id' => false,
             ];
             $attr->validate($data);
         } catch (ValidationException $e) {
@@ -26,8 +26,8 @@ class GlobalAttributesTypeDescriptionTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'attribute_type_id'           => 1,
-                'language_id'             => 36,
+                'attribute_type_id' => 1,
+                'language_id' => 36,
             ];
             $attr->validate($data);
         } catch (ValidationException $e) {

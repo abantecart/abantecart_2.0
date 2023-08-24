@@ -1,37 +1,36 @@
 <?php
 
 
-use abc\models\system\StoreDescription;
+use abc\models\user\UserNotification;
 use Illuminate\Validation\ValidationException;
 use PHPUnit\Framework\TestCase;
 
-class StoreDescriptionTest extends TestCase
+class UserNotificationTest extends TestCase
 {
-    public function testStoreDescriptionValidation()
+    public function testUserNotificationValidation()
     {
-        $store = new StoreDescription();
+        $user = new UserNotification();
         $errors = [];
         try {
             $data = [
+                'user_id' => false,
                 'store_id' => false,
-                'language_id' => false,
             ];
-            $store->validate($data);
+            $user->validate($data);
         } catch (ValidationException $e) {
-            $errors = $store->errors()['validation'];
-            //var_Dump($errors);
+            $errors = $user->errors()['validation'];
         }
         $this->assertCount(2, $errors);
 
         $errors = [];
         try {
             $data = [
+                'user_id' => 1,
                 'store_id' => 1,
-                'language_id' => 1,
             ];
-            $store->validate($data);
+            $user->validate($data);
         } catch (ValidationException $e) {
-            $errors = $store->errors()['validation'];
+            $errors = $user->errors()['validation'];
             //var_Dump($errors);
         }
         $this->assertCount(0, $errors);

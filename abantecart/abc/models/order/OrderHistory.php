@@ -60,8 +60,8 @@ class OrderHistory extends BaseModel
 
     protected $rules = [
         /** @see validate() */
-        'order_id'        => [
-            'checks'   => [
+        'order_id' => [
+            'checks' => [
                 'integer',
                 'required',
                 'exists:orders',
@@ -70,14 +70,14 @@ class OrderHistory extends BaseModel
             ],
             'messages' => [
                 'integer' => ['default_text' => ':attribute is not integer!'],
-                'max'=>['default_text'=>':attribute must be less than 2147483647'],
-                'min'=>['default_text'=> ':attribute value must be greater than zero'],
-                'exists'=>['default_text'=>':attribute not exists in orders table'],
-                'required'=>['default_text'=>':attribute required']
+                'max' => ['default_text' => ':attribute must be less than 2147483647'],
+                'min' => ['default_text' => ':attribute value must be greater than zero'],
+                'exists' => ['default_text' => ':attribute not exists in orders table'],
+                'required' => ['default_text' => ':attribute required']
             ],
         ],
         'order_status_id' => [
-            'checks'   => [
+            'checks' => [
                 'integer',
                 'required',
                 'exists:order_statuses',
@@ -86,14 +86,14 @@ class OrderHistory extends BaseModel
             ],
             'messages' => [
                 'integer' => ['default_text' => ':attribute is not integer'],
-                'max'=>['default_text'=>':attribute must be less than 2147483647'],
-                'min'=>['default_text'=> ':attribute value must be greater than zero'],
-                'exists'=>['default_text'=>':attribute not exists in order_statuses table'],
-                'required'=>['default_text'=>':attribute required']
+                'max' => ['default_text' => ':attribute must be less than 2147483647'],
+                'min' => ['default_text' => ':attribute value must be greater than zero'],
+                'exists' => ['default_text' => ':attribute not exists in order_statuses table'],
+                'required' => ['default_text' => ':attribute required']
             ],
         ],
-        'notify'          => [
-            'checks'   => [
+        'notify' => [
+            'checks' => [
                 'boolean',
             ],
             'messages' => [
@@ -102,8 +102,8 @@ class OrderHistory extends BaseModel
                 ],
             ],
         ],
-        'comment'         => [
-            'checks'   => [
+        'comment' => [
+            'checks' => [
                 'string',
                 'max:1500',
             ],

@@ -96,19 +96,19 @@ class CustomerTransaction extends BaseModel
 
     protected $rules = [
         'customer_transaction_id' => [
-            'checks'   => [
+            'checks' => [
                 'integer',
                 'min:0',
                 'max:2147483647'
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Transaction ID must be an integer!'],
-                'min'=>['default_text'=> 'Transaction ID value must be greater than zero'],
-                'max'=>['default_text'=>'Transaction ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Transaction ID value must be greater than zero'],
+                'max' => ['default_text' => 'Transaction ID must be less than 2147483647'],
             ],
         ],
-        'customer_id'             => [
-            'checks'   => [
+        'customer_id' => [
+            'checks' => [
                 'integer',
                 'required',
                 'min:0',
@@ -116,13 +116,13 @@ class CustomerTransaction extends BaseModel
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Customer ID must be an integer!',],
-                'max'=>['default_text'=>'Customer ID must be less than 2147483647'],
-                'min'=>['default_text'=> 'Customer ID value must be greater than zero'],
-                'required'=>['default_text'=>'Customer ID required']
+                'max' => ['default_text' => 'Customer ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Customer ID value must be greater than zero'],
+                'required' => ['default_text' => 'Customer ID required']
             ],
         ],
-        'order_id'                => [
-            'checks'   => [
+        'order_id' => [
+            'checks' => [
                 'integer',
                 'nullable',
                 'min:0',
@@ -130,12 +130,12 @@ class CustomerTransaction extends BaseModel
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Order ID must be an integer or Null!'],
-                'max'=>['default_text'=>'Order ID must be less than 2147483647'],
-                'min'=>['default_text'=> 'Order ID value must be greater than zero'],
+                'max' => ['default_text' => 'Order ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Order ID value must be greater than zero'],
             ],
         ],
-        'created_by'              => [
-            'checks'   => [
+        'created_by' => [
+            'checks' => [
                 'integer',
                 'required',
                 'min:0',
@@ -143,12 +143,12 @@ class CustomerTransaction extends BaseModel
             ],
             'messages' => [
                 'integer' => ['default_text' => 'User ID (:attribute) who creates transaction must be an integer!'],
-                'max'=>['default_text'=>'User ID must be less than 2147483647'],
-                'min'=>['default_text'=> 'User ID value must be greater than zero'],
+                'max' => ['default_text' => 'User ID must be less than 2147483647'],
+                'min' => ['default_text' => 'User ID value must be greater than zero'],
             ],
         ],
-        'section'                 => [
-            'checks'   => [
+        'section' => [
+            'checks' => [
                 'integer',
                 'in:0,1',
             ],
@@ -158,53 +158,53 @@ class CustomerTransaction extends BaseModel
                 ],
             ],
         ],
-        'credit'                  => [
-            'checks'   => [
+        'credit' => [
+            'checks' => [
                 'numeric',
                 'max:99999999999.9999',
                 'required_without:debit',
             ],
             'messages' => [
                 '*' => [
-                    'language_key'   => 'error_incorrect_debit_credit',
+                    'language_key' => 'error_incorrect_debit_credit',
                     'language_block' => 'sale/customer',
-                    'default_text'   => ':attribute value must be numeric less than 99 999 999 999.9999',
-                    'section'        => 'admin',
+                    'default_text' => ':attribute value must be numeric less than 99 999 999 999.9999',
+                    'section' => 'admin',
                 ],
             ],
         ],
-        'debit'                   => [
-            'checks'   => [
+        'debit' => [
+            'checks' => [
                 'numeric',
                 'max:99999999999.9999',
                 'required_without:credit',
             ],
             'messages' => [
                 '*' => [
-                    'language_key'   => 'error_incorrect_debit_credit',
+                    'language_key' => 'error_incorrect_debit_credit',
                     'language_block' => 'sale/customer',
-                    'default_text'   => ':attribute value must be numeric less than 99 999 999 999.9999',
-                    'section'        => 'admin',
+                    'default_text' => ':attribute value must be numeric less than 99 999 999 999.9999',
+                    'section' => 'admin',
                 ],
             ],
         ],
-        'transaction_type'        => [
-            'checks'   => [
+        'transaction_type' => [
+            'checks' => [
                 'string',
                 'max:255',
                 'required',
             ],
             'messages' => [
                 '*' => [
-                    'language_key'   => 'error_transaction_type',
+                    'language_key' => 'error_transaction_type',
                     'language_block' => 'sale/customer',
-                    'default_text'   => 'Please fill transaction type form field.',
-                    'section'        => 'admin',
+                    'default_text' => 'Please fill transaction type form field.',
+                    'section' => 'admin',
                 ],
             ],
         ],
-        'comment'                 => [
-            'checks'   => [
+        'comment' => [
+            'checks' => [
                 'string',
                 'max:1500',
                 'nullable',
@@ -215,8 +215,8 @@ class CustomerTransaction extends BaseModel
                 ],
             ],
         ],
-        'description'             => [
-            'checks'   => [
+        'description' => [
+            'checks' => [
                 'string',
                 'max:1500',
                 'nullable',

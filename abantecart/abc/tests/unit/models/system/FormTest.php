@@ -13,7 +13,7 @@ class FormTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'status'           => false,
+                'status' => false,
 
             ];
             $form->validate($data);
@@ -26,7 +26,7 @@ class FormTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'status'           => 1,
+                'status' => 1,
             ];
             $form->validate($data);
         } catch (ValidationException $e) {

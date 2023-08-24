@@ -13,8 +13,8 @@ class FormDescriptionTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'form_id'           => false,
-                'language_id'                  => false,
+                'form_id' => false,
+                'language_id' => false,
             ];
             $form->validate($data);
         } catch (ValidationException $e) {
@@ -26,8 +26,8 @@ class FormDescriptionTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'form_id'           => 1,
-                'language_id'  => 1,
+                'form_id' => 1,
+                'language_id' => 1,
             ];
             $form->validate($data);
         } catch (ValidationException $e) {
@@ -35,4 +35,5 @@ class FormDescriptionTest extends TestCase
             //var_Dump($errors);
         }
         $this->assertCount(0, $errors);
-    }}
+    }
+}

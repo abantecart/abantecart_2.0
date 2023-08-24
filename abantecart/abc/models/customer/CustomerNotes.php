@@ -54,39 +54,39 @@ class CustomerNotes extends BaseModel
     protected $rules = [
         /** @see validate() */
         'customer_id' => [
-            'checks'   => [
+            'checks' => [
                 'integer',
                 'min:0',
                 'max:2147483647'
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Customer ID is not integer!'],
-                'min'=>['default_text'=> 'Customer ID value must be greater than zero'],
-                'max'=>['default_text'=>'Customer ID must be less than 2147483647']
+                'min' => ['default_text' => 'Customer ID value must be greater than zero'],
+                'max' => ['default_text' => 'Customer ID must be less than 2147483647']
             ],
         ],
-        'user_id'=> [
-            'checks'   => [
+        'user_id' => [
+            'checks' => [
                 'integer',
                 'min:0',
                 'max:2147483647'
             ],
             'messages' => [
                 'integer' => ['default_text' => 'User ID is not integer!'],
-                'min'=>['default_text'=> 'User ID value must be greater than zero'],
-                'max'=>['default_text'=>'User ID must be less than 2147483647']
+                'min' => ['default_text' => 'User ID value must be greater than zero'],
+                'max' => ['default_text' => 'User ID must be less than 2147483647']
             ],
         ],
-        'stage_id'=> [
-            'checks'   => [
+        'stage_id' => [
+            'checks' => [
                 'integer',
                 'min:0',
                 'max:2147483647'
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Stage ID is not integer!'],
-                'min'=>['default_text'=> 'Stage ID value must be greater than zero'],
-                'max'=>['default_text'=>'Stage ID must be less than 2147483647']
+                'min' => ['default_text' => 'Stage ID value must be greater than zero'],
+                'max' => ['default_text' => 'Stage ID must be less than 2147483647']
             ],
         ],
     ];

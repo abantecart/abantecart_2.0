@@ -14,14 +14,14 @@ class ProductOptionValueTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'product_option_id'           => false,
-                'product_id'                  => false,
-                'group_id'             => false,
-                'quantity'                  => false,
-                'subtract'  => false,
+                'product_option_id' => false,
+                'product_id' => false,
+                'group_id' => false,
+                'quantity' => false,
+                'subtract' => false,
                 'attribute_value_id' => false,
-                'default'        => false,
-                'sort_order'            => false,
+                'default' => false,
+                'sort_order' => false,
             ];
             $product->validate($data);
         } catch (ValidationException $e) {
@@ -32,14 +32,14 @@ class ProductOptionValueTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'product_option_id'           => 1,
-                'product_id'                  => 2,
-                'group_id'             => 2,
-                'quantity'                  => 2,
-                'subtract'  => 1,
+                'product_option_id' => 1,
+                'product_id' => 2,
+                'group_id' => 2,
+                'quantity' => 2,
+                'subtract' => 1,
                 'attribute_value_id' => 1,
-                'default'        => 2,
-                'sort_order'            => 1,
+                'default' => 2,
+                'sort_order' => 1,
             ];
             $product->validate($data);
         } catch (ValidationException $e) {

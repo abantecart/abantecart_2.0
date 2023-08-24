@@ -14,10 +14,10 @@ class ReviewTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'product_id'           => false,
-                'customer_id'                  => false,
-                'rating'             => false,
-                'status'                => 0.000001111,
+                'product_id' => false,
+                'customer_id' => false,
+                'rating' => false,
+                'status' => 0.000001111,
             ];
             $review->validate($data);
         } catch (ValidationException $e) {
@@ -28,15 +28,15 @@ class ReviewTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'product_id'           => 1,
-                'customer_id'                  =>1,
-                'rating'             => 36,
-                'status'                => 1,
+                'product_id' => 1,
+                'customer_id' => 1,
+                'rating' => 36,
+                'status' => 1,
             ];
             $review->validate($data);
         } catch (ValidationException $e) {
             $errors = $review->errors()['validation'];
-           // var_Dump($errors);
+            // var_Dump($errors);
         }
         $this->assertCount(0, $errors);
     }

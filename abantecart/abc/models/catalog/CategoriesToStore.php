@@ -54,7 +54,7 @@ class CategoriesToStore extends BaseModel
     protected $rules = [
         /** @see validate() */
         'category_id' => [
-            'checks'   => [
+            'checks' => [
                 'integer',
                 'sometimes',
                 'required',
@@ -63,13 +63,13 @@ class CategoriesToStore extends BaseModel
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Category ID is not integer!'],
-                'max'=>['default_text'=>'Category ID must be less than 2147483647'],
-                'min'=>['default_text'=> 'Category ID value must be greater than zero'],
-                'required'=>['default_text'=>'Category ID required']
+                'max' => ['default_text' => 'Category ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Category ID value must be greater than zero'],
+                'required' => ['default_text' => 'Category ID required']
             ],
         ],
-        'store_id'=> [
-            'checks'   => [
+        'store_id' => [
+            'checks' => [
                 'integer',
                 'sometimes',
                 'required',
@@ -78,9 +78,9 @@ class CategoriesToStore extends BaseModel
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Store ID is not integer!'],
-                'max'=>['default_text'=>'Store ID must be less than 2147483647'],
-                'min'=>['default_text'=> 'Store ID value must be greater than zero'],
-                'required'=>['default_text'=>'Store ID required']
+                'max' => ['default_text' => 'Store ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Store ID value must be greater than zero'],
+                'required' => ['default_text' => 'Store ID required']
             ],
         ],
     ];

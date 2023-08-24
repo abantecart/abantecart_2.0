@@ -15,7 +15,7 @@ class GlobalAttributesGroupsDescriptionTest extends TestCase
         try {
             $data = [
                 'attribute_group_id' => false,
-                'language_id'  => false,
+                'language_id' => false,
             ];
             $attr->validate($data);
         } catch (ValidationException $e) {
@@ -28,7 +28,7 @@ class GlobalAttributesGroupsDescriptionTest extends TestCase
         try {
             $data = [
                 'attribute_group_id' => 1,
-                'language_id'  => 1,
+                'language_id' => 1,
             ];
             $attr->validate($data);
         } catch (ValidationException $e) {

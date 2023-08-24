@@ -13,8 +13,8 @@ class ContentDescriptionTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'content_id'           => false,
-                'language_id'                  => false,
+                'content_id' => false,
+                'language_id' => false,
             ];
             $content->validate($data);
         } catch (ValidationException $e) {
@@ -25,8 +25,8 @@ class ContentDescriptionTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'content_id'           => 1,
-                'language_id'             => 36,
+                'content_id' => 1,
+                'language_id' => 36,
             ];
             $content->validate($data);
         } catch (ValidationException $e) {

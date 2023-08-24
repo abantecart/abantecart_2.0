@@ -13,11 +13,11 @@ class TaskTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'starter'           => false,
-                'status'                  => false,
-                'progress'             => false,
-                'last_result'                  => false,
-                'run_interval'  => false,
+                'starter' => false,
+                'status' => false,
+                'progress' => false,
+                'last_result' => false,
+                'run_interval' => false,
                 'max_execution_time' => false,
             ];
             $task->validate($data);
@@ -30,12 +30,12 @@ class TaskTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'starter'           => 1,
-                'status'             => 1,
-                'progress'  => 1,
+                'starter' => 1,
+                'status' => 1,
+                'progress' => 1,
                 'last_result' => 1,
-                'run_interval'        => 1,
-                'max_execution_time'            => 1,
+                'run_interval' => 1,
+                'max_execution_time' => 1,
             ];
             $task->validate($data);
         } catch (ValidationException $e) {

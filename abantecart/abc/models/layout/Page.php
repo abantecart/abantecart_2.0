@@ -60,7 +60,7 @@ class Page extends BaseModel
     protected $rules = [
         /** @see validate() */
         'controller' => [
-            'checks'   => [
+            'checks' => [
                 'string',
                 'required',
                 'sometimes'
@@ -69,8 +69,8 @@ class Page extends BaseModel
                 '*' => ['default_text' => 'Controller Route is empty!'],
             ],
         ],
-        'key_param'  => [
-            'checks'   => [
+        'key_param' => [
+            'checks' => [
                 'string',
                 'max:40'
             ],
@@ -80,8 +80,8 @@ class Page extends BaseModel
                 ],
             ],
         ],
-        'key_value'  => [
-            'checks'   => [
+        'key_value' => [
+            'checks' => [
                 'string',
                 'required_with:key_param',
                 'max:40'
@@ -93,15 +93,15 @@ class Page extends BaseModel
             ],
         ],
         'parent_page_id' => [
-            'checks'   => [
+            'checks' => [
                 'integer',
                 'min:0',
                 'max:2147483647'
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Parent Page ID is not integer!'],
-                'max'=>['default_text'=>'Parent Page ID must be less than 2147483647'],
-                'min'=>['default_text'=> 'Parent Page ID value must be greater than zero'],
+                'max' => ['default_text' => 'Parent Page ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Parent Page ID value must be greater than zero'],
             ],
         ]
     ];

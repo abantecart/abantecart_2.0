@@ -13,8 +13,8 @@ class ExtensionTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'status'           => false,
-                'priority'                  => false,
+                'status' => false,
+                'priority' => false,
             ];
             $extension->validate($data);
         } catch (ValidationException $e) {
@@ -25,8 +25,8 @@ class ExtensionTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'status'           => 1,
-                'priority'  => 1,
+                'status' => 1,
+                'priority' => 1,
 
             ];
             $extension->validate($data);

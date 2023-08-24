@@ -1,38 +1,37 @@
 <?php
 
-namespace Tests\unit\models\catalog;
 
-use abc\models\catalog\GlobalAttributesGroup;
+use abc\models\user\User;
 use Illuminate\Validation\ValidationException;
 use PHPUnit\Framework\TestCase;
 
-class GlobalAttributesGroupTest extends TestCase
+class UserTest extends TestCase
 {
-    public function testValidator()
+    public function testUserValidation()
     {
-        $attr = new  GlobalAttributesGroup();
+        $user = new User();
         $errors = [];
         try {
             $data = [
-                'sort_order' => false,
+                'user_group_id' => false,
                 'status' => false,
             ];
-            $attr->validate($data);
+            $user->validate($data);
         } catch (ValidationException $e) {
-            $errors = $attr->errors()['validation'];
-            //var_Dump($errors);
+            $errors = $user->errors()['validation'];
         }
         $this->assertCount(2, $errors);
 
         $errors = [];
         try {
             $data = [
-                'sort_order' => 1,
+                'user_group_id' => 1,
                 'status' => 1,
             ];
-            $attr->validate($data);
+            $user->validate($data);
         } catch (ValidationException $e) {
-            $errors = $attr->errors()['validation'];
+            $errors = $user->errors()['validation'];
+            //var_Dump($errors);
         }
         $this->assertCount(0, $errors);
     }

@@ -14,11 +14,11 @@ class DownloadTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'max_downloads'           => false,
-                'expire_days'                  => false,
-                'sort_order'             => false,
-                'activate_order_status_id'                  => false,
-                'shared'  => false,
+                'max_downloads' => false,
+                'expire_days' => false,
+                'sort_order' => false,
+                'activate_order_status_id' => false,
+                'shared' => false,
                 'status' => false,
 
             ];
@@ -32,11 +32,11 @@ class DownloadTest extends TestCase
         $errors = [];
         try {
             $data = [
-                'max_downloads'           => 1,
-                'expire_days'                  => 1,
-                'sort_order'             => 1,
-                'activate_order_status_id'                  => 1,
-                'shared'  => 1,
+                'max_downloads' => 1,
+                'expire_days' => 1,
+                'sort_order' => 1,
+                'activate_order_status_id' => 1,
+                'shared' => 1,
                 'status' => 1,
             ];
             $download->validate($data);
