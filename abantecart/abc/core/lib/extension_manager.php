@@ -872,7 +872,7 @@ class AExtensionManager
      *
      * @return bool
      */
-    public function validateCoreVersion(string $extension_txt_id, DOMNode $config)
+    public function validateCoreVersion(string $extension_txt_id, DOMNode|SimpleXMLElement $config)
     {
         $this->errors = [];
         if (!isset($config->cartversions->item)) {
