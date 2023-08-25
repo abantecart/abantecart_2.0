@@ -85,7 +85,7 @@ class AHelperUtils extends AHelper
             $value = str_replace('.', '~', $value);
             $value = str_replace($decimal_point, '.', $value);
         }
-
+        // TODO: replace with number_format()
         return (float)preg_replace('/[^\d\-.]/', '', $value);
     }
 

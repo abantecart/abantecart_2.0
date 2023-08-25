@@ -3,7 +3,7 @@
  * AbanteCart, Ideal Open Source Ecommerce Solution
  * http://www.abantecart.com
  *
- * Copyright 2011-2022 Belavier Commerce LLC
+ * Copyright 2011-2023 Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
@@ -26,9 +26,7 @@ use abc\models\content\ContentsToStore;
 use abc\models\customer\Customer;
 use abc\models\order\Order;
 use abc\models\user\UserNotification;
-use Dyrynda\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class Store
@@ -43,8 +41,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Store extends BaseModel
 {
-    use SoftDeletes, CascadeSoftDeletes;
-
     protected $cascadeDeletes = [
         'descriptions',
         'categories',

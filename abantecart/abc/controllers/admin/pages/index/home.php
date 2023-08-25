@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2018 Belavier Commerce LLC
+  Copyright © 2011-2023 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -21,6 +21,7 @@
 namespace abc\controllers\admin;
 
 use abc\core\engine\AController;
+use abc\models\catalog\Product;
 use abc\models\customer\Customer;
 use abc\models\locale\Currency;
 use abc\models\order\Order;
@@ -28,7 +29,6 @@ use H;
 
 class ControllerPagesIndexHome extends AController
 {
-    public $data = [];
 
     public function main()
     {
@@ -59,15 +59,12 @@ class ControllerPagesIndexHome extends AController
             )
         );
 
-        $total_sale_year = Order::whereRaw("YEAR(date_added) = ".(int)date('Y'))
+        $total_sale_year = Order::whereYear('date_added', '=', (int)date('Y'))
                                 ->where('order_status_id', '>', 0)
                                 ->sum('total');
         $this->view->assign(
             'total_sale_year',
-            $this->currency->format(
-                $total_sale_year,
-                $this->config->get('config_currency')
-            )
+            $this->currency->format($total_sale_year, $this->config->get('config_currency'))
         );
         $this->view->assign('total_order', Order::search(['mode' => 'total_only']));
 
@@ -75,7 +72,7 @@ class ControllerPagesIndexHome extends AController
         $this->view->assign('total_customer_approval', Customer::getTotalCustomers(['filter' => ['approved' => 0]]));
 
         $this->loadModel('catalog/product');
-        $this->view->assign('total_product', $this->model_catalog_product->getTotalProducts());
+        $this->view->assign('total_product', Product::count());
         $this->loadModel('catalog/review');
         $this->view->assign('total_review', $this->model_catalog_review->getTotalReviews());
         $this->view->assign('total_review_approval', $this->model_catalog_review->getTotalReviewsAwaitingApproval());
@@ -165,13 +162,9 @@ class ControllerPagesIndexHome extends AController
         $this->view->assign('customers', $top_customers);
         $this->view->assign('customers_url', $this->html->getSecureURL('sale/customer'));
 
+        $this->view->assign('orders_url', $this->html->getSecureURL('sale/order'));
+        $this->view->assign('orders_text', $this->language->get('text_order'));
         $orders = [];
-        $filter = [
-            'sort'  => 'date_added',
-            'order' => 'DESC',
-            'start' => 0,
-            'limit' => 10,
-        ];
         $this->view->assign('orders_url', $this->html->getSecureURL('sale/order'));
         $this->view->assign('orders_text', $this->language->get('text_order'));
 
@@ -212,7 +205,7 @@ class ControllerPagesIndexHome extends AController
         }
 
         if ($no_payment_installed) {
-            $this->view->assign('no_payment_installed', $no_payment_installed);
+            $this->view->assign('no_payment_installed', true);
             $this->loadLanguage('common/tips');
             $tip_content = $this->html->convertLinks($this->language->get('no_enabled_payments_tip'));
             $this->view->assign('tip_content', $tip_content);
@@ -224,12 +217,12 @@ class ControllerPagesIndexHome extends AController
             //show it for first administrator only
             && $this->user->getId() < 2
         ) {
-            $store_id = !isset($this->session->data['current_store_id']) ? 0 : $this->session->data['current_store_id'];
+            $store_id = (int)$this->session->data['current_store_id'];
             $resources_scripts = $this->dispatch(
                 'responses/common/resource_library/get_resources_scripts',
                 [
                     'object_name' => 'store',
-                    'object_id'   => (int)$store_id,
+                    'object_id' => $store_id,
                     'types'       => ['image'],
                     'onload'      => true,
                     'mode'        => 'single',
@@ -244,5 +237,4 @@ class ControllerPagesIndexHome extends AController
         //update controller data
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
     }
-
 }

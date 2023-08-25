@@ -107,7 +107,8 @@ use stdClass;
  *
  * @method static Product|Collection find(int|array $product_id) Product
  * @method static Product select(mixed $select) Builder
- * @method static Collection search(array $filterParams) - see getProducts() method
+ * @see static::getProducts()
+ * @method static Collection search(array $filterParams)
  * @method static WithFinalPrice(int $customer_group_id, Carbon|string $toDate = null) - adds "final_price" column into selected fields
  * @method static WithFirstSpecialPrice(int $customer_group_id, Carbon|string $toDate = null) - adds "special_price" column into selected fields
  * @method static WithFirstDiscountPrice(int $customer_group_id, Carbon|string $toDate = null) - adds "discount_price" column into selected fields
