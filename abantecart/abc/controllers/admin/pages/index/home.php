@@ -71,7 +71,6 @@ class ControllerPagesIndexHome extends AController
         $this->view->assign('total_customer', Customer::getTotalCustomers());
         $this->view->assign('total_customer_approval', Customer::getTotalCustomers(['filter' => ['approved' => 0]]));
 
-        $this->loadModel('catalog/product');
         $this->view->assign('total_product', Product::count());
         $this->loadModel('catalog/review');
         $this->view->assign('total_review', $this->model_catalog_review->getTotalReviews());

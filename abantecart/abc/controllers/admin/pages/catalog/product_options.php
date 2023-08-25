@@ -49,7 +49,6 @@ class ControllerPagesCatalogProductOptions extends AController
         $productId = (int)$this->request->get['product_id'];
 
         $this->loadLanguage('catalog/product');
-        $this->loadModel('catalog/product');
 
         $this->attribute_manager = ABC::getObjectByAlias('AttributeManager');
         $language_id = $this->language->getContentLanguageID();
