@@ -26,22 +26,17 @@ use abc\core\engine\Registry;
 use abc\core\lib\AError;
 use abc\core\lib\AException;
 use abc\core\lib\AJson;
-use abc\models\admin\ModelCatalogProduct;
 use abc\models\catalog\Product;
 use abc\models\catalog\ProductDiscount;
 use abc\models\catalog\ProductSpecial;
+use abc\models\QueryBuilder;
 use Exception;
 use H;
 use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionException;
 use stdClass;
 
-/**
- * Class ControllerResponsesListingGridProduct
- *
- * @package abc\controllers\admin
- * @property ModelCatalogProduct $model_catalog_product
- */
+
 class ControllerResponsesListingGridProduct extends AController
 {
     public function main()
@@ -99,7 +94,7 @@ class ControllerResponsesListingGridProduct extends AController
         $results = Product::getProducts($this->data['search_parameters']);
         //push result into public scope to get access from extensions
         $this->data['results'] = $results;
-
+        /** @see QueryBuilder::get() */
         $total = $results::getFoundRowsCount();
         $total_pages = $total > 0 ? ceil($total / $limit) : 0;
         $response = new stdClass();
@@ -186,7 +181,6 @@ class ControllerResponsesListingGridProduct extends AController
             return;
         }
 
-        $this->loadModel('catalog/product');
         $this->loadLanguage('catalog/product');
 
         switch ($this->request->post['oper']) {
@@ -308,7 +302,6 @@ class ControllerResponsesListingGridProduct extends AController
         }
 
         $this->loadLanguage('catalog/product');
-        $this->loadModel('catalog/product');
 
         $product_id = (int)$this->request->get['id'];
         if ($product_id) {
@@ -449,7 +442,6 @@ class ControllerResponsesListingGridProduct extends AController
         }
 
         $this->loadLanguage('catalog/product');
-        $this->loadModel('catalog/product');
         if (isset($this->request->get['id'])) {
             //request sent from edit form. ID in url
             foreach ($this->request->post as $key => $value) {

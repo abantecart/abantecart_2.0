@@ -79,8 +79,6 @@ class ControllerPagesCatalogProductRelations extends AController
 
         $this->addTabs('relations');
 
-        $this->data['category_products'] = $this->html->getSecureURL('product/product/category');
-        $this->data['related_products'] = $this->html->getSecureURL('product/product/related');
         $this->data['action'] = $this->html->getSecureURL('catalog/product_relations', '&product_id=' . $productId);
         $this->data['form_title'] = $this->language->get('text_edit') . '&nbsp;' . $this->language->get('text_product');
         $this->data['update'] = $this->html->getSecureURL(

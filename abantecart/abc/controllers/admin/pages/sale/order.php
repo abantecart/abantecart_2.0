@@ -467,7 +467,6 @@ class ControllerPagesSaleOrder extends AController
         );
 
         $this->data['invoice_generate'] = $this->html->getSecureURL('sale/invoice/generate');
-        $this->data['category_products'] = $this->html->getSecureURL('product/product/category');
         $this->data['product_update'] = $this->html->getSecureURL('catalog/product/update');
         $this->data['order_id'] = $order_id;
         $this->data['action'] = $this->html->getSecureURL('sale/order/details', '&order_id=' . $order_id);
@@ -637,7 +636,7 @@ class ControllerPagesSaleOrder extends AController
                 'disable_edit'     => in_array($order_product['order_status_id'], $this->data['cancel_statuses']),
                 'order_product_id' => $order_product['order_product_id'],
                 'product_id'       => $order_product['product_id'],
-                'product_status'   => $product['status'],
+                'product_status' => $product->status,
                 'order_status_id'  => $order_product['order_status_id'],
                 'order_status'     => ($orderStatus
                     ? $orderStatus->name
@@ -1791,7 +1790,6 @@ class ControllerPagesSaleOrder extends AController
             ]
         );
         $this->data['invoice_generate'] = $this->html->getSecureURL('sale/invoice/generate');
-        $this->data['category_products'] = $this->html->getSecureURL('product/product/category');
         $this->data['product_update'] = $this->html->getSecureURL('catalog/product/update');
         $this->data['order_id'] = $this->request->get['order_id'];
         $this->data['action'] = $this->html->getSecureURL(

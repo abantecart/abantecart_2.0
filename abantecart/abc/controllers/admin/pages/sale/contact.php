@@ -316,7 +316,6 @@ class ControllerPagesSaleContact extends AController
             $this->data['emails'] = (array)$this->request->get['email'];
         }
 
-        $this->data['category_products'] = $this->html->getSecureURL('product/product/category');
         $this->data['customers_list'] = $this->html->getSecureURL('user/customers');
         $this->data['presave_url'] = $this->html->getSecureURL('r/sale/contact/presave');
 
