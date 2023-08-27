@@ -2688,18 +2688,24 @@ class Product extends BaseModel
         return $product_option_data;
     }
 
-    public static function getProductOption($option_id)
+    public static function getProductOption($optionId)
     {
+        if (!$optionId) {
+            return [];
+        }
         $option = ProductOption::with('descriptions')
-            ->find($option_id)
+            ->find($optionId)
             ?->toArray();
+        if (!$option) {
+            return [];
+        }
 
         $optionData = [];
         foreach ($option['descriptions'] as $desc) {
             $optionData['language'][$desc['language_id']] = $desc;
         }
         $option_data = array_merge($option, $optionData);
-        $option_data['product_option_value'] = ProductOptionValue::getProductOptionValues($option_id);
+        $option_data['product_option_value'] = ProductOptionValue::getProductOptionValues($optionId);
 
         return $option_data;
     }
