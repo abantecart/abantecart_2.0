@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2023 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -22,14 +22,16 @@ namespace abc\controllers\admin;
 
 use abc\core\engine\AController;
 use abc\core\lib\AError;
+use abc\core\lib\AException;
 use abc\core\lib\AFilter;
 use abc\core\lib\AJson;
+use abc\models\catalog\Product;
+use Psr\SimpleCache\InvalidArgumentException;
+use ReflectionException;
 use stdClass;
 
 class ControllerResponsesListingGridTaxClass extends AController
 {
-    public $data = [];
-
     public function main()
     {
 
@@ -51,17 +53,18 @@ class ControllerResponsesListingGridTaxClass extends AController
         $response->records = $total;
         $response->userdata = (object)[''];
         $results = $this->model_localisation_tax_class->getTaxClasses($filter_data);
+        $languageId = $this->language->getContentLanguageID();
 
         $i = 0;
         foreach ($results as $result) {
-
             $response->rows[$i]['id'] = $result['tax_class_id'];
             $response->rows[$i]['cell'] = [
-                $this->html->buildInput([
-                    'name'  => 'tax_class['.$result['tax_class_id'].']['.$this->session->data['content_language_id']
-                        .'][title]',
-                    'value' => $result['title'],
-                ]),
+                $this->html->buildInput(
+                    [
+                        'name'  => 'tax_class[' . $result['tax_class_id'] . '][' . $languageId . '][title]',
+                        'value' => $result['title'],
+                    ]
+                ),
             ];
             $i++;
         }
@@ -83,11 +86,14 @@ class ControllerResponsesListingGridTaxClass extends AController
         $this->loadLanguage('localisation/tax_class');
         if (!$this->user->canModify('listing_grid/tax_class')) {
             $error = new AError('');
-            return $error->toJSONResponse('NO_PERMISSIONS_403',
+            $error->toJSONResponse(
+                'NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/tax_class'),
                     'reset_value' => true,
-                ]);
+                ]
+            );
+            return;
         }
 
         switch ($this->request->post['oper']) {
@@ -95,10 +101,11 @@ class ControllerResponsesListingGridTaxClass extends AController
                 $ids = explode(',', $this->request->post['id']);
                 if (!empty($ids)) {
                     foreach ($ids as $id) {
-                        $err = $this->_validateDelete($id);
+                        $err = $this->_validateDelete((int)$id);
                         if (!empty($err)) {
                             $error = new AError('');
-                            return $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
+                            $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
+                            return;
                         }
                         $this->model_localisation_tax_class->deleteTaxClass($id);
                     }
@@ -109,17 +116,21 @@ class ControllerResponsesListingGridTaxClass extends AController
                 if (!empty($ids)) {
                     foreach ($ids as $id) {
                         if (isset($this->request->post['tax_class'][$id])) {
-                            foreach ($this->request->post['tax_class'][$id] as $lang => $value) {
+                            foreach ($this->request->post['tax_class'][$id] as $value) {
                                 if (isset($value['title'])) {
                                     $err = $this->_validateField('title', $value['title']);
                                     if (!empty($err)) {
                                         $this->response->setOutput($err);
-                                        return null;
+                                        return;
                                     }
                                 }
                             }
-                            $this->model_localisation_tax_class->editTaxClass($id,
-                                ['tax_class' => $this->request->post['tax_class'][$id]]);
+                            $this->model_localisation_tax_class->editTaxClass(
+                                $id,
+                                [
+                                    'tax_class' => $this->request->post['tax_class'][$id]
+                                ]
+                            );
                         }
                     }
                 }
@@ -134,25 +145,27 @@ class ControllerResponsesListingGridTaxClass extends AController
     /**
      * update only one field
      *
-     * @return void
-     * @throws \Psr\SimpleCache\InvalidArgumentException
-     * @throws \ReflectionException
-     * @throws \abc\core\lib\AException
+     * @void
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
+     * @throws AException
      */
     public function update_field()
     {
-
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
         $this->loadLanguage('localisation/tax_class');
         if (!$this->user->canModify('listing_grid/tax_class')) {
             $error = new AError('');
-            return $error->toJSONResponse('NO_PERMISSIONS_403',
+            $error->toJSONResponse(
+                'NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/tax_class'),
                     'reset_value' => true,
-                ]);
+                ]
+            );
+            return;
         }
         $this->loadModel('localisation/tax_class');
         if (isset($this->request->get['id'])) {
@@ -160,7 +173,7 @@ class ControllerResponsesListingGridTaxClass extends AController
             foreach ($this->request->post as $key => $value) {
                 $err = '';
                 if ($key == 'tax_class') {
-                    foreach ($value as $lang => $val) {
+                    foreach ($value as $val) {
                         if (isset($val['title'])) {
                             $err .= $this->_validateField('title', $val['title']);
                         }
@@ -170,22 +183,24 @@ class ControllerResponsesListingGridTaxClass extends AController
                 }
                 if (!empty($err)) {
                     $error = new AError('');
-                    return $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
+                    $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
+                    return;
                 }
                 $data = [$key => $value];
                 $this->model_localisation_tax_class->editTaxClass($this->request->get['id'], $data);
             }
-            return null;
+            return;
         }
 
         //request sent from jGrid. ID is key of array
         if (isset($this->request->post['tax_class'])) {
             foreach ($this->request->post['tax_class'] as $id => $v) {
-                foreach ($v as $lang => $value) {
+                foreach ($v as $value) {
                     $err = $this->_validateField('title', $value['title']);
                     if (!empty($err)) {
                         $error = new AError('');
-                        return $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
+                        $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
+                        return;
                     }
                 }
                 $this->model_localisation_tax_class->editTaxClass($id, ['tax_class' => $v]);
@@ -199,10 +214,10 @@ class ControllerResponsesListingGridTaxClass extends AController
     /**
      * update only one field
      *
-     * @return void
-     * @throws \Psr\SimpleCache\InvalidArgumentException
-     * @throws \ReflectionException
-     * @throws \abc\core\lib\AException
+     * @void
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
+     * @throws AException
      */
     public function update_rate_field()
     {
@@ -213,11 +228,14 @@ class ControllerResponsesListingGridTaxClass extends AController
         $this->loadLanguage('localisation/tax_class');
         if (!$this->user->canModify('listing_grid/tax_class')) {
             $error = new AError('');
-            return $error->toJSONResponse('NO_PERMISSIONS_403',
+            $error->toJSONResponse(
+                'NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/tax_class'),
                     'reset_value' => true,
-                ]);
+                ]
+            );
+            return;
         }
 
         $this->loadModel('localisation/tax_class');
@@ -227,19 +245,20 @@ class ControllerResponsesListingGridTaxClass extends AController
                 $err = $this->_validateField($key, $value);
                 if (!empty($err)) {
                     $error = new AError('');
-                    return $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
+                    $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
+                    return;
                 }
                 $data = [$key => $value];
                 $this->model_localisation_tax_class->editTaxRate($this->request->get['id'], $data);
             }
-            return null;
+            return;
         }
 
         //update controller data
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
     }
 
-    private function _validateField($field, $value)
+    protected function _validateField($field, $value)
     {
         $this->data['error'] = '';
         switch ($field) {
@@ -259,12 +278,11 @@ class ControllerResponsesListingGridTaxClass extends AController
         return $this->data['error'];
     }
 
-    private function _validateDelete($tax_class_id)
+    protected function _validateDelete(int $tax_class_id)
     {
         $this->data['error'] = '';
-        $this->loadModel('catalog/product');
 
-        $product_total = $this->model_catalog_product->getTotalProductsByTaxClassId($tax_class_id);
+        $product_total = Product::where('tax_class_id', '=', $tax_class_id)->count();
         if ($product_total) {
             $this->data['error'] = sprintf($this->language->get('error_product'), $product_total);
         }
@@ -275,7 +293,6 @@ class ControllerResponsesListingGridTaxClass extends AController
 
     public function tax_rates()
     {
-
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
@@ -325,7 +342,7 @@ class ControllerResponsesListingGridTaxClass extends AController
                 $locations[$tax_rate['location_id']],
                 $zones[(int)$tax_rate['zone_id']],
                 $tax_rate['description'],
-                $tax_rate['rate_prefix'].$tax_rate['rate'],
+                $tax_rate['rate_prefix'] . $tax_rate['rate'],
                 $tax_rate['priority'],
             ];
         }

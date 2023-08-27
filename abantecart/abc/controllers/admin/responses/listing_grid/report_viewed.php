@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2023 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -20,63 +20,65 @@
 namespace abc\controllers\admin;
 use abc\core\engine\AController;
 use abc\core\lib\AJson;
+use abc\models\catalog\Product;
 use stdClass;
 
-if (!class_exists('abc\core\ABC') || !\abc\core\ABC::env('IS_ADMIN')) {
-	header('Location: static_pages/?forbidden='.basename(__FILE__));
-}
 class ControllerResponsesListingGridReportViewed extends AController {
-	public $data = array();
+    public function main()
+    {
+        $page = (int)$this->request->post['page'] ?: 1;
+        $limit = $this->request->post['rows'];
+        $sort = $this->request->post['sidx'];
+        $order = $this->request->post['sord'];
 
-    public function main() {
+        $this->data['search_parameters'] = [
+            'language_id' => $this->language->getContentLanguageID(),
+            'start'       => ($page - 1) * $limit,
+            'limit'       => $limit,
+            'sort'        => $sort,
+            'order'       => $order
+        ];
 
 	    //init controller data
         $this->extensions->hk_InitData($this,__FUNCTION__);
 
+        $this->data['search_parameters']['filter']['only_viewed'] = true;
+
 		$this->loadLanguage('report/viewed');
-		$this->loadModel('report/viewed');
-	    $this->loadModel('catalog/product');
 
-		$page = $this->request->post['page']; // get the requested page
-		$limit = $this->request->post['rows']; // get how many rows we want to have into the grid
-		$sidx = $this->request->post['sidx']; // get index row - i.e. user click to sort
-		$sord = $this->request->post['sord']; // get the direction
+        $results = Product::getProducts($this->data['search_parameters']);
+        //push result into public scope to get access from extensions
+        $this->data['results'] = $results;
+        /** @see QueryBuilder::get() */
+        $total = $results::getFoundRowsCount();
+        $total_pages = $total > 0 ? ceil($total / $limit) : 0;
 
-	    $data = array(
-			'sort'  => $sidx,
-			'order' => $sord,
-			'start' => ($page - 1) * $limit,
-			'limit' => $limit
-		);
+        $totalViews = Product::sum('viewed');
 
-		$total = $this->model_catalog_product->getTotalProducts($data);
-	    if( $total > 0 ) {
-			$total_pages = ceil($total/$limit);
-		} else {
-			$total_pages = 0;
-		}
+        $response = new stdClass();
+        $response->page = $page;
+        $response->total = $total_pages;
+        $response->records = $total;
+        $response->userdata = (object)[''];
+        $response->userdata->classes = [];
 
-	    if($page > $total_pages){
-            $page = $total_pages;
-            $data['start'] = ($page - 1) * $limit;
-        }
-
-	    $response = new stdClass();
-		$response->page = $page;
-		$response->total = $total_pages;
-		$response->records = $total;
-
-	    $results = $this->model_report_viewed->getProductViewedReport($data['start'],$data['limit']);
 	    $i = 0;
 		foreach ($results as $result) {
+
+            if ($result->viewed) {
+                $percent = number_format(round(($result->viewed / $totalViews) * 100, 2), 2);
+            } else {
+                $percent = '0';
+            }
+
             $response->rows[$i]['id'] = $i;
-			$response->rows[$i]['cell'] = array(
-				$result['product_id'],
-				$result['name'],
-				$result['model'],
-				$result['viewed'],
-                $result['percent'],
-			);
+            $response->rows[$i]['cell'] = [
+                $result->product_id,
+                $result->name,
+                $result->model,
+                $result->viewed,
+                $percent . '%',
+            ];
 			$i++;
 		}
 	    $this->data['response'] = $response;
@@ -86,5 +88,4 @@ class ControllerResponsesListingGridReportViewed extends AController {
         $this->load->library('json');
         $this->response->setOutput(AJson::encode($this->data['response']));
 	}
-
 }

@@ -2726,6 +2726,7 @@ class Product extends BaseModel
      *              - description
      *              - model
      *              - only_enabled - with status 1 and date_available less than current time
+     *              - only_viewed  - with viewed count greater than zero
      *              - customer_group_id
      *              - keyword
      *              - keyword_search_parameters - array(
@@ -2765,6 +2766,7 @@ class Product extends BaseModel
         $filter['related_to'] = $filter['related_to'] ?? [];
 
         $filter['only_enabled'] = (bool)$filter['only_enabled'];
+        $filter['only_viewed'] = (bool)$filter['only_viewed'];
         $filter['customer_group_id'] = $filter['customer_group_id']
             ?? Registry::config()?->get('config_customer_group_id');
         $filter['keyword'] = trim($filter['keyword']);
@@ -2888,6 +2890,9 @@ class Product extends BaseModel
         }
         if ($filter['only_featured']) {
             $query->where('products.featured', '=', 1);
+        }
+        if ($filter['only_viewed']) {
+            $query->where('products.viewed', '>', 0);
         }
 
         if ($filter['related_to']) {
