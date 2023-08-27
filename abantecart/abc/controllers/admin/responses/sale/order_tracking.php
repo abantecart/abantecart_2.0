@@ -1,16 +1,36 @@
 <?php
+/*------------------------------------------------------------------------------
+  $Id$
 
+  AbanteCart, Ideal OpenSource Ecommerce Solution
+  http://www.AbanteCart.com
+
+  Copyright © 2011-2023 Belavier Commerce LLC
+
+  This source file is subject to Open Software License (OSL 3.0)
+  License details is bundled with this package in the file LICENSE.txt.
+  It is also available at this URL:
+  <http://www.opensource.org/licenses/OSL-3.0>
+
+ UPGRADE NOTE:
+   Do not edit or add to this file if you wish to upgrade AbanteCart to newer
+   versions in the future. If you wish to customize AbanteCart for your
+   needs please refer to http://www.AbanteCart.com for more information.
+------------------------------------------------------------------------------*/
 namespace abc\controllers\admin;
+
 use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\engine\Registry;
 use abc\core\lib\AError;
 use abc\core\lib\AJson;
+use abc\models\catalog\Product;
 use abc\models\order\Order;
 use abc\models\order\OrderProduct;
 use abc\models\order\OrderStatus;
 use abc\modules\events\ABaseEvent;
+use Exception;
 use H;
 
 class ControllerResponsesSaleOrderTracking extends AController
@@ -18,7 +38,6 @@ class ControllerResponsesSaleOrderTracking extends AController
     public function products()
     {
         $this->loadLanguage('sale/order');
-        $this->loadModel('catalog/product');
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
@@ -36,37 +55,34 @@ class ControllerResponsesSaleOrderTracking extends AController
         }
 
         $order_info = Order::getOrderArray($order_id, 'any');
-        if(!$order_info){
-            exit('order # '.$order_id.' not found!');
+        if (!$order_info) {
+            exit('order # ' . $order_id . ' not found!');
         }
 
         $post = $this->request->post;
         if ($this->request->is_POST() && is_array($post['product'])) {
-
             $this->db->beginTransaction();
             try {
-                foreach($post['product'] as $orderProduct){
-                    /**
-                     * @var OrderProduct $op
-                     */
+                foreach ($post['product'] as $orderProduct) {
                     $op = OrderProduct::find($orderProduct['order_product_id']);
-                    if($op && $op->order_status_id != $orderProduct['order_status_id']){
+                    if ($op && $op->order_status_id != $orderProduct['order_status_id']) {
                         $op->update(['order_status_id' => $orderProduct['order_status_id']]);
                     }
                 }
                 $this->db->commit();
                 H::event('abc\models\admin\order@update', [new ABaseEvent($order_id, $post)]);
-            } catch (\Exception $e) {
-                Registry::log()->write($e->getMessage());
+            } catch (Exception $e) {
+                Registry::log()->critical($e->getMessage());
                 $this->db->rollback();
                 $error = new AError('');
-                $error->toJSONResponse('APP_ERROR_406',
+                $error->toJSONResponse(
+                    'APP_ERROR_406',
                     [
                         'error_text'  => 'Application error. See error log for details',
                         'reset_value' => true,
-                    ]);
+                    ]
+                );
                 return;
-
             }
 
             $this->response->addJSONHeader();
@@ -76,7 +92,7 @@ class ControllerResponsesSaleOrderTracking extends AController
 
         if ($this->error) {
             $this->session->data['error'] = implode(' ', $this->error);
-            abc_redirect($this->html->getSecureURL('sale/order/details', '&order_id='.$order_id));
+            abc_redirect($this->html->getSecureURL('sale/order/details', '&order_id=' . $order_id));
         }
 
         $this->data['order_info'] = $order_info;
@@ -106,9 +122,9 @@ class ControllerResponsesSaleOrderTracking extends AController
             $this->data['success'] = '';
         }
 
-        $this->data['heading_title'] = $this->language->get('heading_title').' #'.$order_id;
+        $this->data['heading_title'] = $this->language->get('heading_title') . ' #' . $order_id;
         $this->data['token'] = $this->session->data['token'];
-        $this->data['invoice_url'] = $this->html->getSecureURL('sale/invoice', '&order_id='.$order_id);
+        $this->data['invoice_url'] = $this->html->getSecureURL('sale/invoice', '&order_id=' . $order_id);
         $this->data['button_invoice'] = $this->html->buildElement(
             [
                 'type' => 'button',
@@ -118,7 +134,7 @@ class ControllerResponsesSaleOrderTracking extends AController
         );
 
         $this->data['order_id'] = $order_id;
-        $this->data['action'] = $this->html->getSecureURL('r/sale/order_tracking/products', '&order_id='.$order_id);
+        $this->data['action'] = $this->html->getSecureURL('r/sale/order_tracking/products', '&order_id=' . $order_id);
         $this->data['cancel'] = $this->html->getSecureURL('sale/order');
 
         $this->data['currency'] = $this->currency->getCurrency($order_info['currency']);
@@ -126,10 +142,12 @@ class ControllerResponsesSaleOrderTracking extends AController
         $this->data['form_title'] = $this->language->get('edit_title_details');
         $form = new AForm('HT');
         $form_id = 'orderTrackProductFrm';
-        $form->setForm([
-            'form_name' => $form_id,
-            'update'    => $this->data['update'],
-        ]);
+        $form->setForm(
+            [
+                'form_name' => $form_id,
+                'update'    => $this->data['update'],
+            ]
+        );
 
         $this->data['form']['id'] = $form_id;
         $this->data['form']['form_open'] = $form->getFieldHtml(
@@ -157,7 +175,7 @@ class ControllerResponsesSaleOrderTracking extends AController
             ]
         );
 
-        $this->data['title'] = $this->language->get('text_tracking_products').' #'.$order_id." - ".$order_info['firstname'].' '.$order_info['lastname'];
+        $this->data['title'] = $this->language->get('text_tracking_products') . ' #' . $order_id . " - " . $order_info['firstname'] . ' ' . $order_info['lastname'];
 
         $this->data['order_products'] = [];
 
@@ -182,12 +200,12 @@ class ControllerResponsesSaleOrderTracking extends AController
                     }
 
                     if (is_file($file)) {
-                        $value = '<a href="'.$this->html->getSecureURL(
+                        $value = '<a href="' . $this->html->getSecureURL(
                                 'tool/files/download',
-                                '&filename='.urlencode($filename).'&order_option_id='.(int)$option['order_option_id']
-                            ).'" title=" to download file" target="_blank">'.$value.'</a>';
+                                '&filename=' . urlencode($filename) . '&order_option_id=' . (int)$option['order_option_id']
+                            ) . '" title=" to download file" target="_blank">' . $value . '</a>';
                     } else {
-                        $value = '<span title="file '.$file.' is unavailable">'.$value.'</span>';
+                        $value = '<span title="file ' . $file . ' is unavailable">' . $value . '</span>';
                     }
 
                 } elseif ($option['element_type'] == 'C' && $value == 1) {
@@ -201,7 +219,7 @@ class ControllerResponsesSaleOrderTracking extends AController
 
                     $value = str_replace('\r\n', "\n", $value);
                     if (mb_strlen($value) > 64) {
-                        $value = mb_substr($value, 0, 64).'...';
+                        $value = mb_substr($value, 0, 64) . '...';
                     }
                 }
 
@@ -214,20 +232,19 @@ class ControllerResponsesSaleOrderTracking extends AController
                 ];
             }
 
-            //check if this product product is still available, so we can use recalculation against the cart
-            $product = $this->model_catalog_product->getProduct($order_product['product_id']);
-            if(!$this->config->get('config_allow_order_recalc')) {
-                if (empty($product) || !$product['status'] || $product['call_to_order']) {
+            //check if this product is still available, so we can use recalculation against the cart
+            $product = Product::find($order_product['product_id']);
+            if (!$this->config->get('config_allow_order_recalc')) {
+                if ($product || !$product->status || $product->call_to_order) {
                     $this->data['no_recalc_allowed'] = true;
-                    $product['status'] = 0;
+                    $product->status = 0;
                 } else {
-                    if (H::dateISO2Int($product['date_available']) > time()) {
+                    if (H::dateISO2Int($product->date_available) > time()) {
                         $this->data['no_recalc_allowed'] = true;
-                        $product['status'] = 0;
+                        $product->status = 0;
                     }
                 }
             }
-
 
             $this->data['cancel_statuses'] = [];
             $statuses = $disabled_statuses = [];
@@ -255,51 +272,51 @@ class ControllerResponsesSaleOrderTracking extends AController
             }
 
             $this->data['order_products'][$kk] =
-                array_merge($order_product,
+                array_merge(
+                    $order_product,
+                    [
+                        'disable_edit'    => in_array($order_product['order_status_id'], $this->data['cancel_statuses']),
+                        'product_status'  => $product->status,
+                        'order_status_id' => $form->getFieldHtml(
                             [
-                                'disable_edit'     => in_array($order_product['order_status_id'], $this->data['cancel_statuses']),
-                                'product_status'   => $product['status'],
-                                'order_status_id'  => $form->getFieldHtml([
-                                    'type'             => 'selectbox',
-                                    'name'             => 'product['.$order_product['order_product_id'].'][order_status_id]',
-                                    'value'            => $order_product['order_status_id'],
-                                    'options'          => $statuses,
-                                    'disabled_options' => $disabled_statuses,
-                                    'attr'             => $readonly,
-                                ]),
-                                'option'           => $option_data,
-                                'price'            => $this->currency->format(
-                                    $order_product['price'],
-                                    $order_info['currency'],
-                                    $order_info['value']
-                                ),
-                                'total'            => $this->currency->format_total(
-                                    $order_product['price'],
-                                    $order_product['quantity'],
-                                    $order_info['currency'], $order_info['value']
-                                ),
-                                'href'             => $this->html->getSecureURL(
-                                    'catalog/product/update',
-                                    '&product_id='.$order_product['product_id']
-                                ),
-                                'product_info' => $product
+                                'type'             => 'selectbox',
+                                'name'             => 'product[' . $order_product['order_product_id'] . '][order_status_id]',
+                                'value'            => $order_product['order_status_id'],
+                                'options'          => $statuses,
+                                'disabled_options' => $disabled_statuses,
+                                'attr'             => $readonly,
                             ]
+                        ),
+                        'option'          => $option_data,
+                        'price'           => $this->currency->format(
+                            $order_product['price'],
+                            $order_info['currency'],
+                            $order_info['value']
+                        ),
+                        'total'           => $this->currency->format_total(
+                            $order_product['price'],
+                            $order_product['quantity'],
+                            $order_info['currency'], $order_info['value']
+                        ),
+                        'href'            => $this->html->getSecureURL(
+                            'catalog/product/update',
+                            '&product_id=' . $order_product['product_id']
+                        ),
+                        'product_info'    => $product
+                    ]
                 );
         }
 
-        $this->data['order_edit_url'] = $this->html->getSecureURL('sale/order/details', '&order_id='. $order_id);
+        $this->data['order_edit_url'] = $this->html->getSecureURL('sale/order/details', '&order_id=' . $order_id);
         $this->data['redirect_confirm_text'] = $this->language->get('text_confirm_redirect_to_order_details');
 
         $this->view->batchAssign($this->data);
         $this->view->assign('help_url', $this->gen_help_url('order_details'));
 
         $tpl = 'responses/sale/orderTrackingProducts.tpl';
-
-
         $this->processTemplate($tpl);
 
         //update controller data
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
     }
-
 }

@@ -36,6 +36,7 @@ use abc\core\lib\AWeight;
 use abc\core\lib\contracts\AttributeManagerInterface;
 use abc\models\admin\ModelCatalogDownload;
 use abc\models\catalog\Category;
+use abc\models\catalog\GlobalAttributesValue;
 use abc\models\catalog\Product;
 use abc\models\catalog\ProductOption;
 use abc\models\catalog\ProductOptionValue;
@@ -45,6 +46,8 @@ use abc\models\order\OrderProduct;
 use abc\models\order\OrderStatus;
 use Exception;
 use H;
+use Illuminate\Database\Query\JoinClause;
+use Illuminate\Support\Collection;
 use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionException;
 
@@ -201,23 +204,25 @@ class ControllerResponsesProductProduct extends AController
         $this->response->setOutput($result);
     }
 
+    /**
+     * Is really needed?
+     * @return void
+     * @throws AException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
+     */
     public function category()
     {
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
-        $this->loadModel('catalog/product');
-        /**
-         * @var APromotion $promotion
-         */
+        /** @var APromotion $promotion */
         $promotion = ABC::getObjectByAlias('APromotion', [$this->request->get['customer_group_id']]);
-
         $category_id = $this->request->get['category_id'] ?? 0;
-
         $product_data = [];
-        $results = $this->model_catalog_product->getProductsByCategoryId($category_id);
-        foreach ($results as $result) {
 
+        $results = Product::getProducts(['filter' => ['category_id' => $category_id]]);
+        foreach ($results as $result) {
             $discount = $promotion->getProductDiscount($result['product_id']);
             if ($discount) {
                 $price = $discount;
@@ -287,42 +292,36 @@ class ControllerResponsesProductProduct extends AController
         $this->response->setOutput(AJson::encode($category_data));
     }
 
+    /**
+     * Is really needed?
+     * @return void
+     */
     public function related()
     {
+        // let change parameters from hooks
+        $this->data['search_parameters'] = [];
+
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
-        $this->loadModel('catalog/product');
+        $this->data['search_parameters']['filter']['include'] = $this->request->post['product_related'] ?? $this->request->post['id'] ?? [];
+        $products = Product::getProducts($this->data['search_parameters']);
 
-        if (isset($this->request->post['product_related'])) {
-            $products = $this->request->post['product_related'];
-        } elseif (isset($this->request->post['id'])) { // variant for popup listing
-            $products = $this->request->post['id'];
-        } else {
-            $products = [];
-        }
-        $product_data = [];
-
-        foreach ($products as $product_id) {
-            $product_info = $this->model_catalog_product->getProduct($product_id);
-
-            if ($product_info) {
-                $product_data[] = [
-                    'id'         => $product_info['product_id'],
-                    'product_id' => $product_info['product_id'],
-                    'name'       => $product_info['name'],
-                    'model'      => $product_info['model'],
-                    'sort_order' => 0,
-                ];
-            }
+        foreach ($products as $k => $product) {
+            $this->data['output'][] = [
+                'id'         => $product->product_id,
+                'product_id' => $product->product_id,
+                'name'       => $product->name,
+                'model'      => $product->model,
+                'sort_order' => $k,
+            ];
         }
 
         //update controller data
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
 
-        $this->load->library('json');
         $this->response->addJSONHeader();
-        $this->response->setOutput(AJson::encode($product_data));
+        $this->response->setOutput(AJson::encode($this->data['output']));
     }
 
     public function get_options_list()
@@ -435,7 +434,6 @@ class ControllerResponsesProductProduct extends AController
 
         $this->loadLanguage('catalog/product');
         $this->document->setTitle($this->language->get('heading_title'));
-        $this->loadModel('catalog/product');
 
         $this->view->assign('success', $this->session->data['success']);
         unset($this->session->data['success']);
@@ -728,7 +726,6 @@ class ControllerResponsesProductProduct extends AController
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
         $this->loadLanguage('catalog/product');
-        $this->loadModel('catalog/product');
 
         $product = Product::find($this->request->get['product_id']);
         if (!$product) {
@@ -1016,8 +1013,8 @@ class ControllerResponsesProductProduct extends AController
         $wht_options = ['%' => '%'];
         $this->loadModel('localisation/weight_class');
         $selected_unit = trim($this->data['weight_type']);
-        $prd_info = $this->model_catalog_product->getProduct($this->request->get['product_id']);
-        $prd_weight_info = $this->model_localisation_weight_class->getWeightClass($prd_info['weight_class_id']);
+        $product = Product::find($this->request->get['product_id']);
+        $prd_weight_info = $this->model_localisation_weight_class->getWeightClass($product->weight_class_id);
         $wht_options[$prd_weight_info['unit']] = $prd_weight_info['title'];
 
         $option_weight_class_id = '';
@@ -1030,7 +1027,7 @@ class ControllerResponsesProductProduct extends AController
             //no weight yet, use product weight unit as default
             $selected_unit = trim($prd_weight_info['unit']);
         } else {
-            if ($option_weight_class_id != trim($prd_info['weight_class_id']) && $selected_unit != '%') {
+            if ($option_weight_class_id != $product->weight_class_id && $selected_unit != '%') {
                 //main product type has changed. Show what weight unit we have in option
                 $weight_info = $this->model_localisation_weight_class->getWeightClassDescriptionByUnit($selected_unit);
                 $wht_options[$selected_unit] = $weight_info['title'];
@@ -1055,7 +1052,7 @@ class ControllerResponsesProductProduct extends AController
      * @param int $attribute_id
      * @param int $language_id
      *
-     * @return array
+     * @return Collection
      * @throws Exception
      */
     public function getProductOptionValues($attribute_id, $language_id = 0)
@@ -1063,17 +1060,43 @@ class ControllerResponsesProductProduct extends AController
         if (!$language_id) {
             $language_id = $this->language->getContentLanguageID();
         }
-        $query = $this->db->query(
-            "SELECT ga.*, gad.value, pov.product_option_value_id
-            FROM " . $this->db->table_name("global_attributes_values") . " ga
-                LEFT JOIN " . $this->db->table_name("global_attributes_value_descriptions") . " gad
-                ON ( ga.attribute_value_id = gad.attribute_value_id AND gad.language_id = '" . (int)$language_id . "' )
-            LEFT JOIN `" . $this->db->table_name('product_option_values') . "` pov 
-                ON pov.attribute_value_id = ga.attribute_value_id
-            WHERE ga.attribute_id = '" . $this->db->escape($attribute_id) . "'
-            ORDER BY sort_order"
-        );
-        return $query->rows;
+        return GlobalAttributesValue::select(
+            [
+                'global_attribute_values.*',
+                'global_attributes_value_descriptions.value',
+                'product_option_values.product_option_value_id'
+            ]
+        )->leftJoin(
+            "global_attributes_value_descriptions",
+            function ($join) use ($language_id) {
+                /** @var JoinClause $join */
+                $join->on(
+                    'global_attribute_values.attribute_value_id',
+                    '=',
+                    'global_attributes_value_descriptions.attribute_value_id'
+                )->where('global_attributes_value_descriptions.language_id', '=', $language_id);
+            }
+        )->leftJoin(
+            'product_option_values',
+            'product_option_values.attribute_value_id',
+            '=',
+            'global_attributes_values.attribute_value_id'
+        )->where("global_attributes_values.attribute_id", '=', $attribute_id)
+            ->orderBy('global_attribute_values.sort_order')
+            ->useCache('product')
+            ->get();
+//
+//        $query = $this->db->query(
+//            "SELECT ga.*, gad.value, pov.product_option_value_id
+//            FROM " . $this->db->table_name("global_attributes_values") . " ga
+//            LEFT JOIN " . $this->db->table_name("global_attributes_value_descriptions") . " gad
+//                ON ( ga.attribute_value_id = gad.attribute_value_id AND gad.language_id = '" . (int)$language_id . "' )
+//            LEFT JOIN `" . $this->db->table_name('product_option_values') . "` pov
+//                ON pov.attribute_value_id = ga.attribute_value_id
+//            WHERE ga.attribute_id = '" . $this->db->escape($attribute_id) . "'
+//            ORDER BY sort_order"
+//        );
+//        return $query->rows;
     }
 
     public function processDownloadForm()
@@ -1693,8 +1716,6 @@ class ControllerResponsesProductProduct extends AController
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
-        $this->loadModel('catalog/product');
-
         $this->loadLanguage('catalog/product');
         $this->loadLanguage('sale/order');
         $this->load->library('json');
@@ -1712,39 +1733,39 @@ class ControllerResponsesProductProduct extends AController
 
         $tax = new ATax($this->registry);
         $tax->setZone($order_info['country_id'], $order_info['zone_id']);
-        $product_info = [];
+        $productInfo = [];
         $product_id = null;
         if (!$order_product_id) {
             $product_id = (int)$this->request->get['product_id'];
-            $product_info = $this->model_catalog_product->getProduct($product_id);
+            $productInfo = Product::getProductInfo($product_id);
         } else {
             $orderProduct = OrderProduct::find($order_product_id);
             if ($orderProduct) {
                 $product_id = $orderProduct->product_id;
-                $product_info = $this->model_catalog_product->getProduct($product_id);
-                if (!$product_info) {
-                    $product_info = $orderProduct->toArray();
+                $productInfo = Product::getProductInfo($product_id);
+                //case if product was removed after purchase
+                if (!$productInfo) {
+                    $productInfo = $orderProduct->toArray();
                 }
             }
         }
         $preset_values = [];
         $order_product_info = null;
 
-        $this->data['product_info'] = $product_info;
-        if (
-            !$product_info
-        ) {
-            $this->data['editable'] = false;
-        } else {
-            $this->data['editable'] = true;
-        }
+        $this->data['product_info'] = $productInfo;
+        $this->data['editable'] = (bool)($productInfo);
 
         //when edit existing order
         if ($order_product_id) {
-
             //if unknown product_id but order_product_id we know
             /** @var OrderProduct $order_product_info */
-            $order_product_info = OrderProduct::where(['order_id' => $order_id, 'order_product_id' => $order_product_id])->first();
+            $order_product_info = OrderProduct::where(
+                [
+                    'order_id'         => $order_id,
+                    'order_product_id' => $order_product_id
+                ]
+            )->first();
+
             $this->data['order_product_info'] = $order_product_info->toArray();
             $quantity = (int)($this->request->get['quantity'] ?? $order_product_info->quantity);
 
@@ -1784,15 +1805,15 @@ class ControllerResponsesProductProduct extends AController
         } //when adding new product to existing order
         elseif ($order_id) {
             $this->data['text_title'] = sprintf($this->language->get('text_add_product_to_order'), $order_id);
-            $preset_values['quantity'] = $product_info['minimum'] ?: 1;
+            $preset_values['quantity'] = $productInfo['minimum'] ?: 1;
             $preset_values['price'] = $this->currency->format(
-                $product_info['price'],
+                $productInfo['price'],
                 $order_info['currency'],
                 $order_info['value'],
                 false
             );
             $preset_values['total'] = $this->currency->format(
-                ($product_info['price'] * $preset_values['quantity']),
+                ($productInfo['price'] * $preset_values['quantity']),
                 $order_info['currency'],
                 $order_info['value'],
                 false
@@ -1805,7 +1826,7 @@ class ControllerResponsesProductProduct extends AController
         } //when trying to add new product to new order
         else {
             $this->data['text_title'] = sprintf($this->language->get('text_add_product_to_order'), $order_id);
-            $preset_values['quantity'] = $product_info['minimum'] ?: 1;
+            $preset_values['quantity'] = $productInfo['minimum'] ?: 1;
 
             if ($this->request->get['currency']) {
                 $currency = new ACurrency($this->registry);
@@ -1815,13 +1836,13 @@ class ControllerResponsesProductProduct extends AController
             }
 
             $preset_values['price'] = $currency->convert(
-                $product_info['price'],
+                $productInfo['price'],
                 $this->currency->getCode(),
                 $currency->getCode()
             );
 
             $preset_values['total'] = $currency->format(
-                ($product_info['price'] * $preset_values['quantity']),
+                ($productInfo['price'] * $preset_values['quantity']),
                 $order_info['currency'],
                 '',
                 false
@@ -1850,7 +1871,7 @@ class ControllerResponsesProductProduct extends AController
             'action' => $form_action,
         ]);
 
-        $this->data['text_title'] .= ' - ' . $product_info['name'];
+        $this->data['text_title'] .= ' - ' . $productInfo['name'];
 
         // Prepare options and values for display
         $product_options = Product::getProductOptionsWithValues($product_id);
@@ -1881,13 +1902,13 @@ class ControllerResponsesProductProduct extends AController
                 //Apply option price modifier
                 if ($option_value['prefix'] == '%') {
                     $price = $tax->calculate(
-                        ($product_info['price'] * $option_value['price'] / 100),
-                        $product_info['tax_class_id'],
+                        ($productInfo['price'] * $option_value['price'] / 100),
+                        $productInfo['tax_class_id'],
                         (bool)$this->config->get('config_tax'));
                 } else {
                     $price = $tax->calculate(
                         $option_value['price'],
-                        $product_info['tax_class_id'],
+                        $productInfo['tax_class_id'],
                         (bool)$this->config->get('config_tax'));
                 }
 
@@ -2011,11 +2032,11 @@ class ControllerResponsesProductProduct extends AController
             );
         }
 
-        if (!$options && $product_info['subtract']) {
-            if ($product_info['quantity']) {
+        if (!$options && $productInfo['subtract']) {
+            if ($productInfo['quantity']) {
                 $this->data['column_quantity'] = $this->language->get('column_quantity')
                     . ' (' . $this->language->get('text_product_in_stock')
-                    . ': ' . $product_info['quantity'] . ')';
+                    . ': ' . $productInfo['quantity'] . ')';
             } else {
                 $this->data['column_quantity'] = $this->language->get('column_quantity')
                     . ' (' . $this->language->get('text_product_out_of_stock') . ')';
@@ -2048,9 +2069,9 @@ class ControllerResponsesProductProduct extends AController
             ]
         );
         $this->data['product_id'] = $product_id;
-        if ($product_info['name']) {
+        if ($productInfo['name']) {
             $this->data['product_name'] = html_entity_decode(
-                $product_info['name'],
+                $productInfo['name'],
                 ENT_QUOTES,
                 ABC::env('APP_CHARSET')
             );
