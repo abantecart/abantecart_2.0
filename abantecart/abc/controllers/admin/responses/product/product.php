@@ -160,7 +160,7 @@ class ControllerResponsesProductProduct extends AController
                 ];
 
                 if (!$get['no_image']) {
-                    $products_data[$k]['image'] = $thumbnail['thumb_html'] . $products_data[$k]['name'];
+                    $products_data[$k]['image'] = $thumbnail['thumb_html'];
                 }
             }
         }
