@@ -71,7 +71,7 @@ class ManufacturerModelTest extends ATestCase
     public function testDeleteManufacturer(int $manufacturerId)
     {
         try {
-            (new Manufacturer)->deleteManufacturer($manufacturerId);
+            Manufacturer::deleteManufacturer($manufacturerId);
         } catch (PDOException|Warning|Exception $e) {
             $this->fail($e->getMessage());
         }
