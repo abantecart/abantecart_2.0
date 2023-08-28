@@ -29,8 +29,9 @@ use abc\core\lib\AException;
 use abc\core\lib\AJson;
 use abc\core\lib\AResourceManager;
 use abc\core\lib\ResourceUploadHandler;
-use abc\models\catalog\Category;
+use abc\models\catalog\CategoryDescription;
 use abc\models\catalog\Manufacturer;
+use abc\models\catalog\ProductDescription;
 use Exception;
 use H;
 use Psr\SimpleCache\InvalidArgumentException;
@@ -1431,9 +1432,9 @@ class ControllerResponsesCommonResourceLibrary extends AController
         $this->data['rl_resource_library'] = $this->html->getSecureURL('common/resource_library', $params);
         $this->data['rl_resources'] = $this->html->getSecureURL('common/resource_library/resources', $params);
         $this->data['rl_resource_single'] = $this->html->getSecureURL(
-                                                        'common/resource_library/get_resource_details', 
-                                                        $params
-                                            );
+            'common/resource_library/get_resource_details',
+            $params
+        );
         $this->data['rl_delete'] = $this->html->getSecureURL('common/resource_library/delete');
         $this->data['rl_unmap'] = $this->html->getSecureURL('common/resource_library/unmap', $params);
         $this->data['rl_map'] = $this->html->getSecureURL('common/resource_library/map', $params);
@@ -1467,29 +1468,31 @@ class ControllerResponsesCommonResourceLibrary extends AController
     }
 
     /**
-     * @param int $object_id
+     * @param int $productId
      *
      * @return string
      * @throws Exception|InvalidArgumentException
      */
-    protected function _getProductsTitle($object_id)
+    protected function _getProductsTitle($productId)
     {
-        $this->loadModel('catalog/product');
-        $description = $this->model_catalog_product->getProductDescriptions($object_id);
-        return $description[$this->config->get('storefront_language_id')]['name'];
+        return (string)ProductDescription::where(
+            'language_id', '=', $this->language->getDefaultLanguageID()
+        )->where('product_id', '=', $productId)
+            ->first()?->name;
     }
 
     /**
-     * @param int $object_id
+     * @param int $categoryId
      *
      * @return string
      * @throws AException
      * @throws ReflectionException|InvalidArgumentException
      */
-    protected function _getCategoriesTitle($object_id)
+    protected function _getCategoriesTitle($categoryId)
     {
-        $description = Category::getCategoryDescriptions($object_id);
-        return $description[$this->config->get('storefront_language_id')]['name'];
+        return (string)CategoryDescription::where('language_id', '=', $this->language->getDefaultLanguageID())
+            ->where('category_id', '=', $categoryId)
+            ->first()?->name;
     }
 
     /**
@@ -1511,15 +1514,13 @@ class ControllerResponsesCommonResourceLibrary extends AController
     }
 
     /**
-     * @param int $object_id
+     * @param int $manufacturerId
      *
      * @return string
      */
-    protected function _getManufacturersTitle($object_id)
+    protected function _getManufacturersTitle($manufacturerId)
     {
-        $this->loadModel('catalog/manufacturer');
-        $description = (new Manufacturer())->getManufacturer($object_id);
-        return $description['name'];
+        return Manufacturer::find($manufacturerId)?->name;
     }
 
     /**
