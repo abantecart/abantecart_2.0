@@ -1396,123 +1396,42 @@ class Product extends BaseModel
             ->toArray();
     }
 
-    /**
-     * @return array
-     * @throws ReflectionException
-     * @throws AException
-     * @throws InvalidArgumentException
-     */
-    public function getProductCategories()
-    {
-        $categories = Category::getCategories(0);
-        $product_categories = [];
-        foreach ($categories as $category) {
-            $product_categories[] = (object)[
-                'id'   => $category['category_id'],
-                'name' => htmlspecialchars_decode($category['name']),
-            ];
-        }
-        return $product_categories;
-    }
-
     public function getProductStores()
     {
-        $stores = Store::active()->select(['store_id as id', 'name'])->get();
-        $result[] = (object)['id' => 0, 'name' => 'Default'];
-        foreach ($stores as $store) {
-            $result[] = (object)['id' => $store->id, 'name' => $store->name];
+        $productId = $this->getKey();
+        $query = Store::active()->select('stores.*')
+            ->addSelect('s1.value as store_url')
+            ->addSelect('s2.value as store_ssl_url');
+        if ($productId) {
+            $query->join(
+                'products_to_stores',
+                function ($join) use ($productId) {
+                    $join->on(
+                        'products_to_stores.store_id',
+                        '=',
+                        'stores.store_id'
+                    )->where(
+                        'products_to_stores.product_id',
+                        '=',
+                        $productId
+                    );
+                }
+            );
         }
-        return $result;
-    }
 
-    public function getManufacturers()
-    {
-        $manufacturers = Manufacturer::select(['manufacturer_id as id', 'name'])->get();
-        $result = [];
-        foreach ($manufacturers as $manufacturer) {
-            $result[] = (object)['id' => $manufacturer->id, 'name' => $manufacturer->name];
-        }
-        return $result;
-    }
-
-    public function getTaxClasses()
-    {
-        $tax_classes = TaxClass::with('description')->get();
-        $result = [];
-        $result[] = (object)['id' => 0, 'name' => Registry::language()->get('text_none')];
-        foreach ($tax_classes as $tax_class) {
-            $result[] = (object)['id' => $tax_class->tax_class_id, 'name' => $tax_class->description->title];
-        }
-        return $result;
-    }
-
-    /**
-     * @return array
-     * @throws AException
-     * @throws InvalidArgumentException
-     * @throws ReflectionException
-     */
-    public function getStockCheckouts()
-    {
-        $language = Registry::language();
-        return [
-            (object)[
-                'id'   => '',
-                'name' => $language->get('text_default'),
-            ],
-            (object)[
-                'id'   => 0,
-                'name' => $language->get('text_no'),
-            ],
-            (object)[
-                'id'   => 1,
-                'name' => $language->get('text_yes'),
-            ],
-        ];
-    }
-
-    /**
-     * @param int $language_id
-     *
-     * @return array
-     */
-    public function getStockStatuses($language_id = 0)
-    {
-        $language_id = $language_id ?: static::$current_language_id;
-        $stock_statuses = StockStatus::where('language_id', '=', $language_id)
-            ->select(['stock_status_id as id', 'name'])
-            ->get();
-        $result = [];
-        foreach ($stock_statuses as $stock_status) {
-            $result[] = (object)[
-                'id'   => $stock_status->id,
-                'name' => $stock_status->name,
-            ];
-        }
-        return $result;
-    }
-
-    public function getLengthClasses()
-    {
-        $length_classes = LengthClass::with('description')->get();
-        $result = [];
-        foreach ($length_classes as $length_class) {
-            $result[] = (object)[
-                'id'   => $length_class->length_class_id,
-                'name' => $length_class->description->title
-            ];
-        }
-        return $result;
-    }
-
-    public function getWeightClasses()
-    {
-        $weight_classes = WeightClass::with('description')->get();
-        $result = [];
-        foreach ($weight_classes as $weight_class) {
-            $result[] = (object)['id' => $weight_class->weight_class_id, 'name' => $weight_class->description->title];
-        }
-        return $result;
+        return $query->leftJoin(
+            'settings as s1',
+            function ($on) {
+                $on->on('products_to_stores.store_id', '=', 's1.store_id')
+                    ->where('s1.key', '=', 'config_url');
+            }
+        )->leftJoin(
+            'settings as s2',
+            function ($on) {
+                $on->on('products_to_stores.store_id', '=', 's2.store_id')
+                    ->where('s2.key', '=', 'config_ssl_url');
+            }
+        )->useCache('product')->get();
     }
 
     /**
@@ -2521,7 +2440,7 @@ class Product extends BaseModel
      * @param array $productIds
      *
      * @return array
-     * @throws ReflectionException
+     * @throws ReflectionException|InvalidArgumentException
      */
     public static function getProductsAllInfo(array $productIds)
     {
@@ -2756,7 +2675,7 @@ class Product extends BaseModel
         $params['sort'] = (string)$params['sort'] ?: 'sort_order';
         $params['order'] = (string)$params['order'] ?: 'ASC';
         $params['start'] = max((int)$params['start'], 0);
-        $params['limit'] = abs((int)$params['limit']) ?: 20;;
+        $params['limit'] = abs((int)$params['limit']) ?: 20;
 
         $filter = (array)$params['filter'];
         $filter['include'] = $filter['include'] ?? [];
