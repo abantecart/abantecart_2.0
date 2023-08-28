@@ -39,12 +39,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class LengthClass extends BaseModel
 {
-    use SoftDeletes, CascadeSoftDeletes;
 
     protected $cascadeDeletes = ['descriptions'];
     protected $primaryKey = 'length_class_id';
-
-    public $timestamps = false;
 
     protected $casts = [
         'value'         => 'float',

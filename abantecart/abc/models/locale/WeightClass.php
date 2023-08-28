@@ -39,8 +39,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class WeightClass extends BaseModel
 {
-    use SoftDeletes, CascadeSoftDeletes;
-
     protected $cascadeDeletes = ['descriptions'];
 
     protected $primaryKey = 'weight_class_id';
