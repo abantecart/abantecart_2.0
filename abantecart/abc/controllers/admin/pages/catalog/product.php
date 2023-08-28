@@ -945,8 +945,15 @@ class ControllerPagesCatalogProduct extends AController
             ]
         );
 
-        $results = Category::getCategories(0, $this->session->data['current_store_id']);
-        $this->data['categories'] = array_column($results, 'name', 'category_id');
+        $results = Category::getCategories(0, $this->data['product_store']);
+
+        if (count((array)$this->data['product_store']) > 1) {
+            foreach ($results as $result) {
+                $this->data['categories'][$result['category_id']] = $result['name'] . ' (' . $result['store_name'] . ')';
+            }
+        } else {
+            $this->data['categories'] = array_column($results, 'name', 'category_id');
+        }
 
         $this->data['form']['fields']['general']['category'] = $form->getFieldHtml(
             [

@@ -495,7 +495,12 @@ class Category extends BaseModel
 
         $category_data = [];
 
-        $query = static::select();
+        $query = static::select(
+            [
+                'categories.*',
+                'category_descriptions.*'
+            ]
+        );
         $query->leftJoin(
             'category_descriptions',
             'categories.category_id',
@@ -503,6 +508,9 @@ class Category extends BaseModel
             'category_descriptions.category_id'
         );
         if (!is_null($storeId)) {
+            $storeId = is_array($storeId)
+                ? array_map('intval', $storeId)
+                : (int)$storeId;
             $query->rightJoin(
                 'categories_to_stores',
                 function ($join) use ($storeId) {
@@ -511,9 +519,18 @@ class Category extends BaseModel
                         'categories.category_id',
                         '=',
                         'categories_to_stores.category_id'
-                    )->where('categories_to_stores.store_id', '=', (int)$storeId);
+                    );
+                    if (is_array($storeId)) {
+                        $join->whereIn('categories_to_stores.store_id', $storeId);
+                    } else {
+                        $join->where('categories_to_stores.store_id', '=', $storeId);
+                    }
                 }
-            );
+            )->leftJoin('stores', 'categories_to_stores.store_id', '=', 'stores.store_id')
+                ->addSelect('stores.name as store_name');
+            if (is_array($storeId)) {
+                $query->orderBy('categories_to_stores.store_id');
+            }
         }
 
         if ((int)$parentId > 0) {
@@ -1182,7 +1199,6 @@ class Category extends BaseModel
                         ->where('sss.key', '=', 'config_ssl_url');
                 }
             )->where('category_id', '=', (int)$category_id)
-            ->useCache('category')
             ->get();
         if ($storeInfo) {
             return json_decode($storeInfo, true);
