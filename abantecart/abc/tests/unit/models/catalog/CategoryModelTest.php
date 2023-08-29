@@ -44,6 +44,7 @@ class CategoryModelTest extends ATestCase
             $category->validate($data);
         } catch (ValidationException $e) {
             $errors = $category->errors()['validation'];
+            //var_Dump($errors);
         }
         $this->assertCount(9, $errors);
 
@@ -63,7 +64,7 @@ class CategoryModelTest extends ATestCase
             $category->validate($data);
         } catch (ValidationException $e) {
             $errors = $category->errors()['validation'];
-            var_Dump($errors);
+            //var_Dump($errors);
         }
         $this->assertCount(0, $errors);
     }

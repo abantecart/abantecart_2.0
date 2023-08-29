@@ -79,28 +79,40 @@ class ProductDescription extends BaseModel
 
     protected $rules = [
         /** @see validate() */
-        'product_id'       => [
-            'checks'   => [
+        'product_id' => [
+            'checks' => [
                 'integer',
                 'required',
                 'exists:products',
+                'max:2147483647',
+                'min:0',
             ],
             'messages' => [
-                '*' => ['default_text' => 'Product ID is not Integer or absent in products table!'],
+                'exists' => ['default_text' => 'Product ID absent in products table!'],
+                'integer' => ['default_text' => 'Product ID is not Integer!'],
+                'max' => ['default_text' => 'Product ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Product ID value must be greater than zero'],
+                'required' => ['default_text' => 'Product ID required']
             ],
         ],
-        'language_id'      => [
-            'checks'   => [
+        'language_id' => [
+            'checks' => [
                 'integer',
                 'required',
-                'exists:languages'
+                'exists:languages',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => ['default_text' => 'Language ID is not Integer or not presents in languages table!'],
+                'exist' => ['default_text' => 'Language ID is not presents in languages table!'],
+                'integer' => ['default_text' => 'Language ID is not Integer!'],
+                'min' => ['default_text' => 'Language ID value must be greater than zero'],
+                'max' => ['default_text' => 'Language ID must be less than 2147483647'],
+                'required' => ['default_text' => 'Language ID required']
             ],
         ],
-        'name'             => [
-            'checks'   => [
+        'name' => [
+            'checks' => [
                 'string',
                 'sometimes',
                 'required',
@@ -108,15 +120,15 @@ class ProductDescription extends BaseModel
             ],
             'messages' => [
                 '*' => [
-                    'language_key'   => 'error_name',
+                    'language_key' => 'error_name',
                     'language_block' => 'catalog/product',
-                    'default_text'   => 'Product Name must be greater than 3 and less than 255 characters!',
-                    'section'        => 'admin',
+                    'default_text' => 'Product Name must be greater than 3 and less than 255 characters!',
+                    'section' => 'admin',
                 ],
             ],
         ],
-        'meta_keywords'    => [
-            'checks'   => [
+        'meta_keywords' => [
+            'checks' => [
                 'string',
                 'max:255',
             ],
@@ -127,7 +139,7 @@ class ProductDescription extends BaseModel
             ],
         ],
         'meta_description' => [
-            'checks'   => [
+            'checks' => [
                 'string',
                 'max:255',
             ],
@@ -137,8 +149,8 @@ class ProductDescription extends BaseModel
                 ],
             ],
         ],
-        'description'      => [
-            'checks'   => [
+        'description' => [
+            'checks' => [
                 'string',
             ],
             'messages' => [
@@ -147,8 +159,8 @@ class ProductDescription extends BaseModel
                 ],
             ],
         ],
-        'blurb'            => [
-            'checks'   => [
+        'blurb' => [
+            'checks' => [
                 'string',
             ],
             'messages' => [

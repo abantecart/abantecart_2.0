@@ -65,27 +65,34 @@ class OrderDatum extends BaseModel
 
     protected $rules = [
         /** @see validate() */
-        'type_id'  => [
-            'checks'   => [
+        'type_id' => [
+            'checks' => [
                 'integer',
                 'exists:order_data_types',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => ':attribute is not integer or does not exists in the table "order_data_types"!',
-                ],
+                'integer' => ['default_text' => ':attribute is not integer!'],
+                'max' => ['default_text' => ':attribute must be less than 2147483647'],
+                'min' => ['default_text' => ':attribute value must be greater than zero'],
+                'exists' => ['default_text' => ':attribute not exists in order_data_types table']
             ],
         ],
         'order_id' => [
-            'checks'   => [
+            'checks' => [
                 'integer',
                 'required',
                 'exists:orders',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => ':attribute is not integer or does not exists in the table "orders"!',
-                ],
+                'integer' => ['default_text' => ':attribute is not integer!'],
+                'max' => ['default_text' => ':attribute must be less than 2147483647'],
+                'min' => ['default_text' => ':attribute value must be greater than zero'],
+                'exists' => ['default_text' => ':attribute not exists in order_data_types table'],
+                'required' => ['default_text' => ':attribute required']
             ],
         ],
     ];

@@ -74,40 +74,52 @@ class ProductOptionDescription extends BaseModel
     protected $rules = [
         /** @see validate() */
         'product_option_id' => [
-            'checks'   => [
+            'checks' => [
                 'integer',
                 'required',
                 'exists:product_options',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => ['default_text' => 'Product Option ID is not Integer or absent in product_options table!'],
+                'integer' => ['default_text' => 'Product Option ID is not Integer'],
+                'exists' => ['default_text' => 'Product Option ID absent in product_options table!'],
+                'max' => ['default_text' => 'Product Option ID must be less than 2147483647'],
             ],
         ],
 
         'product_id' => [
-            'checks'   => [
+            'checks' => [
                 'integer',
                 'required',
                 'exists:products',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => ['default_text' => 'Product ID is not Integer or absent in products table!'],
+                'integer' => ['default_text' => 'Product ID is not Integer!'],
+                'exists' => ['default_text' => 'Product ID absent in products table!'],
+                'max' => ['default_text' => 'Product ID must be less than 2147483647'],
             ],
         ],
 
         'language_id' => [
-            'checks'   => [
+            'checks' => [
                 'integer',
                 'required',
                 'exists:languages',
+                'max:2147483647',
+                'min:0',
             ],
             'messages' => [
-                '*' => ['default_text' => 'Language ID is not Integer or absent in languages table!'],
+                'integer' => ['default_text' => 'Language ID is not Integer'],
+                'max' => ['default_text' => 'Language ID must be less than 2147483647'],
+                'exists' => ['default_text' => 'Language ID absent in languages table'],
+                'min' => ['default_text' => 'Language ID value must be greater than zero'],
+                'required' => ['default_text' => 'Language ID required']
             ],
         ],
 
         'name' => [
-            'checks'   => [
+            'checks' => [
                 'string',
                 'sometimes',
                 'required',
@@ -121,7 +133,7 @@ class ProductOptionDescription extends BaseModel
         ],
 
         'option_placeholder' => [
-            'checks'   => [
+            'checks' => [
                 'string',
                 'max:255',
             ],
@@ -133,7 +145,7 @@ class ProductOptionDescription extends BaseModel
         ],
 
         'error_text' => [
-            'checks'   => [
+            'checks' => [
                 'string',
                 'max:255',
                 'nullable',

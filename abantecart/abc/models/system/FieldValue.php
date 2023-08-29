@@ -50,6 +50,34 @@ class FieldValue extends BaseModel
         'language_id',
     ];
 
+    protected $rules = [
+        /** @see validate() */
+        'field_id' => [
+            'checks' => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Field ID is not integer!'],
+                'max' => ['default_text' => 'Field ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Field ID value must be greater than zero'],
+            ],
+        ],
+        'language_id' => [
+            'checks' => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Language ID is not integer!'],
+                'max' => ['default_text' => 'Language ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Language ID value must be greater than zero'],
+            ],
+        ],
+    ];
+
     public function field()
     {
         return $this->belongsTo(Field::class, 'field_id');

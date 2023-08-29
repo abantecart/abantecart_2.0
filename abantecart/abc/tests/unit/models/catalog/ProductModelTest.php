@@ -145,7 +145,7 @@ class ProductModelTest extends ATestCase
             $product->validate($data);
         } catch (ValidationException $e) {
             $errors = $product->errors()['validation'];
-            var_Dump($errors);
+            //var_Dump($errors);
         }
         $this->assertCount(0, $errors);
 
@@ -348,4 +348,56 @@ class ProductModelTest extends ATestCase
 
     }
 
+    public function testValidateInt()
+    {
+        $product = new Product(
+            [
+                'product_id' => 2147483648,
+                'stock_status_id' => 2147483648,
+                'quantity' => 2147483648,
+                'manufacturer_id' => 2147483648,
+                'tax_class_id' => 2147483648,
+                'weight_class_id' => 2147483648,
+                'length_class_id' => 2147483648,
+                'viewed' => 2147483648,
+                'sort_order' => 2147483648,
+                'minimum' => 2147483648,
+                'maximum' => 2147483648,
+                'product_type_id' => 2147483648,
+            ]
+        );
+        $errors = [];
+        try {
+            $product->validate();
+        } catch (ValidationException $e) {
+            $errors = $product->errors()['validation'];
+            //var_dump($errors);
+        }
+
+        $this->assertCount(1, $errors);
+        $product = new Product(
+            [
+                'product_id' => 1,
+                'stock_status_id' => 1,
+                'quantity' => 1,
+                'manufacturer_id' => 1,
+                'tax_class_id' => 1,
+                'weight_class_id' => 1,
+                'length_class_id' => 1,
+                'viewed' => 1,
+                'sort_order' => 1,
+                'minimum' => 1,
+                'maximum' => 1,
+                'product_type_id' => 1
+            ]
+        );
+        $errors = [];
+        try {
+            $product->validate();
+        } catch (ValidationException $e) {
+            $errors = $product->errors()['validation'];
+            //var_dump($errors);
+        }
+        $this->assertCount(0, $errors);
+    }
 }

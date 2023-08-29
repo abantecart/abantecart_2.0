@@ -54,6 +54,40 @@ class ContentsToStore extends BaseModel
         'store_id'   => 'int',
     ];
 
+    protected $rules = [
+        /** @see validate() */
+        'content_id' => [
+            'checks' => [
+                'integer',
+                'sometimes',
+                'required',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Content ID is not integer!'],
+                'max' => ['default_text' => 'Content ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Content ID value must be greater than zero'],
+                'required' => ['default_text' => 'Content ID required']
+            ],
+        ],
+        'store_id' => [
+            'checks' => [
+                'integer',
+                'sometimes',
+                'required',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Store ID is not integer!'],
+                'max' => ['default_text' => 'Store ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Store ID value must be greater than zero'],
+                'required' => ['default_text' => 'Store ID required']
+            ],
+        ],
+    ];
+
     public function content()
     {
         return $this->belongsTo(Content::class, 'content_id');

@@ -66,7 +66,7 @@ class OrderStatus extends BaseModel
     protected $rules = [
 
         'status_text_id' => [
-            'checks'   => [
+            'checks' => [
                 'string',
                 'max:64',
                 'sometimes',
@@ -74,15 +74,15 @@ class OrderStatus extends BaseModel
             ],
             'messages' => [
                 '*' => [
-                    'language_key'   => 'error_status_text_id',
+                    'language_key' => 'error_status_text_id',
                     'language_block' => 'localisation/order_status',
-                    'section'        => 'admin',
-                    'default_text'   => ':attribute must be string 64 characters length!',
+                    'section' => 'admin',
+                    'default_text' => ':attribute must be string 64 characters length!',
                 ],
             ],
         ],
         'display_status' => [
-            'checks'   => [
+            'checks' => [
                 'boolean',
             ],
             'messages' => [

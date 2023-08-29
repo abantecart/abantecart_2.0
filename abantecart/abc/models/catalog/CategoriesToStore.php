@@ -51,6 +51,40 @@ class CategoriesToStore extends BaseModel
         'store_id'    => 'int',
     ];
 
+    protected $rules = [
+        /** @see validate() */
+        'category_id' => [
+            'checks' => [
+                'integer',
+                'sometimes',
+                'required',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Category ID is not integer!'],
+                'max' => ['default_text' => 'Category ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Category ID value must be greater than zero'],
+                'required' => ['default_text' => 'Category ID required']
+            ],
+        ],
+        'store_id' => [
+            'checks' => [
+                'integer',
+                'sometimes',
+                'required',
+                'max:2147483647',
+                'min:0',
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Store ID is not integer!'],
+                'max' => ['default_text' => 'Store ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Store ID value must be greater than zero'],
+                'required' => ['default_text' => 'Store ID required']
+            ],
+        ],
+    ];
+
     public function category()
     {
         return $this->belongsTo(Category::class, 'category_id');

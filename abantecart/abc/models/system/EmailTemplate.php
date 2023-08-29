@@ -36,8 +36,8 @@ class EmailTemplate extends BaseModel
     ];
 
     protected $rules = [
-        'text_id'     => [
-            'checks'   => [
+        'text_id' => [
+            'checks' => [
                 'string',
                 'sometimes',
                 'required',
@@ -50,8 +50,8 @@ class EmailTemplate extends BaseModel
                 ],
             ],
         ],
-        'headers'     => [
-            'checks'   => [
+        'headers' => [
+            'checks' => [
                 'string',
                 'max:254',
             ],
@@ -61,8 +61,8 @@ class EmailTemplate extends BaseModel
                 ],
             ],
         ],
-        'subject'     => [
-            'checks'   => [
+        'subject' => [
+            'checks' => [
                 'string',
                 'required',
                 'max:254',
@@ -73,8 +73,8 @@ class EmailTemplate extends BaseModel
                 ],
             ],
         ],
-        'html_body'   => [
-            'checks'   => [
+        'html_body' => [
+            'checks' => [
                 'required',
             ],
             'messages' => [
@@ -83,8 +83,8 @@ class EmailTemplate extends BaseModel
                 ],
             ],
         ],
-        'text_body'   => [
-            'checks'   => [
+        'text_body' => [
+            'checks' => [
                 'required',
             ],
             'messages' => [
@@ -94,16 +94,18 @@ class EmailTemplate extends BaseModel
             ],
         ],
         'language_id' => [
-            'checks'   => [
+            'checks' => [
                 'integer',
                 'sometimes',
                 'required',
-                'min:1',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => ':attribute is required!',
-                ],
+                'integer' => ['default_text' => ':attribute is not integer'],
+                'max' => ['default_text' => ':attribute must be less than 2147483647'],
+                'min' => ['default_text' => ':attribute value must be greater than zero'],
+                'required' => ['default_text' => ':attribute required']
             ],
         ],
     ];

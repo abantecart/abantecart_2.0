@@ -15,6 +15,7 @@
  * versions in the future. If you wish to customize AbanteCart for your
  * needs please refer to http://www.abantecart.com for more information.
  */
+
 namespace abc\models\system;
 
 use abc\models\BaseModel;
@@ -48,7 +49,7 @@ class StoreDescription extends BaseModel
     public $timestamps = false;
 
     protected $casts = [
-        'store_id'    => 'int',
+        'store_id' => 'int',
         'language_id' => 'int',
     ];
 
@@ -57,6 +58,34 @@ class StoreDescription extends BaseModel
         'title',
         'meta_description',
         'meta_keywords',
+    ];
+
+    protected $rules = [
+        /** @see validate() */
+        'store_id' => [
+            'checks' => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Store ID is not integer!'],
+                'max' => ['default_text' => 'Store ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Store ID value must be greater than zero'],
+            ],
+        ],
+        'language_id' => [
+            'checks' => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Language ID is not integer!'],
+                'max' => ['default_text' => 'Language ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Language ID value must be greater than zero'],
+            ],
+        ],
     ];
 
     public function store()

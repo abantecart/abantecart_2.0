@@ -58,6 +58,38 @@ class GlobalAttributesTypeDescription extends BaseModel
         'date_modified',
     ];
 
+    protected $rules = [
+        /** @see validate() */
+        'attribute_type_id' => [
+            'checks' => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Attribute Type ID is not Integer!'],
+                'min' => ['default_text' => 'Attribute Type ID value must be greater than zero'],
+                'max' => ['default_text' => 'Attribute Type ID must be less than 2147483647'],
+            ],
+        ],
+        'language_id' => [
+            'checks' => [
+                'integer',
+                'required',
+                'exists:languages',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Language ID is not Integer!'],
+                'exists' => ['default_text' => 'Language ID absent in languages table!'],
+                'max' => ['default_text' => 'Language ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Language ID value must be greater than zero'],
+                'required' => ['default_text' => 'Language ID required']
+            ],
+        ],
+    ];
+
     public function type()
     {
         return $this->belongsTo(GlobalAttributesType::class, 'attribute_type_id');

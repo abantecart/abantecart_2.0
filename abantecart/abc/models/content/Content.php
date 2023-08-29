@@ -68,8 +68,8 @@ class Content extends BaseModel
 
     protected $rules = [
         /** @see validate() */
-        'status'     => [
-            'checks'   => [
+        'status' => [
+            'checks' => [
                 'boolean',
             ],
             'messages' => [
@@ -78,18 +78,33 @@ class Content extends BaseModel
                 ],
             ],
         ],
-        'parent_id'  => [
-            'checks'   => [
+        'parent_id' => [
+            'checks' => [
                 'integer',
                 'nullable',
                 'exists:contents,content_id',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => ['default_text' => 'Parent ID is not integer or absent in contents table!'],
+                'integer' => ['default_text' => 'Parent ID is not integer'],
+                'exists' => ['default_text' => 'Parent ID absent in contents table!'],
+                'max' => ['default_text' => 'Parent ID must be less than 2147483647']
+            ],
+        ],
+        'content_id' => [
+            'checks' => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Parent ID is not integer'],
+                'min' => ['default_text' => 'Category ID must be greater than zero'],
+                'max' => ['default_text' => 'Category ID must be less than 2147483647']
             ],
         ],
         'hide_title' => [
-            'checks'   => [
+            'checks' => [
                 'boolean',
             ],
             'messages' => [
@@ -99,13 +114,15 @@ class Content extends BaseModel
             ],
         ],
         'sort_order' => [
-            'checks'   => [
+            'checks' => [
                 'integer',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => 'Sort Order is not integer!',
-                ],
+                'integer' => ['default_text' => 'Sort Order is not integer!'],
+                'min' => ['default_text' => 'Category ID must be greater than zero'],
+                'max' => ['default_text' => 'Category ID must be less than 2147483647']
             ],
         ]
     ];

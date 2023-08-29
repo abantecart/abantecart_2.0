@@ -62,6 +62,53 @@ class Download extends BaseModel
         'status'
     ];
 
+    protected $rules = [
+        'max_downloads' => [
+            'checks' => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ], 'messages' => [
+                'integer' => ['default_text' => ':value is not Integer!'],
+                'min' => ['default_text' => ':value  must be greater than zero'],
+                'max' => ['default_text' => ':value must be less than 2147483647']
+            ],
+        ],
+        'expire_days' => [
+            'checks' => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ], 'messages' => [
+                'integer' => ['default_text' => ':value is not Integer!'],
+                'min' => ['default_text' => ':value  must be greater than zero'],
+                'max' => ['default_text' => ':value must be less than 2147483647']
+            ],
+        ],
+        'sort_order' => [
+            'checks' => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ], 'messages' => [
+                'integer' => ['default_text' => ':value is not Integer!'],
+                'min' => ['default_text' => ':value  must be greater than zero'],
+                'max' => ['default_text' => ':value must be less than 2147483647']
+            ],
+        ],
+        'activate_order_status_id' => [
+            'checks' => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ], 'messages' => [
+                'integer' => ['default_text' => ':value is not Integer!'],
+                'min' => ['default_text' => ':value  must be greater than zero'],
+                'max' => ['default_text' => ':value must be less than 2147483647']
+            ],
+        ],
+    ];
+
     public function attribute_values()
     {
         return $this->hasMany(DownloadAttributeValue::class, 'download_id');

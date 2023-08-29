@@ -15,6 +15,7 @@
  * versions in the future. If you wish to customize AbanteCart for your
  * needs please refer to http://www.abantecart.com for more information.
  */
+
 namespace abc\models\user;
 
 use abc\models\BaseModel;
@@ -55,10 +56,10 @@ class UserNotification extends BaseModel
     public $timestamps = false;
 
     protected $casts = [
-        'user_id'       => 'int',
-        'store_id'      => 'int',
-        'section'       => 'bool',
-        'date_added'    => 'datetime',
+        'user_id' => 'int',
+        'store_id' => 'int',
+        'section' => 'bool',
+        'date_added' => 'datetime',
         'date_modified' => 'datetime'
     ];
 
@@ -66,6 +67,34 @@ class UserNotification extends BaseModel
         'uri',
         'date_added',
         'date_modified',
+    ];
+
+    protected $rules = [
+        /** @see validate() */
+        'user_id' => [
+            'checks' => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'User ID is not integer!'],
+                'max' => ['default_text' => 'User ID must be less than 2147483647'],
+                'min' => ['default_text' => 'User ID value must be greater than zero'],
+            ],
+        ],
+        'store_id' => [
+            'checks' => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Store ID is not integer!'],
+                'max' => ['default_text' => 'Store ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Store ID value must be greater than zero'],
+            ],
+        ],
     ];
 
     /**

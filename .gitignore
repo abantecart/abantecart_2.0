@@ -28,3 +28,4 @@
 /abantecart/abc/composer.lock
 /abantecart/abc/system/temp/*
 /abantecart/abc/.phpunit.result.cache
+/abantecart/abc/laradock/*

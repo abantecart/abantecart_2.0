@@ -55,7 +55,7 @@ class Block extends BaseModel
     protected $rules = [
         /** @see validate() */
         'block_text_id' => [
-            'checks'   => [
+            'checks' => [
                 'string',
                 'required',
                 'sometimes'
@@ -64,8 +64,8 @@ class Block extends BaseModel
                 '*' => ['default_text' => 'Block Text ID is empty!'],
             ],
         ],
-        'controller'    => [
-            'checks'   => [
+        'controller' => [
+            'checks' => [
                 'string',
                 'required',
                 'sometimes'

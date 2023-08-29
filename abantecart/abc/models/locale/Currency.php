@@ -76,7 +76,8 @@ class Currency extends BaseModel
                 'integer',
                 'required',
                 'sometimes',
-                'min:1'
+                'min:1',
+                'max:2147483647'
             ],
             'messages' => [
                 'integer'  => [
@@ -97,6 +98,7 @@ class Currency extends BaseModel
                     'default_text'   => 'currency_id must be more 1!',
                     'section'        => 'admin'
                 ],
+                'max' => ['default_text' => 'Currency ID must be less than 2147483647']
             ],
         ],
         'title'         => [
@@ -257,17 +259,21 @@ class Currency extends BaseModel
                 ]
             ]
         ],
-        'status'        => [
-            'checks'   => [
+        'status' => [
+            'checks' => [
                 'integer',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
                 'integer' => [
-                    'language_key'   => 'error_currency_status',
+                    'language_key' => 'error_currency_status',
                     'language_block' => 'localisation/currency',
-                    'default_text'   => 'status is not integer!',
-                    'section'        => 'admin'
-                ]
+                    'default_text' => 'status is not integer!',
+                    'section' => 'admin'
+                ],
+                'min' => ['default_text' => 'Status must be greater than zero'],
+                'max' => ['default_text' => 'Status must be less than 2147483647']
             ]
         ],
     ];
