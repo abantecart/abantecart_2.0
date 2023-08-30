@@ -18,7 +18,9 @@
 
 namespace Tests\unit\models\catalog;
 
+use abc\models\catalog\GlobalAttribute;
 use abc\models\catalog\GlobalAttributesDescription;
+use abc\models\locale\Language;
 use Illuminate\Validation\ValidationException;
 use Tests\unit\ATestCase;
 
@@ -42,8 +44,8 @@ class GlobalAttributesDescriptionTest extends ATestCase
         $errors = [];
         try {
             $data = [
-                'attribute_id' => 1,
-                'language_id' => 1,
+                'attribute_id' => GlobalAttribute::first()->attribute_id,
+                'language_id'  => Language::first()->language_id,
             ];
             $attr->validate($data);
         } catch (ValidationException $e) {

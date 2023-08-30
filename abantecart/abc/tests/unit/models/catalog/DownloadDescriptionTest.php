@@ -18,7 +18,9 @@
 
 namespace Tests\unit\models\catalog;
 
+use abc\models\catalog\Download;
 use abc\models\catalog\DownloadDescription;
+use abc\models\locale\Language;
 use Illuminate\Validation\ValidationException;
 use Tests\unit\ATestCase;
 
@@ -32,18 +34,20 @@ class DownloadDescriptionTest extends ATestCase
             $data = [
                 'download_id' => false,
                 'language_id' => false,
+                'name' => 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
             ];
             $download->validate($data);
         } catch (ValidationException $e) {
             $errors = $download->errors()['validation'];
         }
-        $this->assertCount(9, $errors);
+        $this->assertCount(3, $errors);
 
         $errors = [];
         try {
             $data = [
-                'download_id' => 1,
-                'language_id' => 1,
+                'download_id' => Download::first()->download_id,
+                'language_id' => Language::first()->language_id,
+                'name'        => 'Test name'
             ];
             $download->validate($data);
         } catch (ValidationException $e) {

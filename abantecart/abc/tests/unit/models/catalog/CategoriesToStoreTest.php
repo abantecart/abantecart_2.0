@@ -21,7 +21,6 @@ namespace Tests\unit\models\catalog;
 use abc\models\catalog\CategoriesToStore;
 use Illuminate\Validation\ValidationException;
 use Tests\unit\ATestCase;
-
 class CategoriesToStoreTest extends ATestCase
 {
     public function testValidator()

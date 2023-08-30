@@ -18,7 +18,9 @@
 
 namespace Tests\unit\models\catalog;
 
+use abc\models\catalog\Product;
 use abc\models\catalog\ProductDiscount;
+use abc\models\customer\CustomerGroup;
 use Illuminate\Validation\ValidationException;
 use Tests\unit\ATestCase;
 
@@ -44,11 +46,12 @@ class ProductDiscountTest extends ATestCase
 
         $this->assertCount(4, $errors);
 
-
+        $product = Product::first();
+        $cGroup = CustomerGroup::first();
         $product = new ProductDiscount(
             [
-                'product_id'        => 1,
-                'customer_group_id' => 1,
+                'product_id'        => $product->product_id,
+                'customer_group_id' => $cGroup->customer_group_id,
                 'quantity'          => 1,
                 'priority'          => 1,
 

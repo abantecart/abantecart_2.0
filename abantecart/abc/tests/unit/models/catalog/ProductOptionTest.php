@@ -18,6 +18,7 @@
 
 namespace Tests\unit\models\catalog;
 
+use abc\models\catalog\Product;
 use abc\models\catalog\ProductOption;
 use Illuminate\Validation\ValidationException;
 use Tests\unit\ATestCase;
@@ -34,8 +35,8 @@ class ProductOptionTest extends ATestCase
                 'product_id'    => false,
                 'group_id'      => false,
                 'sort_order'    => false,
-                'status'        => false,
-                'required'      => false,
+                'status'   => [111],
+                'required' => 'www',
             ];
             $product->validate($data);
         } catch (ValidationException $e) {
@@ -44,10 +45,11 @@ class ProductOptionTest extends ATestCase
         $this->assertCount(6, $errors);
 
         $errors = [];
+        $product = Product::first();
         try {
             $data = [
                 'attribute_id'  => 1,
-                'product_id'    => 1,
+                'product_id' => $product->product_id,
                 'group_id'      => 1,
                 'sort_order'    => 1,
                 'status'        => 1,
@@ -56,6 +58,8 @@ class ProductOptionTest extends ATestCase
             $product->validate($data);
         } catch (ValidationException $e) {
             $errors = $product->errors()['validation'];
+            var_Dump($errors);
+            exit;
         }
         $this->assertCount(0, $errors);
     }

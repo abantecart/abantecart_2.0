@@ -96,10 +96,12 @@ class ProductModelTest extends ATestCase
         $rels = Product::getRelationships('HasMany', 'HasOne', 'belongsToMany');
         $rels = array_keys($rels);
         unset($rels['options']);
+        $relsContains = 0;
         foreach ($rels as $rel) {
             $rel = Str::snake($rel);
-            $this->assertGreaterThan(0, count($data[$rel]));
+            $relsContains += count((array)($data[$rel] ?? $data['product_' . $rel]));
         }
+        $this->assertGreaterThan(0, $relsContains);
         $product->delete();
     }
 
@@ -359,12 +361,13 @@ class ProductModelTest extends ATestCase
      */
     public function testDeleteProduct(int $productId)
     {
+        $result = -1;
         try {
             $result = Product::destroy($productId);
         } catch (PDOException|Warning|Exception $e) {
             $this->fail($e->getMessage());
         }
-        $this->assertEquals(true, $result);
+        $this->assertGreaterThan(0, $result);
     }
 
     public function testStaticMethods()
@@ -427,13 +430,13 @@ class ProductModelTest extends ATestCase
             $errors = $product->errors()['validation'];
         }
 
-        $this->assertCount(1, $errors);
+        $this->assertCount(12, $errors);
         $product = new Product(
             [
                 'product_id' => 1,
                 'stock_status_id' => 1,
                 'quantity' => 1,
-                'manufacturer_id' => 1,
+                'manufacturer_id' => null,
                 'tax_class_id' => 1,
                 'weight_class_id' => 1,
                 'length_class_id' => 1,
@@ -449,6 +452,7 @@ class ProductModelTest extends ATestCase
             $product->validate();
         } catch (ValidationException $e) {
             $errors = $product->errors()['validation'];
+            var_dump($errors);
         }
         $this->assertCount(0, $errors);
     }

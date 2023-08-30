@@ -27,13 +27,11 @@ use Tests\unit\ATestCase;
  */
 class LocationModelTest extends ATestCase
 {
-
     public function testValidator()
     {
-
         $location = new Location(
             [
-                'location_id' => 0,
+                'location_id' => 214748364711111111,
                 'name' => 'somestringsomestringsomestringsomestringsomestringsomestringsomestringsomestringsomestring',
                 'description' => ''
             ]
@@ -44,7 +42,7 @@ class LocationModelTest extends ATestCase
         } catch (ValidationException $e) {
             $errors = $location->errors()['validation'];
         }
-        $this->assertCount(2, $errors);
+        $this->assertCount(3, $errors);
 
         $location = new Location(
             [
@@ -60,7 +58,5 @@ class LocationModelTest extends ATestCase
             $errors = $location->errors()['validation'];
         }
         $this->assertCount(0, $errors);
-
     }
-
 }

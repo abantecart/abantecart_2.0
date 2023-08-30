@@ -24,6 +24,9 @@
     <testsuite name="models-unit-tests-order">
       <directory suffix="Test.php">./tests/unit/models/order</directory>
     </testsuite>
+      <testsuite name="models-unit-tests-system">
+          <directory suffix="Test.php">./tests/unit/models/system</directory>
+      </testsuite>
     <testsuite name="models-unit-tests-storefront">
       <directory suffix="Test.php">./tests/unit/models/storefront</directory>
     </testsuite>

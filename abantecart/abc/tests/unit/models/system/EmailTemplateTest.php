@@ -19,13 +19,17 @@ class EmailTemplateTest extends ATestCase
         } catch (ValidationException $e) {
             $errors = $template->errors()['validation'];
         }
-        $this->assertCount(1, $errors);
+
+        $this->assertCount(4, $errors);
+
 
         $errors = [];
         try {
             $data = [
                 'language_id' => 1,
-
+                'subject'   => 'some subj',
+                'text_body' => 'some text',
+                'html_body' => 'some html',
             ];
             $template->validate($data);
         } catch (ValidationException $e) {

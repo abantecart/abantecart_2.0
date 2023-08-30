@@ -15,7 +15,6 @@
  * versions in the future. If you wish to customize AbanteCart for your
  * needs please refer to https://www.abantecart.com for more information.
  */
-
 namespace Tests\unit\models\catalog;
 
 use abc\models\catalog\ProductOptionValue;
@@ -34,9 +33,9 @@ class ProductOptionValueTest extends ATestCase
                 'product_id' => false,
                 'group_id' => false,
                 'quantity' => false,
-                'subtract' => false,
+                'subtract' => [333],
                 'attribute_value_id' => false,
-                'default' => false,
+                'default'  => [111],
                 'sort_order' => false,
             ];
             $product->validate($data);
@@ -47,16 +46,7 @@ class ProductOptionValueTest extends ATestCase
 
         $errors = [];
         try {
-            $data = [
-                'product_option_id' => 1,
-                'product_id' => 2,
-                'group_id' => 2,
-                'quantity' => 2,
-                'subtract' => 1,
-                'attribute_value_id' => 1,
-                'default' => 2,
-                'sort_order' => 1,
-            ];
+            $data = ProductOptionValue::first()->toArray();
             $product->validate($data);
         } catch (ValidationException $e) {
             $errors = $product->errors()['validation'];

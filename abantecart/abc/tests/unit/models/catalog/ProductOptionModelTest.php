@@ -105,7 +105,8 @@ class ProductOptionModelTest extends ATestCase{
         $optionCheckData['product_option_value_id'] = $valueId;
         unset($optionCheckData['descriptions']);
         $diff = array_diff_assoc($optionCheckData, $optionValue->toArray());
-        $this->assertGreaterThan(0, count($diff));
+        $this->assertCount(0, $diff);
+
         $this->assertEquals($data['descriptions'][1]['name'], $optionValue->description->name);
         $optionValue->forceDelete();
 
@@ -137,7 +138,7 @@ class ProductOptionModelTest extends ATestCase{
         $optionCheckData['product_option_value_id'] = $valueId;
         unset($optionCheckData['descriptions']);
         $diff = array_diff_assoc($optionCheckData, $optionValue->toArray());
-        $this->assertGreaterThan(0, count($diff));
+        $this->assertCount(0, $diff);
         $this->assertEquals($data['description']['name'], $optionValue->description->name);
         $optionValue->forceDelete();
 
@@ -220,7 +221,7 @@ class ProductOptionModelTest extends ATestCase{
         $optionCheckData = $data;
         $optionCheckData['product_option_value_id'] = $valueId;
         $diff = array_diff_assoc($optionCheckData, $optionValue->toArray());
-        $this->assertGreaterThan(0, count($diff));
+        $this->assertCount(0, $diff);
         $this->assertEquals('1.7 oz', $optionValue->description->name);
 
         $optionValue->forceDelete();

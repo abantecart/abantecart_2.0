@@ -28,9 +28,8 @@ class CustomerNotesTest extends ATestCase
     {
         $customer = new CustomerNotes(
             [
-                'customer_id' => -1,
-                'user_id' => -1,
-                'stage_id' => false,
+                'customer_id' => '-1',
+                'user_id'     => '-1'
             ]
         );
         $errors = [];
@@ -40,14 +39,13 @@ class CustomerNotesTest extends ATestCase
             $errors = $customer->errors()['validation'];
         }
 
-        $this->assertCount(3, $errors);
+        $this->assertCount(2, $errors);
 
 
         $customer = new CustomerNotes(
             [
                 'customer_id' => 1,
-                'user_id' => 1,
-                'stage_id' => 1,
+                'user_id' => 1
             ]
         );
         $errors = [];

@@ -19,6 +19,7 @@
 namespace Tests\unit\models\catalog;
 
 use abc\models\catalog\GlobalAttribute;
+use abc\models\catalog\GlobalAttributesType;
 use Illuminate\Validation\ValidationException;
 use Tests\unit\ATestCase;
 
@@ -30,12 +31,12 @@ class GlobalAttributeTest extends ATestCase
         $errors = [];
         try {
             $data = [
-                'attribute_parent_id' => 0,
-                'attribute_group_id'  => 0,
-                'attribute_type_id'   => 0,
-                'sort_order'          => 0,
-                'required'            => 0,
-                'status'              => 0,
+                'attribute_parent_id' => -100,
+                'attribute_group_id'  => false,
+                'attribute_type_id'   => [],
+                'sort_order'          => [],
+                'required'            => -1,
+                'status'              => [111],
             ];
             $attr->validate($data);
         } catch (ValidationException $e) {
@@ -46,9 +47,19 @@ class GlobalAttributeTest extends ATestCase
         $errors = [];
         try {
             $data = [
-                'attribute_parent_id' => 1,
+                'attribute_parent_id' => GlobalAttribute::first()->attribute_id,
                 'attribute_group_id'  => 1,
-                'attribute_type_id'   => 1,
+                'attribute_type_id'   => GlobalAttributesType::first()->attribute_type_id,
+                'sort_order'          => 1,
+                'required'            => 1,
+                'status'              => 1,
+            ];
+            $attr->validate($data);
+            //check nullables
+            $data = [
+                'attribute_parent_id' => null,
+                'attribute_group_id'  => null,
+                'attribute_type_id'   => GlobalAttributesType::first()->attribute_type_id,
                 'sort_order'          => 1,
                 'required'            => 1,
                 'status'              => 1,

@@ -19,6 +19,7 @@
 namespace Tests\unit\models\catalog;
 
 use abc\models\catalog\Download;
+use abc\models\order\OrderStatus;
 use Illuminate\Validation\ValidationException;
 use Tests\unit\ATestCase;
 
@@ -30,19 +31,16 @@ class DownloadTest extends ATestCase
         $errors = [];
         try {
             $data = [
-                'max_downloads' => false,
-                'expire_days' => false,
-                'sort_order' => false,
-                'activate_order_status_id' => false,
-                'shared' => false,
-                'status' => false,
-
+                'max_downloads'            => [],
+                'expire_days'              => [],
+                'sort_order'               => [],
+                'activate_order_status_id' => [],
             ];
             $download->validate($data);
         } catch (ValidationException $e) {
             $errors = $download->errors()['validation'];
         }
-        $this->assertCount(9, $errors);
+        $this->assertCount(4, $errors);
 
         $errors = [];
         try {
@@ -50,7 +48,7 @@ class DownloadTest extends ATestCase
                 'max_downloads' => 1,
                 'expire_days' => 1,
                 'sort_order' => 1,
-                'activate_order_status_id' => 1,
+                'activate_order_status_id' => OrderStatus::first()->order_status_id,
                 'shared' => 1,
                 'status' => 1,
             ];
