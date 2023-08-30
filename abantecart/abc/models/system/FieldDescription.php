@@ -1,19 +1,19 @@
 <?php
 /**
  * AbanteCart, Ideal Open Source Ecommerce Solution
- * http://www.abantecart.com
+ * https://www.abantecart.com
  *
- * Copyright 2011-2022 Belavier Commerce LLC
+ * Copyright (c) 2011-2023  Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
  * It is also available at this URL:
- * <http://www.opensource.org/licenses/OSL-3.0>
+ * <https://www.opensource.org/licenses/OSL-3.0>
  *
  * UPGRADE NOTE:
  * Do not edit or add to this file if you wish to upgrade AbanteCart to newer
  * versions in the future. If you wish to customize AbanteCart for your
- * needs please refer to http://www.abantecart.com for more information.
+ * needs please refer to https://www.abantecart.com for more information.
  */
 namespace abc\models\system;
 
@@ -37,14 +37,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class FieldDescription extends BaseModel
 {
-    use SoftDeletes;
-
     protected $primaryKey = 'id';
     protected $primaryKeySet = [
         'field_id',
         'language_id',
     ];
-    public $timestamps = false;
 
     protected $casts = [
         'field_id'    => 'int',
@@ -52,6 +49,8 @@ class FieldDescription extends BaseModel
     ];
 
     protected $fillable = [
+        'field_id',
+        'language_id',
         'name',
         'description',
         'error_text',
@@ -62,7 +61,6 @@ class FieldDescription extends BaseModel
         'field_id' => [
             'checks' => [
                 'integer',
-                'exists:order_data_types',
                 'min:0',
                 'max:2147483647'
             ],
@@ -70,14 +68,13 @@ class FieldDescription extends BaseModel
                 'integer' => ['default_text' => ':attribute is not integer!'],
                 'max' => ['default_text' => ':attribute must be less than 2147483647'],
                 'min' => ['default_text' => ':attribute value must be greater than zero'],
-                'exists' => ['default_text' => ':attribute not exists in order_data_types table']
             ],
         ],
         'language_id' => [
             'checks' => [
                 'integer',
                 'required',
-                'exists:orders',
+                'exists:languages',
                 'min:0',
                 'max:2147483647'
             ],
@@ -85,7 +82,7 @@ class FieldDescription extends BaseModel
                 'integer' => ['default_text' => ':attribute is not integer!'],
                 'max' => ['default_text' => ':attribute must be less than 2147483647'],
                 'min' => ['default_text' => ':attribute value must be greater than zero'],
-                'exists' => ['default_text' => ':attribute not exists in order_data_types table'],
+                'exists' => ['default_text' => ':attribute not exists in languages table'],
                 'required' => ['default_text' => ':attribute required']
             ],
         ],
