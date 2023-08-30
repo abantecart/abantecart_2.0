@@ -129,9 +129,9 @@ WHERE `customer_id` = 0;
 ALTER TABLE `ac_orders`
     CHANGE COLUMN `coupon_id` `coupon_id` int(11) DEFAULT NULL;
 ALTER TABLE `ac_orders`
-    modify shipping_company varchar(64) null;
+    modify shipping_company varchar(255) null;
 ALTER TABLE `ac_orders`
-    modify payment_company varchar(64) null;
+    modify payment_company varchar(255) null;
 
 
 UPDATE `ac_orders`
