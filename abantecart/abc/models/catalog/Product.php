@@ -1,20 +1,19 @@
 <?php
 /**
  * AbanteCart, Ideal Open Source Ecommerce Solution
- * http://www.abantecart.com
+ * https://www.abantecart.com
  *
- * Copyright 2011-2023 Belavier Commerce LLC
+ * Copyright (c) 2011-2023  Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
  * It is also available at this URL:
- * <http://www.opensource.org/licenses/OSL-3.0>
+ * <https://www.opensource.org/licenses/OSL-3.0>
  *
  * UPGRADE NOTE:
  * Do not edit or add to this file if you wish to upgrade AbanteCart to newer
  * versions in the future. If you wish to customize AbanteCart for your
- * needs please refer to http://www.abantecart.com for more information.
- *
+ * needs please refer to https://www.abantecart.com for more information.
  */
 
 namespace abc\models\catalog;
@@ -28,15 +27,12 @@ use abc\models\BaseModel;
 use abc\core\engine\AResource;
 use abc\models\casts\NullableInt;
 use abc\models\casts\Serialized;
-use abc\models\locale\LengthClass;
-use abc\models\locale\WeightClass;
 use abc\models\order\Coupon;
 use abc\models\order\OrderProduct;
 use abc\models\QueryBuilder;
 use abc\models\system\Audit;
 use abc\models\system\Setting;
 use abc\models\system\Store;
-use abc\models\system\TaxClass;
 use Carbon\Carbon;
 use Dyrynda\Database\Support\GeneratesUuid;
 use Exception;
@@ -341,8 +337,7 @@ class Product extends BaseModel
         'manufacturer_id' => [
             'checks' => [
                 'integer',
-                'required',
-                'sometimes',
+                'nullable',
                 'exists:manufacturers',
                 'min:0',
                 'max:2147483647'
@@ -411,18 +406,12 @@ class Product extends BaseModel
         'tax_class_id' => [
             'checks' => [
                 'integer',
-                'required',
-                'sometimes',
+                'nullable',
                 'exists:tax_classes',
-                'min:0',
-                'max:2147483647'
             ],
             'messages' => [
                 'integer' => ['default_text' => ':attribute is not integer!',],
                 'exists' => ['default_text' => ':attribute not presents in tax_classes table!'],
-                'max' => ['default_text' => ':attribute must be less than 2147483647'],
-                'min' => ['default_text' => ':attribute value must be greater than zero'],
-                'required' => ['default_text' => ':attribute ID required']
             ],
         ],
 
@@ -442,15 +431,10 @@ class Product extends BaseModel
                 'integer',
                 'nullable',
                 'exists:weight_classes',
-                'min:0',
-                'max:2147483647'
             ],
             'messages' => [
                 'integer' => ['default_text' => ':attribute is not integer!',],
                 'exists' => ['default_text' => ':attribute not presents in weight_classes table'],
-                'max' => ['default_text' => ':attribute must be less than 2147483647'],
-                'required' => ['default_text' => ':attribute required'],
-                'min' => ['default_text' => ':attribute value must be greater than zero'],
             ],
         ],
 
@@ -492,12 +476,10 @@ class Product extends BaseModel
                 'integer',
                 'nullable',
                 'exists:length_classes',
-                'max:2147483647'
             ],
             'messages' => [
                 'integer' => ['default_text' => ':attribute is not integer'],
                 'exists' => ['default_text' => ':attribute not presents in length_classes table!'],
-                'max' => ['default_text' => ':attribute must be less than 2147483647']
             ],
         ],
 
@@ -2054,7 +2036,7 @@ class Product extends BaseModel
      * @param array $product_data
      *
      * @return bool
-     * @throws Exception
+     * @throws Exception|InvalidArgumentException
      */
     public static function updateProduct(int $product_id, array $product_data)
     {
@@ -2517,8 +2499,9 @@ class Product extends BaseModel
     public function delete()
     {
         UrlAlias::where('query', '=', 'product_id=' . $this->getKey())->delete();
-        parent::delete();
+        $result = parent::delete();
         Registry::cache()->flush('product');
+        return $result;
     }
 
     /**

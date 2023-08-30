@@ -1,19 +1,19 @@
 <?php
 /**
  * AbanteCart, Ideal Open Source Ecommerce Solution
- * http://www.abantecart.com
+ * https://www.abantecart.com
  *
- * Copyright 2011-2022 Belavier Commerce LLC
+ * Copyright (c) 2011-2023  Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
  * It is also available at this URL:
- * <http://www.opensource.org/licenses/OSL-3.0>
+ * <https://www.opensource.org/licenses/OSL-3.0>
  *
  * UPGRADE NOTE:
  * Do not edit or add to this file if you wish to upgrade AbanteCart to newer
  * versions in the future. If you wish to customize AbanteCart for your
- * needs please refer to http://www.abantecart.com for more information.
+ * needs please refer to https://www.abantecart.com for more information.
  */
 
 namespace abc\models\catalog;
@@ -21,7 +21,6 @@ namespace abc\models\catalog;
 use abc\models\BaseModel;
 use abc\models\locale\Language;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class GlobalAttributesTypeDescription
@@ -36,8 +35,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class GlobalAttributesTypeDescription extends BaseModel
 {
-    use SoftDeletes;
-
     protected $primaryKey = 'id';
     protected $primaryKeySet = [
         'attribute_type_id',
@@ -63,12 +60,11 @@ class GlobalAttributesTypeDescription extends BaseModel
         'attribute_type_id' => [
             'checks' => [
                 'integer',
-                'min:0',
+                'exists:global_attributes_types',
                 'max:2147483647'
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Attribute Type ID is not Integer!'],
-                'min' => ['default_text' => 'Attribute Type ID value must be greater than zero'],
                 'max' => ['default_text' => 'Attribute Type ID must be less than 2147483647'],
             ],
         ],
@@ -77,14 +73,12 @@ class GlobalAttributesTypeDescription extends BaseModel
                 'integer',
                 'required',
                 'exists:languages',
-                'min:0',
                 'max:2147483647'
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Language ID is not Integer!'],
                 'exists' => ['default_text' => 'Language ID absent in languages table!'],
                 'max' => ['default_text' => 'Language ID must be less than 2147483647'],
-                'min' => ['default_text' => 'Language ID value must be greater than zero'],
                 'required' => ['default_text' => 'Language ID required']
             ],
         ],

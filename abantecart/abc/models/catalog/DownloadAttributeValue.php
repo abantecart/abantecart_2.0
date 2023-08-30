@@ -1,19 +1,19 @@
 <?php
 /**
  * AbanteCart, Ideal Open Source Ecommerce Solution
- * http://www.abantecart.com
+ * https://www.abantecart.com
  *
- * Copyright 2011-2022 Belavier Commerce LLC
+ * Copyright (c) 2011-2023  Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
  * It is also available at this URL:
- * <http://www.opensource.org/licenses/OSL-3.0>
+ * <https://www.opensource.org/licenses/OSL-3.0>
  *
  * UPGRADE NOTE:
  * Do not edit or add to this file if you wish to upgrade AbanteCart to newer
  * versions in the future. If you wish to customize AbanteCart for your
- * needs please refer to http://www.abantecart.com for more information.
+ * needs please refer to https://www.abantecart.com for more information.
  */
 namespace abc\models\catalog;
 
@@ -46,25 +46,33 @@ class DownloadAttributeValue extends BaseModel
         'attribute_id' => [
             'checks' => [
                 'integer',
-                'min:0',
+                'exists:global_attributes',
                 'max:2147483647'
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Attribute ID is not Integer!'],
-                'min' => ['default_text' => 'Attribute ID value must be greater than zero'],
-                'max' => ['default_text' => 'Attribute ID must be less than 2147483647']
+                'exists' => ['default_text' => 'Attribute ID value does not exists in the global_attributes table!'],
+                'max'    => ['default_text' => 'Attribute ID must be less than :max']
             ],
         ],
         'download_id' => [
             'checks' => [
                 'integer',
-                'min:0',
+                'exists:downloads',
                 'max:2147483647'
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Download ID is not Integer!'],
-                'min' => ['default_text' => 'Download ID value must be greater than zero'],
+                'exists' => ['default_text' => 'Download ID does not exists in the downloads table!'],
                 'max' => ['default_text' => 'Download ID must be less than 2147483647']
+            ],
+        ],
+        'attribute_value_ids' => [
+            'checks'   => [
+                'max:1500'
+            ],
+            'messages' => [
+                'max' => ['default_text' => ':attribute must be less than :max characters length!']
             ],
         ]
     ];

@@ -1,4 +1,20 @@
 <?php
+/**
+ * AbanteCart, Ideal Open Source Ecommerce Solution
+ * https://www.abantecart.com
+ *
+ * Copyright (c) 2011-2023  Belavier Commerce LLC
+ *
+ * This source file is subject to Open Software License (OSL 3.0)
+ * License details is bundled with this package in the file LICENSE.txt.
+ * It is also available at this URL:
+ * <https://www.opensource.org/licenses/OSL-3.0>
+ *
+ * UPGRADE NOTE:
+ * Do not edit or add to this file if you wish to upgrade AbanteCart to newer
+ * versions in the future. If you wish to customize AbanteCart for your
+ * needs please refer to https://www.abantecart.com for more information.
+ */
 
 namespace abc\models\catalog;
 
@@ -6,9 +22,7 @@ use abc\models\BaseModel;
 use abc\models\order\OrderDownload;
 use abc\models\order\OrderDownloadsHistory;
 use Carbon\Carbon;
-use Dyrynda\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class Download
@@ -46,8 +60,8 @@ class Download extends BaseModel
         'expire_days'              => 'int',
         'sort_order'               => 'int',
         'activate_order_status_id' => 'int',
-        'shared'                   => 'int',
-        'status' => 'int'
+        'shared' => 'boolean',
+        'status' => 'boolean'
     ];
 
     protected $fillable = [
@@ -71,7 +85,7 @@ class Download extends BaseModel
             ], 'messages' => [
                 'integer' => ['default_text' => ':value is not Integer!'],
                 'min' => ['default_text' => ':value  must be greater than zero'],
-                'max' => ['default_text' => ':value must be less than 2147483647']
+                'max' => ['default_text' => ':value must be less than :max']
             ],
         ],
         'expire_days' => [
@@ -82,7 +96,7 @@ class Download extends BaseModel
             ], 'messages' => [
                 'integer' => ['default_text' => ':value is not Integer!'],
                 'min' => ['default_text' => ':value  must be greater than zero'],
-                'max' => ['default_text' => ':value must be less than 2147483647']
+                'max' => ['default_text' => ':value must be less than :max']
             ],
         ],
         'sort_order' => [
@@ -93,16 +107,19 @@ class Download extends BaseModel
             ], 'messages' => [
                 'integer' => ['default_text' => ':value is not Integer!'],
                 'min' => ['default_text' => ':value  must be greater than zero'],
-                'max' => ['default_text' => ':value must be less than 2147483647']
+                'max' => ['default_text' => ':value must be less than :max']
             ],
         ],
         'activate_order_status_id' => [
             'checks' => [
                 'integer',
+                'nullable',
+                'exists:order_statuses,order_status_id',
                 'min:0',
                 'max:2147483647'
             ], 'messages' => [
                 'integer' => ['default_text' => ':value is not Integer!'],
+                'exists' => ['default_text' => ':value does not exists in the order_statuses table!'],
                 'min' => ['default_text' => ':value  must be greater than zero'],
                 'max' => ['default_text' => ':value must be less than 2147483647']
             ],
@@ -134,5 +151,4 @@ class Download extends BaseModel
     {
         return $this->hasMany(OrderDownloadsHistory::class, 'download_id');
     }
-
 }
