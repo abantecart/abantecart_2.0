@@ -4,9 +4,9 @@ namespace Tests\unit\models\catalog;
 
 use abc\models\catalog\GlobalAttributesGroup;
 use Illuminate\Validation\ValidationException;
-use PHPUnit\Framework\TestCase;
+use Tests\unit\ATestCase;
 
-class GlobalAttributesGroupTest extends TestCase
+class GlobalAttributesGroupTest extends ATestCase
 {
     public function testValidator()
     {

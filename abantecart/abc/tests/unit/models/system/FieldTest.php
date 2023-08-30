@@ -1,11 +1,12 @@
 <?php
 
+namespace Tests\unit\models\system;
 
 use abc\models\system\Field;
 use Illuminate\Validation\ValidationException;
-use PHPUnit\Framework\TestCase;
+use Tests\unit\ATestCase;
 
-class FieldTest extends TestCase
+class FieldTest extends ATestCase
 {
     public function testFieldValidation()
     {
@@ -33,7 +34,6 @@ class FieldTest extends TestCase
             $field->validate($data);
         } catch (ValidationException $e) {
             $errors = $field->errors()['validation'];
-            //var_Dump($errors);
         }
         $this->assertCount(0, $errors);
     }

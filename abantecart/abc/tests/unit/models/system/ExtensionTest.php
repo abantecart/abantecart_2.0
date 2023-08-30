@@ -1,11 +1,12 @@
 <?php
 
+namespace Tests\unit\models\system;
 
 use abc\models\system\Extension;
 use Illuminate\Validation\ValidationException;
-use PHPUnit\Framework\TestCase;
+use Tests\unit\ATestCase;
 
-class ExtensionTest extends TestCase
+class ExtensionTest extends ATestCase
 {
     public function testExtensionValidation()
     {
@@ -32,7 +33,6 @@ class ExtensionTest extends TestCase
             $extension->validate($data);
         } catch (ValidationException $e) {
             $errors = $extension->errors()['validation'];
-            //var_Dump($errors);
         }
         $this->assertCount(0, $errors);
     }

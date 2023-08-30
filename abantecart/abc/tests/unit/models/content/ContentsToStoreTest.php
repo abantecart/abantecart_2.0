@@ -1,12 +1,13 @@
 <?php
 
+namespace Tests\unit\models\content;
 
 use abc\models\content\ContentsToStore;
-use PHPUnit\Framework\TestCase;
 use Illuminate\Validation\ValidationException;
+use Tests\unit\ATestCase;
 
 
-class ContentsToStoreTest extends TestCase
+class ContentsToStoreTest extends ATestCase
 {
     public function testValidator()
     {

@@ -5,8 +5,9 @@ namespace Tests\unit\models\catalog;
 use abc\models\catalog\UrlAlias;
 use Illuminate\Validation\ValidationException;
 use PHPUnit\Framework\TestCase;
+use Tests\unit\ATestCase;
 
-class UrlAliasTest extends TestCase
+class UrlAliasTest extends ATestCase
 {
     public function testValidator()
     {

@@ -4,9 +4,9 @@ namespace Tests\unit\models\catalog;
 
 use abc\models\catalog\ResourceMap;
 use Illuminate\Validation\ValidationException;
-use PHPUnit\Framework\TestCase;
+use Tests\unit\ATestCase;
 
-class ResourceMapTest extends TestCase
+class ResourceMapTest extends ATestCase
 {
     public function testValidator()
     {

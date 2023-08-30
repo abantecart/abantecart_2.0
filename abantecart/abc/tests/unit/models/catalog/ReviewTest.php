@@ -5,8 +5,9 @@ namespace Tests\unit\models\catalog;
 use abc\models\catalog\Review;
 use Illuminate\Validation\ValidationException;
 use PHPUnit\Framework\TestCase;
+use Tests\unit\ATestCase;
 
-class ReviewTest extends TestCase
+class ReviewTest extends ATestCase
 {
     public function testValidator()
     {

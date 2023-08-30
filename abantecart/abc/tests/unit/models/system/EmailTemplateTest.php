@@ -1,11 +1,11 @@
 <?php
 
-
+namespace Tests\unit\models\system;
 use abc\models\system\EmailTemplate;
 use Illuminate\Validation\ValidationException;
-use PHPUnit\Framework\TestCase;
+use Tests\unit\ATestCase;
 
-class EmailTemplateTest extends TestCase
+class EmailTemplateTest extends ATestCase
 {
     public function testEmailTemplateValidation()
     {
@@ -30,7 +30,6 @@ class EmailTemplateTest extends TestCase
             $template->validate($data);
         } catch (ValidationException $e) {
             $errors = $template->errors()['validation'];
-            //var_Dump($errors);
         }
         $this->assertCount(0, $errors);
     }

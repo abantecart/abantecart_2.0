@@ -160,7 +160,5 @@ class TouchesTest extends ATestCase
         $discount->touch();
         $product = Product::find($discount->product_id);
         $this->assertEquals($now, $product->date_modified->timestamp);
-
     }
-
 }
