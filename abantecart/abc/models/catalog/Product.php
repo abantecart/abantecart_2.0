@@ -26,6 +26,7 @@ use abc\core\lib\AException;
 use abc\core\lib\AttributeManager;
 use abc\models\BaseModel;
 use abc\core\engine\AResource;
+use abc\models\casts\NullableInt;
 use abc\models\casts\Serialized;
 use abc\models\locale\LengthClass;
 use abc\models\locale\WeightClass;
@@ -160,19 +161,19 @@ class Product extends BaseModel
         'product_id'        => 'int',
         'quantity'          => 'int',
         'stock_status_id'   => 'int',
-        'manufacturer_id'   => 'int',
+        'manufacturer_id' => NullableInt::class,
         'shipping'          => 'int',
         'ship_individually' => 'int',
         'free_shipping'     => 'int',
         'shipping_price'    => 'float',
         'price'             => 'float',
-        'tax_class_id'      => 'int',
+        'tax_class_id'    => NullableInt::class,
         'weight'            => 'float',
-        'weight_class_id'   => 'int',
+        'weight_class_id' => NullableInt::class,
         'length'            => 'float',
         'width'             => 'float',
         'height'            => 'float',
-        'length_class_id'   => 'int',
+        'length_class_id' => NullableInt::class,
         'status'            => 'int',
         'featured'          => 'boolean',
         'viewed'            => 'int',

@@ -23,6 +23,7 @@ use abc\core\engine\HtmlElementFactory;
 use abc\core\engine\Registry;
 use abc\core\lib\AException;
 use abc\models\BaseModel;
+use abc\models\casts\NullableInt;
 use abc\models\casts\Serialized;
 use abc\models\catalog\Product;
 use abc\models\catalog\ProductOption;
@@ -130,18 +131,18 @@ class Order extends BaseModel
     protected $casts = [
         'invoice_id'          => 'int',
         'store_id'            => 'int',
-        'customer_id'         => 'int',
+        'customer_id'      => NullableInt::class,
         'customer_group_id'   => 'int',
-        'shipping_zone_id'    => 'int',
+        'shipping_zone_id' => NullableInt::class,
         'shipping_country_id' => 'int',
-        'payment_zone_id'     => 'int',
+        'payment_zone_id'  => NullableInt::class,
         'payment_country_id'  => 'int',
         'total'               => 'float',
         'order_status_id'     => 'int',
-        'language_id'         => 'int',
-        'currency_id'         => 'int',
+        'language_id'      => NullableInt::class,
+        'currency_id'      => NullableInt::class,
         'value'               => 'float',
-        'coupon_id'           => 'int',
+        'coupon_id'        => NullableInt::class,
         'payment_method_data' => Serialized::class,
         'date_added'          => 'datetime',
         'date_modified'       => 'datetime'
