@@ -27,7 +27,6 @@ use abc\models\QueryBuilder;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Collection;
 
@@ -59,8 +58,6 @@ use Illuminate\Support\Collection;
  */
 class Address extends BaseModel
 {
-    use SoftDeletes;
-
     protected $mainClassName = Customer::class;
     protected $mainClassKey = 'customer_id';
     protected $primaryKey = 'address_id';
@@ -295,7 +292,6 @@ class Address extends BaseModel
     //temporary disable softDeleting
     public function __construct(array $attributes = [])
     {
-        $this->forceDeleting = true;
         parent::__construct($attributes);
     }
 
@@ -310,8 +306,6 @@ class Address extends BaseModel
 
     /**
      * @param array $options
-     *
-     * @return bool
      * @throws AException
      */
     public function save(array $options = [])
@@ -324,8 +318,7 @@ class Address extends BaseModel
         }
 
         $this->attributes = $data;
-        return parent::save($options);
-
+        parent::save($options);
     }
 
     public function customer()

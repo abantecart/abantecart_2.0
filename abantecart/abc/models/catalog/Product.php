@@ -149,7 +149,7 @@ class Product extends BaseModel
     protected $hidden = ['pivot'];
 
     /** @see Product::boot() categories touching! */
-    protected $touches = ['stores'];
+    protected $touches = ['stores', 'categories'];
     /**
      * @var array
      */
