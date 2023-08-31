@@ -1860,11 +1860,10 @@ class Product extends BaseModel
         $product->save();
         $productId = $product->product_id;
         if ($productId) {
-            if ($product_data['product_description']) {
-                $description = new ProductDescription();
-                $description->fillAndCast($product_data['product_description']);
-                $product->descriptions()->save($description);
-            }
+            $description = new ProductDescription();
+            $description->fillAndCast($product_data['product_description'] ?: $product_data);
+            $product->descriptions()->save($description);
+
             if ($product_data['keyword'] || $product_data['product_description']['name']) {
                 UrlAlias::setProductKeyword(
                     $product_data['keyword'] ?: $product_data['product_description']['name'],
