@@ -1,22 +1,20 @@
 <?php
-/*------------------------------------------------------------------------------
-  $Id$
-
-  AbanteCart, Ideal OpenSource Ecommerce Solution
-  http://www.AbanteCart.com
-
-  Copyright © 2011-2023 Belavier Commerce LLC
-
-  This source file is subject to Open Software License (OSL 3.0)
-  License details is bundled with this package in the file LICENSE.txt.
-  It is also available at this URL:
-  <http://www.opensource.org/licenses/OSL-3.0>
-
- UPGRADE NOTE:
-   Do not edit or add to this file if you wish to upgrade AbanteCart to newer
-   versions in the future. If you wish to customize AbanteCart for your
-   needs please refer to http://www.AbanteCart.com for more information.
-------------------------------------------------------------------------------*/
+/**
+ * AbanteCart, Ideal Open Source Ecommerce Solution
+ * https://www.abantecart.com
+ *
+ * Copyright (c) 2011-2023  Belavier Commerce LLC
+ *
+ * This source file is subject to Open Software License (OSL 3.0)
+ * License details is bundled with this package in the file LICENSE.txt.
+ * It is also available at this URL:
+ * <https://www.opensource.org/licenses/OSL-3.0>
+ *
+ * UPGRADE NOTE:
+ * Do not edit or add to this file if you wish to upgrade AbanteCart to newer
+ * versions in the future. If you wish to customize AbanteCart for your
+ * needs please refer to https://www.abantecart.com for more information.
+ */
 
 namespace abc\controllers\admin;
 
@@ -27,11 +25,13 @@ use abc\core\lib\AError;
 use abc\core\lib\AException;
 use abc\core\lib\AJson;
 use abc\models\catalog\Product;
+use abc\models\catalog\ProductDescription;
 use abc\models\catalog\ProductDiscount;
 use abc\models\catalog\ProductSpecial;
 use abc\models\QueryBuilder;
 use Exception;
 use H;
+use Illuminate\Validation\ValidationException;
 use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionException;
 use stdClass;
@@ -39,6 +39,7 @@ use stdClass;
 
 class ControllerResponsesListingGridProduct extends AController
 {
+    public $error = [];
     public function main()
     {
         $page = (int)$this->request->post['page'] ?: 1;
@@ -137,7 +138,7 @@ class ControllerResponsesListingGridProduct extends AController
                 $thumbnail['thumb_html'],
                 $this->html->buildInput(
                     [
-                        'name'  => 'product_description[' . $result['product_id'] . '][name]',
+                        'name' => 'name[' . $result['product_id'] . ']',
                         'value' => $result['name'],
                     ]
                 ),
@@ -230,7 +231,7 @@ class ControllerResponsesListingGridProduct extends AController
                 break;
             case 'save':
                 $allowedFields = array_merge(
-                    ['product_description', 'model', 'call_to_order', 'price', 'quantity', 'status'],
+                    ['name', 'model', 'call_to_order', 'price', 'quantity', 'status'],
                     (array)$this->data['allowed_fields']
                 );
                 $ids = explode(',', $this->request->post['id']);
@@ -243,7 +244,7 @@ class ControllerResponsesListingGridProduct extends AController
                             }
 
                             if (isset($this->request->post[$f][$id])) {
-                                $err = $this->validateField($f, $this->request->post[$f][$id]);
+                                $err = $this->validateField($id, $f, $this->request->post[$f][$id]);
                                 if (!empty($err)) {
                                     $error = new AError('');
                                     $error->toJSONResponse(
@@ -303,11 +304,11 @@ class ControllerResponsesListingGridProduct extends AController
 
         $this->loadLanguage('catalog/product');
 
-        $product_id = (int)$this->request->get['id'];
-        if ($product_id) {
+        $productId = (int)$this->request->get['id'];
+        if ($productId) {
             //request sent from edit form. ID in url
             foreach ($this->request->post as $key => $value) {
-                $err = $this->validateField($key, $value);
+                $err = $this->validateField($productId, $key, $value);
                 if (!empty($err)) {
                     $error = new AError('');
                     $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
@@ -317,28 +318,29 @@ class ControllerResponsesListingGridProduct extends AController
                     $value = H::dateDisplay2ISO($value);
                 }
                 $data = [$key => $value];
-                Product::updateProduct($product_id, $data);
+                Product::updateProduct($productId, $data);
             }
-            $this->extensions->hk_ProcessData($this, 'update_field', ['product_id' => $product_id]);
+            $this->extensions->hk_ProcessData($this, 'update_field', ['product_id' => $productId]);
             return;
         }
 
         //request sent from jGrid. ID is key of array
         $allowedFields = array_merge(
-            ['product_description', 'model', 'price', 'call_to_order', 'quantity', 'status'],
+            ['name', 'model', 'price', 'call_to_order', 'quantity', 'status'],
             (array)$this->data['allowed_fields']
         );
+        //NOTE: structure of data from jqGrid is $_POST[{fieldname}][{productID}] => value
         foreach ($allowedFields as $f) {
             if (isset($this->request->post[$f])) {
-                foreach ($this->request->post[$f] as $k => $v) {
-                    $err = $this->validateField($f, $v);
+                foreach ($this->request->post[$f] as $productId => $v) {
+                    $err = $this->validateField($productId, $f, $v);
                     if (!empty($err)) {
                         $error = new AError('');
                         $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
                         return;
                     }
-                    Product::updateProduct($k, [$f => $v]);
-                    $this->extensions->hk_ProcessData($this, 'update_field', ['product_id' => $k]);
+                    Product::updateProduct($productId, [$f => $v]);
+                    $this->extensions->hk_ProcessData($this, 'update_field', ['product_id' => $productId]);
                 }
             }
         }
@@ -465,33 +467,41 @@ class ControllerResponsesListingGridProduct extends AController
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
     }
 
-    protected function validateField($field, $value)
+    protected function validateField(int $productId, string $field, $value)
     {
-        $this->data['error'] = '';
-        switch ($field) {
-            case 'product_description' :
-                if (isset($value['name']) && ((mb_strlen($value['name']) < 1) || (mb_strlen($value['name']) > 255))) {
-                    $this->data['error'] = $this->language->get('error_name');
-                }
-                break;
-            case 'model' :
-                if (mb_strlen($value) > 64) {
-                    $this->data['error'] = $this->language->get('error_model');
-                }
-                break;
-            case 'keyword' :
-                $this->data['error'] = $this->html->isSEOkeywordExists('product_id=' . $this->request->get['id'], $value);
-                break;
-            case 'length' :
-            case 'width'  :
-            case 'height' :
-            case 'weight' :
-                $v = abs(H::preformatFloat($value, $this->language->get('decimal_point')));
-                if ($v >= 1000) {
-                    $this->data['error'] = $this->language->get('error_measure_value');
-                }
-                break;
+        $this->error = [];
+        $data = [$field => $value];
+        if ($productId) {
+            $data['product_id'] = $productId;
         }
+
+        $this->data['error'] = '';
+        $product = Product::find($productId);
+        if (!$product) {
+            $this->data['error'] = 'Product #' . $productId . ' not found.';
+            return $this->data['error'];
+        }
+        $pd = new ProductDescription($data);
+
+        if ($field == 'keyword') {
+            $this->data['error'] = $this->html->isSEOkeywordExists('product_id=' . $productId, $value);
+        } elseif (in_array($field, $product->getFillable())) {
+            try {
+                $product->validate($data);
+            } catch (ValidationException $e) {
+                H::SimplifyValidationErrors($product->errors()['validation'], $this->error);
+                $this->data['error'] .= implode("\n", $this->error);
+            }
+        } elseif (in_array($field, $pd->getFillable())) {
+            $data['language_id'] = $this->language->getContentLanguageID();
+            try {
+                $pd->validate($data);
+            } catch (ValidationException $e) {
+                H::SimplifyValidationErrors($pd->errors()['validation'], $this->error);
+                $this->data['error'] .= implode("\n", $this->error);
+            }
+        }
+
         $this->extensions->hk_ValidateData($this, __FUNCTION__, $field, $value);
 
         return $this->data['error'];

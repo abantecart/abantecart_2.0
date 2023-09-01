@@ -1,20 +1,19 @@
 <?php
 /**
  * AbanteCart, Ideal Open Source Ecommerce Solution
- * http://www.abantecart.com
+ * https://www.abantecart.com
  *
- * Copyright 2011-2022 Belavier Commerce LLC
+ * Copyright (c) 2011-2023  Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
  * It is also available at this URL:
- * <http://www.opensource.org/licenses/OSL-3.0>
+ * <https://www.opensource.org/licenses/OSL-3.0>
  *
  * UPGRADE NOTE:
  * Do not edit or add to this file if you wish to upgrade AbanteCart to newer
  * versions in the future. If you wish to customize AbanteCart for your
- * needs please refer to http://www.abantecart.com for more information.
- *
+ * needs please refer to https://www.abantecart.com for more information.
  */
 
 namespace abc\models\catalog;
@@ -84,14 +83,10 @@ class ProductDescription extends BaseModel
                 'integer',
                 'required',
                 'exists:products',
-                'max:2147483647',
-                'min:0',
             ],
             'messages' => [
                 'exists' => ['default_text' => 'Product ID absent in products table!'],
                 'integer' => ['default_text' => 'Product ID is not Integer!'],
-                'max' => ['default_text' => 'Product ID must be less than 2147483647'],
-                'min' => ['default_text' => 'Product ID value must be greater than zero'],
                 'required' => ['default_text' => 'Product ID required']
             ],
         ],
@@ -100,14 +95,10 @@ class ProductDescription extends BaseModel
                 'integer',
                 'required',
                 'exists:languages',
-                'min:0',
-                'max:2147483647'
             ],
             'messages' => [
                 'exist' => ['default_text' => 'Language ID is not presents in languages table!'],
                 'integer' => ['default_text' => 'Language ID is not Integer!'],
-                'min' => ['default_text' => 'Language ID value must be greater than zero'],
-                'max' => ['default_text' => 'Language ID must be less than 2147483647'],
                 'required' => ['default_text' => 'Language ID required']
             ],
         ],
@@ -196,5 +187,4 @@ class ProductDescription extends BaseModel
     {
         return $this->belongsTo(Language::class, 'language_id');
     }
-
 }

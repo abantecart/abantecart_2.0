@@ -411,17 +411,19 @@ class Product extends BaseModel
             ],
             'messages' => [
                 'integer' => ['default_text' => ':attribute is not integer!',],
-                'exists' => ['default_text' => ':attribute not presents in tax_classes table!'],
+                'exists' => ['default_text' => 'The :attribute not presents in tax_classes table!'],
             ],
         ],
 
         'weight' => [
             'checks' => [
                 'numeric',
+                'max:1000',
+                'min:0'
             ],
             'messages' => [
                 '*' => [
-                    'default_text' => ':attribute must be numeric!',
+                    'default_text' => 'The :attribute must be numeric between 0 and 1000!',
                 ],
             ],
         ],
@@ -434,17 +436,19 @@ class Product extends BaseModel
             ],
             'messages' => [
                 'integer' => ['default_text' => ':attribute is not integer!',],
-                'exists' => ['default_text' => ':attribute not presents in weight_classes table'],
+                'exists' => ['default_text' => 'The :attribute not presents in weight_classes table'],
             ],
         ],
 
         'length' => [
             'checks' => [
                 'numeric',
+                'max:1000',
+                'min:0'
             ],
             'messages' => [
                 '*' => [
-                    'default_text' => ':attribute must be numeric!',
+                    'default_text' => 'The :attribute must be numeric between 0 and 1000!',
                 ],
             ],
         ],
@@ -452,10 +456,12 @@ class Product extends BaseModel
         'width' => [
             'checks' => [
                 'numeric',
+                'max:1000',
+                'min:0'
             ],
             'messages' => [
                 '*' => [
-                    'default_text' => ':attribute must be numeric!',
+                    'default_text' => 'The :attribute must be numeric between 0 and 1000!',
                 ],
             ],
         ],
@@ -463,10 +469,12 @@ class Product extends BaseModel
         'height' => [
             'checks' => [
                 'numeric',
+                'max:1000',
+                'min:0'
             ],
             'messages' => [
                 '*' => [
-                    'default_text' => ':attribute must be numeric!',
+                    'default_text' => ':attribute must be numeric between 0 and 1000!',
                 ],
             ],
         ],

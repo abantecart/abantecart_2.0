@@ -27,6 +27,7 @@ use abc\models\catalog\Category;
 use abc\models\catalog\Manufacturer;
 use abc\models\catalog\ObjectType;
 use abc\models\catalog\Product;
+use abc\models\catalog\ProductDescription;
 use abc\models\catalog\UrlAlias;
 use abc\models\QueryBuilder;
 use abc\models\system\Store;
@@ -477,8 +478,8 @@ class ControllerPagesCatalogProduct extends AController
 
         if ($this->request->is_POST()) {
             $post = $this->prepareData($this->request->post);
-            if ($this->validateForm($post)) {
-                $product_id = $this->data['product_id'] = (int)$this->request->get['product_id'];
+            $product_id = $this->data['product_id'] = (int)$this->request->get['product_id'];
+            if ($this->validateForm($post, $product_id)) {
                 Product::updateProduct($product_id, $post);
 
                 $this->extensions->hk_ProcessData($this, 'product_update');
@@ -1376,17 +1377,8 @@ class ControllerPagesCatalogProduct extends AController
             return false;
         }
 
-        $len = mb_strlen($data['name']);
-        if ($len < 1 || $len > 255) {
-            $this->error['name'] = $this->language->get_error('error_name');
-        }
-
-        if (mb_strlen($data['model']) > 64) {
-            $this->error['model'] = $this->language->get_error('error_model');
-        }
-
         $error_text = $this->html->isSEOkeywordExists(
-            'product_id=' . $this->request->get['product_id'],
+            'product_id=' . $product_id,
             $data['keyword']
         );
 
@@ -1394,12 +1386,6 @@ class ControllerPagesCatalogProduct extends AController
             $this->error['keyword'] = $error_text;
         }
 
-        foreach (['length', 'width', 'height', 'weight'] as $name) {
-            $v = abs(H::preformatFloat($data[$name], $this->language->get('decimal_point')));
-            if ($v >= 1000) {
-                $this->error[$name] = $this->language->get('error_measure_value');
-            }
-        }
 
         if ($product_id) {
             $data['product_id'] = $product_id;
@@ -1411,11 +1397,18 @@ class ControllerPagesCatalogProduct extends AController
         } else {
             $product = new Product();
         }
-
+        $pd = new ProductDescription($data);
+        //first try to get errors from product model
         try {
             $product->validate($data);
         } catch (ValidationException $e) {
             H::SimplifyValidationErrors($product->errors()['validation'], $this->error);
+        }
+        //then get errors from description model
+        try {
+            $pd->validate($data);
+        } catch (ValidationException $e) {
+            H::SimplifyValidationErrors($pd->errors()['validation'], $this->error);
         }
 
         $this->extensions->hk_ValidateData($this, __FUNCTION__, $data);
