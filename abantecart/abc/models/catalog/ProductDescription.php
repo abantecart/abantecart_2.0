@@ -82,6 +82,7 @@ class ProductDescription extends BaseModel
             'checks' => [
                 'integer',
                 'required',
+                'sometimes',
                 'exists:products',
             ],
             'messages' => [

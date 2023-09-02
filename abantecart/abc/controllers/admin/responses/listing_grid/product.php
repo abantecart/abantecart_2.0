@@ -250,7 +250,7 @@ class ControllerResponsesListingGridProduct extends AController
                                     $error->toJSONResponse(
                                         'VALIDATION_ERROR_406',
                                         [
-                                            'error_text' => $err
+                                            'error_text' => $err . ' (' . $this->request->post[$f][$id] . ')'
                                         ]
                                     );
                                     return;
@@ -263,6 +263,7 @@ class ControllerResponsesListingGridProduct extends AController
                             $this->extensions->hk_ProcessData($this, 'update', ['product_id' => $id]);
                         }
                     }
+                    $this->response->setOutput($this->language->get('text_success'));
                 }
                 break;
             case 'relate':
@@ -270,6 +271,7 @@ class ControllerResponsesListingGridProduct extends AController
                 if (!empty($ids)) {
                     Product::relateProducts($ids);
                 }
+                $this->response->setOutput($this->language->get('text_success'));
                 break;
         }
 
