@@ -83,54 +83,66 @@ class OrderOption extends BaseModel
 
     protected $rules = [
         /** @see validate() */
-        'order_id'                => [
-            'checks'   => [
+        'order_id' => [
+            'checks' => [
                 'integer',
                 'required',
                 'exists:orders',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => ':attribute is not integer or not presents in orders table!',
-                ],
+                'integer' => ['default_text' => ':attribute is not integer or not presents in orders table!'],
+                'max' => ['default_text' => ':attribute must be less than 2147483647'],
+                'min' => ['default_text' => ':attribute value must be greater than zero'],
+                'exists' => ['default_text' => ':attribute not exists in orders table'],
+                'required' => ['default_text' => ':attribute required']
             ],
         ],
-        'order_product_id'        => [
-            'checks'   => [
+        'order_product_id' => [
+            'checks' => [
                 'integer',
                 'required',
                 'exists:order_products',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => ':attribute is not integer or not presents in order_products table!',
-                ],
+                'integer' => ['default_text' => ':attribute is not integer!'],
+                'max' => ['default_text' => ':attribute must be less than 2147483647'],
+                'min' => ['default_text' => ':attribute value must be greater than zero'],
+                'exists' => ['default_text' => ':attribute not exists in order_products table'],
+                'required' => ['default_text' => ':attribute required']
             ],
         ],
-        'product_option_id'       => [
-            'checks'   => [
+        'product_option_id' => [
+            'checks' => [
                 'integer',
                 'nullable',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => ':attribute is not integer!',
-                ],
+                'integer' => ['default_text' => ':attribute is not integer!'],
+                'max' => ['default_text' => ':attribute must be less than 2147483647'],
+                'min' => ['default_text' => ':attribute value must be greater than zero'],
             ],
         ],
         'product_option_value_id' => [
-            'checks'   => [
+            'checks' => [
                 'integer',
                 'nullable',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => ':attribute is not integer!',
-                ],
+                'integer' => ['default_text' => ':attribute is not integer!'],
+                'max' => ['default_text' => ':attribute must be less than 2147483647'],
+                'min' => ['default_text' => ':attribute value must be greater than zero'],
             ],
         ],
-        'name'                    => [
-            'checks'   => [
+        'name' => [
+            'checks' => [
                 'string',
                 'max:255',
                 'required',
@@ -141,8 +153,8 @@ class OrderOption extends BaseModel
                 ],
             ],
         ],
-        'sku'                     => [
-            'checks'   => [
+        'sku' => [
+            'checks' => [
                 'string',
                 'max:64',
                 'nullable',
@@ -153,8 +165,8 @@ class OrderOption extends BaseModel
                 ],
             ],
         ],
-        'value'                   => [
-            'checks'   => [
+        'value' => [
+            'checks' => [
                 'string',
                 'max:1500',
                 'required',
@@ -165,8 +177,8 @@ class OrderOption extends BaseModel
                 ],
             ],
         ],
-        'price'                   => [
-            'checks'   => [
+        'price' => [
+            'checks' => [
                 'numeric',
             ],
             'messages' => [
@@ -177,7 +189,7 @@ class OrderOption extends BaseModel
         ],
 
         'prefix' => [
-            'checks'   => [
+            'checks' => [
                 'string',
                 'size:1',
             ],
@@ -188,7 +200,7 @@ class OrderOption extends BaseModel
             ],
         ],
         'weight' => [
-            'checks'   => [
+            'checks' => [
                 'numeric',
                 'nullable'
             ],
@@ -199,7 +211,7 @@ class OrderOption extends BaseModel
             ],
         ],
         'weight_type' => [
-            'checks'   => [
+            'checks' => [
                 'string',
                 'max:3',
             ],

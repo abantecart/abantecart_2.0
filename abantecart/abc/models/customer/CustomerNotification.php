@@ -64,6 +64,33 @@ class CustomerNotification extends BaseModel
         'date_modified',
     ];
 
+    protected $rules = [
+        /** @see validate() */
+        'customer_id' => [
+            'checks' => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Customer ID is not Integer!'],
+                'min' => ['default_text' => 'Customer ID value must be greater than zero'],
+                'max' => ['default_text' => 'Customer ID must be less than 2147483647'],
+            ],
+        ],
+        'status' => [
+            'checks' => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Status is not Integer!'],
+                'min' => ['default_text' => 'Status value must be greater than zero'],
+                'max' => ['default_text' => 'Status must be less than 2147483647'],
+            ],
+        ],
+    ];
     protected $touches = ['customer'];
 
     public function customer()

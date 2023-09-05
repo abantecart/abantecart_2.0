@@ -52,23 +52,28 @@ class CustomList extends BaseModel
         'data_type',
         'id',
         'store_id',
-        'sort_order'
+        'sort_order',
     ];
 
     protected $rules = [
         /** @see validate() */
         'custom_block_id' => [
-            'checks'   => [
+            'checks' => [
                 'int',
                 'required',
-                'sometimes'
+                'sometimes',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => ['default_text' => 'Block ID is empty!'],
+                'int' => ['default_text' => 'Block ID is not integer!'],
+                'max' => ['default_text' => 'Block ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Block ID value must be greater than zero'],
+                'required' => ['default_text' => 'Block ID required']
             ]
         ],
-        'data_type'       => [
-            'checks'   => [
+        'data_type' => [
+            'checks' => [
                 'string',
                 'max:70'
             ],
@@ -76,28 +81,41 @@ class CustomList extends BaseModel
                 '*' => ['default_text' => 'Data Type is empty or have length greater than 70 chars!'],
             ]
         ],
-        'id'              => [
-            'checks'   => [
-                'int'
+        'id' => [
+            'checks' => [
+                'int',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => ['default_text' => 'List Item ID is empty!'],
+                'int' => ['default_text' => 'List Item ID is not integer!'],
+                'max' => ['default_text' => 'List Item ID must be less than 2147483647'],
+                'min' => ['default_text' => 'List Item ID value must be greater than zero'],
             ]
         ],
-        'store_id'        => [
-            'checks'   => [
-                'int'
+        'store_id' => [
+            'checks' => [
+                'int',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => ['default_text' => 'Store ID is not integer!'],
+                'int' => ['default_text' => 'Store ID is not integer!'],
+                'max' => ['default_text' => 'Store ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Store ID value must be greater than zero'],
+
             ]
         ],
-        'sort_order'      => [
-            'checks'   => [
-                'int'
+        'sort_order' => [
+            'checks' => [
+                'int',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => ['default_text' => 'Sort order is not integer!'],
+                'int' => ['default_text' => 'Sort order is not integer!'],
+                'max' => ['default_text' => 'Sort order must be less than 2147483647'],
+                'min' => ['default_text' => 'Sort order value must be greater than zero'],
             ]
         ],
     ];

@@ -1,4 +1,21 @@
 <?php
+/**
+ * AbanteCart, Ideal Open Source Ecommerce Solution
+ * https://www.abantecart.com
+ *
+ * Copyright (c) 2011-2023  Belavier Commerce LLC
+ *
+ * This source file is subject to Open Software License (OSL 3.0)
+ * License details is bundled with this package in the file LICENSE.txt.
+ * It is also available at this URL:
+ * <https://www.opensource.org/licenses/OSL-3.0>
+ *
+ * UPGRADE NOTE:
+ * Do not edit or add to this file if you wish to upgrade AbanteCart to newer
+ * versions in the future. If you wish to customize AbanteCart for your
+ * needs please refer to https://www.abantecart.com for more information.
+ */
+
 namespace Tests\unit\core\engine;
 
 use abc\core\engine\ALanguage;
@@ -10,19 +27,25 @@ use Tests\unit\ATestCase;
  */
 class LanguageTest extends ATestCase{
 
+    protected function setUp(): void
+    {
+        Registry::config()->set('config_cache', 0);
+    }
 
-//    protected function setUp():void
-//    {
-//        //init
-//    }
-//
-//    public function testLoadFromDb(){
-//
-//        Registry::config()->set('config_cache', 0);
-//        //let use sf language
-//        $language = new ALanguage(Registry::getInstance(), 'en');
-//        $language->load('tims/tims');
-//        $text = $language->get('tims_text_activate_account');
-//        var_Dump($text);
-//    }
+    public function testLoadFromDb()
+    {
+        //let use sf language
+        $language = new ALanguage(Registry::getInstance(), 'en');
+        $language->load('english');
+        $this->assertEquals('en', $language->get('code'));
+
+        $row = Registry::db()->table('language_definitions')->where(
+            [
+                'section'      => 1,
+                'block'        => 'english',
+                'language_key' => 'code'
+            ]
+        )->first();
+        $this->assertEquals('en', $row->language_value);
+    }
 }

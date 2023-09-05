@@ -71,27 +71,39 @@ class ContentDescription extends BaseModel
 
     protected $rules = [
 
-        'content_id'       => [
-            'checks'   => [
+        'content_id' => [
+            'checks' => [
                 'integer',
                 'required',
-                'sometimes'
+                'sometimes',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => ['default_text' => 'Content ID is not Integer!'],
+                'integer' => ['default_text' => 'Content ID is not Integer!'],
+                'max' => ['default_text' => 'Content ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Content ID value must be greater than zero'],
+                'required' => ['default_text' => 'Content ID required']
+
             ],
         ],
-        'language_id'      => [
-            'checks'   => [
+        'language_id' => [
+            'checks' => [
                 'integer',
-                'required'
+                'required',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => ['default_text' => 'Language ID is not Integer!'],
+                'integer' => ['default_text' => 'Language ID is not Integer!'],
+                'max' => ['default_text' => 'Category ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Content ID value must be greater than zero'],
+                'required' => ['default_text' => 'Content ID required']
+
             ],
         ],
-        'name'             => [
-            'checks'   => [
+        'name' => [
+            'checks' => [
                 'required',
                 'sometimes',
                 'string',
@@ -103,8 +115,8 @@ class ContentDescription extends BaseModel
                 ],
             ],
         ],
-        'title'            => [
-            'checks'   => [
+        'title' => [
+            'checks' => [
                 'string',
                 'max:255',
                 'required',
@@ -116,8 +128,8 @@ class ContentDescription extends BaseModel
                 ],
             ],
         ],
-        'description'      => [
-            'checks'   => [
+        'description' => [
+            'checks' => [
                 'string',
                 'max:255',
             ],
@@ -127,8 +139,8 @@ class ContentDescription extends BaseModel
                 ],
             ],
         ],
-        'meta_keywords'    => [
-            'checks'   => [
+        'meta_keywords' => [
+            'checks' => [
                 'string',
                 'max:255',
             ],
@@ -139,7 +151,7 @@ class ContentDescription extends BaseModel
             ],
         ],
         'meta_description' => [
-            'checks'   => [
+            'checks' => [
                 'string',
                 'max:255',
             ],
@@ -149,8 +161,8 @@ class ContentDescription extends BaseModel
                 ],
             ],
         ],
-        'content'          => [
-            'checks'   => [
+        'content' => [
+            'checks' => [
                 'required',
                 'sometimes',
                 'string',

@@ -60,7 +60,8 @@ class CountryDescription extends BaseModel
                 'integer',
                 'required',
                 'sometimes',
-                'min:1'
+                'min:1',
+                'max:2147483647'
             ],
             'messages' => [
                 'integer' => [
@@ -81,6 +82,7 @@ class CountryDescription extends BaseModel
                     'default_text' => 'id must be more 0!',
                     'section' => 'admin'
                 ],
+                'max' => ['default_text' => 'ID must be less than 2147483647']
             ],
         ],
         'name' => [
@@ -123,7 +125,8 @@ class CountryDescription extends BaseModel
                 'integer',
                 'required',
                 'sometimes',
-                'min:1'
+                'min:1',
+                'max:2147483647'
             ],
             'messages' => [
                 'integer' => [
@@ -144,6 +147,7 @@ class CountryDescription extends BaseModel
                     'default_text' => 'language_id must be more 0!',
                     'section' => 'admin'
                 ],
+                'max' => ['default_text' => 'Language ID must be less than 2147483647']
             ],
         ]
     ];

@@ -3,7 +3,7 @@
  * AbanteCart, Ideal Open Source Ecommerce Solution
  * http://www.abantecart.com
  *
- * Copyright 2011-2022 Belavier Commerce LLC
+ * Copyright 2011-2023 Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
@@ -26,9 +26,7 @@ use abc\models\content\ContentsToStore;
 use abc\models\customer\Customer;
 use abc\models\order\Order;
 use abc\models\user\UserNotification;
-use Dyrynda\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class Store
@@ -43,8 +41,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Store extends BaseModel
 {
-    use SoftDeletes, CascadeSoftDeletes;
-
     protected $cascadeDeletes = [
         'descriptions',
         'categories',
@@ -66,6 +62,21 @@ class Store extends BaseModel
         'name',
         'alias',
         'status',
+    ];
+    protected $rules = [
+        /** @see validate() */
+        'status' => [
+            'checks' => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Status is not integer!'],
+                'max' => ['default_text' => 'Status must be less than 2147483647'],
+                'min' => ['default_text' => 'Status value must be greater than zero'],
+            ],
+        ]
     ];
 
     public function categories()

@@ -44,6 +44,34 @@ class GlobalAttributesGroupsDescription extends BaseModel
         'language_id'        => 'int',
     ];
 
+    protected $rules = [
+        /** @see validate() */
+        'language_id' => [
+            'checks' => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Language ID is not Integer!'],
+                'min' => ['default_text' => 'Language ID value must be greater than zero'],
+                'max' => ['default_text' => 'Language ID must be less than 2147483647']
+            ],
+        ],
+        'attribute_group_id' => [
+            'checks' => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Attribute group ID is not Integer!'],
+                'min' => ['default_text' => 'Attribute group ID value must be greater than zero'],
+                'max' => ['default_text' => 'Attribute group ID must be less than 2147483647']
+            ],
+        ]
+    ];
+
     protected $fillable = [
         'name',
     ];

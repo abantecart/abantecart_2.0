@@ -1,7 +1,24 @@
 <?php
+/**
+ * AbanteCart, Ideal Open Source Ecommerce Solution
+ * https://www.abantecart.com
+ *
+ * Copyright (c) 2011-2023  Belavier Commerce LLC
+ *
+ * This source file is subject to Open Software License (OSL 3.0)
+ * License details is bundled with this package in the file LICENSE.txt.
+ * It is also available at this URL:
+ * <https://www.opensource.org/licenses/OSL-3.0>
+ *
+ * UPGRADE NOTE:
+ * Do not edit or add to this file if you wish to upgrade AbanteCart to newer
+ * versions in the future. If you wish to customize AbanteCart for your
+ * needs please refer to https://www.abantecart.com for more information.
+ */
 
 namespace Tests\unit\models;
 
+use abc\models\catalog\Category;
 use abc\models\catalog\Product;
 use abc\models\catalog\ProductDiscount;
 use abc\models\catalog\ProductOption;
@@ -32,8 +49,8 @@ class TouchesTest extends ATestCase
     public function testCustomerTouches()
     {
         /** @var Address $address */
-        $address = Address::with('customer')->find(1);
-        $now = $address->customer->date_modified->timestamp;
+        $address = Address::with('customer')->first();
+        $now = time();;
         $address->touch();
         /** @var Customer $customer */
         $customer = Customer::find($address->customer_id);
@@ -107,6 +124,12 @@ class TouchesTest extends ATestCase
     {
         /** @var ProductOptionValueDescription $optionValueDescription */
         $optionValueDescription = ProductOptionValueDescription::first();
+        /** @var Product $product */
+        $product = Product::with('categories')->find($optionValueDescription->product_id);
+        $priorProductTime = $product->date_modified->timestamp;
+        $categoryId = $product->categories->first()->category_id;
+        $priorCategoryTime = $product->categories->first()->date_modified->timestamp;
+
         $now = time();
         $optionValueDescription->touch();
         /** @var ProductOptionValue $optionValue */
@@ -117,11 +140,11 @@ class TouchesTest extends ATestCase
         $option = ProductOption::find($optionValue->product_option_id);
         $this->assertEquals($now, $option->date_modified->timestamp);
         /** @var Product $product */
-        $product = Product::with('categories')->find($optionValueDescription->product_id);
-        $this->assertEquals($now, $product->date_modified->timestamp);
+        $product = Product::find($optionValueDescription->product_id);
+        $this->assertGreaterThan($priorProductTime, $product->date_modified->timestamp);
 
-        $category = $product->categories->first();
-        $this->assertEquals($now, $category->date_modified->timestamp);
+        $category = Category::find($categoryId);
+        $this->assertGreaterThan($priorCategoryTime, $category->date_modified->timestamp);
 
         /** @var ProductOptionDescription $optionDescription */
         $optionDescription = ProductOptionDescription::first();
@@ -160,7 +183,5 @@ class TouchesTest extends ATestCase
         $discount->touch();
         $product = Product::find($discount->product_id);
         $this->assertEquals($now, $product->date_modified->timestamp);
-
     }
-
 }

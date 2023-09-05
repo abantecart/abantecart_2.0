@@ -50,7 +50,45 @@ class DatasetValue extends BaseModel
         'row_id'            => 'int',
         'value_timestamp' => 'datetime'
     ];
-
+    protected $rules = [
+        /** @see validate() */
+        'dataset_column_id' => [
+            'checks' => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => ':attribute is not integer!'],
+                'max' => ['default_text' => ':attribute must be less than 2147483647'],
+                'min' => ['default_text' => ':attribute value must be greater than zero'],
+            ],
+        ],
+        'value_integer' => [
+            'checks' => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => ':attribute is not integer or does not exists in the table "orders"!'],
+                'max' => ['default_text' => ':attribute must be less than 2147483647'],
+                'min' => ['default_text' => ':attribute value must be greater than zero'],
+            ],
+        ],
+        'row_id' => [
+            'checks' => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => ':attribute is not integer or does not exists in the table "orders"!'],
+                'max' => ['default_text' => ':attribute must be less than 2147483647'],
+                'min' => ['default_text' => ':attribute value must be greater than zero'],
+            ],
+        ],
+    ];
     protected $fillable = [
         'dataset_column_id',
         'value_integer',

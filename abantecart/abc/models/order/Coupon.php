@@ -83,7 +83,7 @@ class Coupon extends BaseModel
     protected $rules = [
         /** @see validate() */
         'code' => [
-            'checks'   => [
+            'checks' => [
                 'string',
                 'sometimes',
                 'required',
@@ -91,16 +91,16 @@ class Coupon extends BaseModel
             ],
             'messages' => [
                 '*' => [
-                    'language_key'   => 'error_code',
+                    'language_key' => 'error_code',
                     'language_block' => 'sale/coupon',
-                    'default_text'   => 'Coupon Code must be between 2 and 10 characters!',
-                    'section'        => 'admin',
+                    'default_text' => 'Coupon Code must be between 2 and 10 characters!',
+                    'section' => 'admin',
                 ],
             ],
         ],
 
         'type' => [
-            'checks'   => [
+            'checks' => [
                 'string',
                 'required',
                 'max:1',
@@ -113,7 +113,7 @@ class Coupon extends BaseModel
         ],
 
         'discount' => [
-            'checks'   => [
+            'checks' => [
                 'numeric',
             ],
             'messages' => [
@@ -123,8 +123,8 @@ class Coupon extends BaseModel
             ],
         ],
 
-        'logged'   => [
-            'checks'   => [
+        'logged' => [
+            'checks' => [
                 'boolean',
             ],
             'messages' => [
@@ -134,7 +134,7 @@ class Coupon extends BaseModel
             ],
         ],
         'shipping' => [
-            'checks'   => [
+            'checks' => [
                 'boolean',
             ],
             'messages' => [
@@ -145,7 +145,7 @@ class Coupon extends BaseModel
         ],
 
         'total' => [
-            'checks'   => [
+            'checks' => [
                 'numeric',
             ],
             'messages' => [
@@ -156,7 +156,7 @@ class Coupon extends BaseModel
         ],
 
         'date_start' => [
-            'checks'   => [
+            'checks' => [
                 'date',
                 'nullable',
             ],
@@ -166,8 +166,8 @@ class Coupon extends BaseModel
                 ],
             ],
         ],
-        'date_end'   => [
-            'checks'   => [
+        'date_end' => [
+            'checks' => [
                 'date',
                 'nullable',
             ],
@@ -178,33 +178,39 @@ class Coupon extends BaseModel
             ],
         ],
 
-        'uses_total'    => [
-            'checks'   => [
+        'uses_total' => [
+            'checks' => [
                 'int',
                 'sometimes',
                 'required',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => 'Total coupon usage count is not integer!',
-                ],
+                'int' => ['default_text' => 'Total coupon usage count is not integer!'],
+                'max' => ['default_text' => 'Total coupon usage count must be less than 2147483647'],
+                'min' => ['default_text' => 'Total coupon usage count value must be greater than zero'],
+                'required' => ['default_text' => 'Total coupon usage count required']
             ],
         ],
         'uses_customer' => [
-            'checks'   => [
+            'checks' => [
                 'integer',
                 'sometimes',
                 'required',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => 'Total coupon usage count is not integer!',
-                ],
+                'integer' => ['default_text' => 'Total coupon usage count is not integer!'],
+                'max' => ['default_text' => 'Total coupon usage count must be less than 2147483647'],
+                'min' => ['default_text' => 'Total coupon usage count value must be greater than zero'],
+                'required' => ['default_text' => 'Total coupon usage count required']
             ],
         ],
 
         'status' => [
-            'checks'   => [
+            'checks' => [
                 'boolean',
             ],
             'messages' => [

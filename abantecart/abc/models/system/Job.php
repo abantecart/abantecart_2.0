@@ -69,4 +69,56 @@ class Job extends BaseModel
         'date_added',
         'date_modified',
     ];
+
+    protected $rules = [
+        /** @see validate() */
+        'status' => [
+            'checks' => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Status is not integer!'],
+                'max' => ['default_text' => 'Status must be less than 2147483647'],
+                'min' => ['default_text' => 'Status value must be greater than zero'],
+            ],
+        ],
+        'last_result' => [
+            'checks' => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Last Result is not integer!'],
+                'max' => ['default_text' => 'Last Result must be less than 2147483647'],
+                'min' => ['default_text' => 'Last Result value must be greater than zero'],
+            ],
+        ],
+        'actor_type' => [
+            'checks' => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Actor Type is not integer!'],
+                'max' => ['default_text' => 'Actor Type must be less than 2147483647'],
+                'min' => ['default_text' => 'Actor Type value must be greater than zero'],
+            ],
+        ],
+        'actor_id' => [
+            'checks' => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Actor ID is not integer!'],
+                'max' => ['default_text' => 'Actor ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Actor ID value must be greater than zero'],
+            ],
+        ],
+    ];
 }

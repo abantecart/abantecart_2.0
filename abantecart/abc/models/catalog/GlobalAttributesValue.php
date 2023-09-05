@@ -52,7 +52,33 @@ class GlobalAttributesValue extends BaseModel
         'attribute_id',
         'sort_order',
     ];
-
+    protected $rules = [
+        /** @see validate() */
+        'attribute_id' => [
+            'checks' => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Attribute ID is not Integer!'],
+                'min' => ['default_text' => 'Attribute ID value must be greater than zero'],
+                'max' => ['default_text' => 'Attribute ID must be less than 2147483647'],
+            ],
+        ],
+        'sort_order' => [
+            'checks' => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Sort Order is not Integer!'],
+                'min' => ['default_text' => 'Sort Order value must be greater than zero'],
+                'max' => ['default_text' => 'Sort Order must be less than 2147483647'],
+            ],
+        ],
+    ];
     public function attribute()
     {
         return $this->belongsTo(GlobalAttribute::class, 'attribute_value_id');

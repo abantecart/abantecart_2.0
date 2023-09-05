@@ -1,4 +1,21 @@
 <?php
+/**
+ * AbanteCart, Ideal Open Source Ecommerce Solution
+ * https://www.abantecart.com
+ *
+ * Copyright (c) 2011-2023  Belavier Commerce LLC
+ *
+ * This source file is subject to Open Software License (OSL 3.0)
+ * License details is bundled with this package in the file LICENSE.txt.
+ * It is also available at this URL:
+ * <https://www.opensource.org/licenses/OSL-3.0>
+ *
+ * UPGRADE NOTE:
+ * Do not edit or add to this file if you wish to upgrade AbanteCart to newer
+ * versions in the future. If you wish to customize AbanteCart for your
+ * needs please refer to https://www.abantecart.com for more information.
+ */
+
 namespace Tests\unit\models\catalog;
 
 use abc\models\catalog\ProductOption;
@@ -10,8 +27,6 @@ use Tests\unit\ATestCase;
  * Class ProductOptionModelTest
  */
 class ProductOptionModelTest extends ATestCase{
-
-
     public function testValidator()
     {
         $productOption = new ProductOption();
@@ -50,7 +65,6 @@ class ProductOptionModelTest extends ATestCase{
             $productOption->validate( $data );
         } catch (ValidationException $e) {
             $errors = $productOption->errors()['validation'];
-            var_Dump($errors);
         }
         $this->assertCount(0, $errors);
     }
@@ -91,7 +105,8 @@ class ProductOptionModelTest extends ATestCase{
         $optionCheckData['product_option_value_id'] = $valueId;
         unset($optionCheckData['descriptions']);
         $diff = array_diff_assoc($optionCheckData, $optionValue->toArray());
-        $this->assertGreaterThan(0, count($diff));
+        $this->assertCount(0, $diff);
+
         $this->assertEquals($data['descriptions'][1]['name'], $optionValue->description->name);
         $optionValue->forceDelete();
 
@@ -123,7 +138,7 @@ class ProductOptionModelTest extends ATestCase{
         $optionCheckData['product_option_value_id'] = $valueId;
         unset($optionCheckData['descriptions']);
         $diff = array_diff_assoc($optionCheckData, $optionValue->toArray());
-        $this->assertGreaterThan(0, count($diff));
+        $this->assertCount(0, $diff);
         $this->assertEquals($data['description']['name'], $optionValue->description->name);
         $optionValue->forceDelete();
 
@@ -206,7 +221,7 @@ class ProductOptionModelTest extends ATestCase{
         $optionCheckData = $data;
         $optionCheckData['product_option_value_id'] = $valueId;
         $diff = array_diff_assoc($optionCheckData, $optionValue->toArray());
-        $this->assertGreaterThan(0, count($diff));
+        $this->assertCount(0, $diff);
         $this->assertEquals('1.7 oz', $optionValue->description->name);
 
         $optionValue->forceDelete();

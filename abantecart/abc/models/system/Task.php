@@ -15,6 +15,7 @@
  * versions in the future. If you wish to customize AbanteCart for your
  * needs please refer to http://www.abantecart.com for more information.
  */
+
 namespace abc\models\system;
 
 use abc\models\BaseModel;
@@ -46,17 +47,17 @@ class Task extends BaseModel
     protected $primaryKey = 'task_id';
 
     protected $casts = [
-        'name'               => 'string',
-        'starter'            => 'int',
-        'status'             => 'int',
-        'start_time'         => 'datetime',
-        'last_time_run'      => 'datetime',
-        'progress'           => 'int',
-        'last_result'        => 'int',
-        'run_interval'       => 'int',
+        'name' => 'string',
+        'starter' => 'int',
+        'status' => 'int',
+        'start_time' => 'datetime',
+        'last_time_run' => 'datetime',
+        'progress' => 'int',
+        'last_result' => 'int',
+        'run_interval' => 'int',
         'max_execution_time' => 'int',
-        'date_added'         => 'datetime',
-        'date_modified'      => 'datetime'
+        'date_added' => 'datetime',
+        'date_modified' => 'datetime'
     ];
 
     protected $fillable = [
@@ -69,5 +70,81 @@ class Task extends BaseModel
         'last_result',
         'run_interval',
         'max_execution_time'
+    ];
+    protected $rules = [
+        /** @see validate() */
+        'starter' => [
+            'checks' => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Starter is not integer!'],
+                'max' => ['default_text' => 'Starter must be less than 2147483647'],
+                'min' => ['default_text' => 'Starter value must be greater than zero'],
+            ],
+        ],
+        'status' => [
+            'checks' => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Status is not integer!'],
+                'max' => ['default_text' => 'Status must be less than 2147483647'],
+                'min' => ['default_text' => 'Status value must be greater than zero'],
+            ],
+        ],
+        'progress' => [
+            'checks' => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Progress is not integer!'],
+                'max' => ['default_text' => 'Progress must be less than 2147483647'],
+                'min' => ['default_text' => 'Progress value must be greater than zero'],
+            ],
+        ],
+        'last_result' => [
+            'checks' => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Last Result is not integer!'],
+                'max' => ['default_text' => 'Last Result must be less than 2147483647'],
+                'min' => ['default_text' => 'Last Result value must be greater than zero'],
+            ],
+        ],
+        'run_interval' => [
+            'checks' => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Run Interval is not integer!'],
+                'max' => ['default_text' => 'Run Interval must be less than 2147483647'],
+                'min' => ['default_text' => 'Run Interval value must be greater than zero'],
+            ],
+        ],
+        'max_execution_time' => [
+            'checks' => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Max Execution Time is not integer!'],
+                'max' => ['default_text' => 'Max Execution Time must be less than 2147483647'],
+                'min' => ['default_text' => 'Max Execution Time value must be greater than zero'],
+            ],
+        ],
+
     ];
 }

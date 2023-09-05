@@ -73,44 +73,50 @@ class ProductSpecial extends BaseModel
     protected $rules = [
         /** @see validate() */
         'product_id' => [
-            'checks'   => [
+            'checks' => [
                 'integer',
                 'sometimes',
                 'required',
                 'exists:products',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => ['default_text' => 'Product ID is not Integer or absent in the products table!'],
+                'integer' => ['default_text' => 'Product ID is not Integer'],
+                'max' => ['default_text' => 'Product ID must be less than 2147483647'],
+                'exist' => ['default_text' => 'Product ID absent in the products table!']
             ],
         ],
 
         'customer_group_id' => [
-            'checks'   => [
+            'checks' => [
                 'integer',
                 'sometimes',
                 'required',
                 'exists:customer_groups',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => 'Customer Group ID must be an integer or NULL or presents in the customer_groups table!',
-                ],
+                'integer' => ['default_text' => 'Customer Group ID must be an integer'],
+                'max' => ['default_text' => 'Customer Group ID must be less than 2147483647'],
+                'exist' => ['default_text' => 'Customer Group ID absent in the customer_groups table!']
             ],
         ],
 
         'priority' => [
-            'checks'   => [
+            'checks' => [
                 'integer',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => 'Priority must be an integer!',
-                ],
+                'integer' => ['default_text' => 'Priority must be an integer!'],
+                'max' => ['default_text' => 'Priority must be less than 2147483647'],
+                'min' => ['default_text' => 'Priority value must be greater than zero'],
             ],
         ],
 
         'price' => [
-            'checks'   => [
+            'checks' => [
                 'numeric',
             ],
             'messages' => [
@@ -121,7 +127,7 @@ class ProductSpecial extends BaseModel
         ],
 
         'date_start' => [
-            'checks'   => [
+            'checks' => [
                 'date_format:Y-m-d H:i:s',
                 'nullable',
             ],
@@ -133,7 +139,7 @@ class ProductSpecial extends BaseModel
         ],
 
         'date_end' => [
-            'checks'   => [
+            'checks' => [
                 'date_format:Y-m-d H:i:s',
                 'nullable',
             ],

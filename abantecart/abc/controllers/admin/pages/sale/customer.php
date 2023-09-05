@@ -1005,7 +1005,7 @@ class ControllerPagesSaleCustomer extends AController
             'sale/customer/update_address',
             '&customer_id=' . $customer_id
         );
-        $this->data['category_products'] = $this->html->getSecureURL('product/product/category');
+
         $this->data['common_zone'] = $this->html->getSecureURL('common/zone');
 
         if (!H::has_value($address_id)) {

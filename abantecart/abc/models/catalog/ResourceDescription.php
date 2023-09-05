@@ -44,6 +44,38 @@ class ResourceDescription extends BaseModel
         'date_modified' => 'datetime'
     ];
 
+    protected $rules = [
+        /** @see validate() */
+        'resource_id' => [
+            'checks' => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Resource ID is not Integer!'],
+                'min' => ['default_text' => 'Resource ID value must be greater than zero'],
+                'max' => ['default_text' => 'Resource ID must be less than 2147483647'],
+            ],
+        ],
+        'language_id' => [
+            'checks' => [
+                'integer',
+                'required',
+                'exists:languages',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Language ID is not Integer!'],
+                'exists' => ['default_text' => 'Language ID absent in languages table!'],
+                'max' => ['default_text' => 'Language ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Language ID value must be greater than zero'],
+                'required' => ['default_text' => 'Language ID required']
+            ],
+        ],
+    ];
+
     protected $fillable = [
         'name',
         'title',

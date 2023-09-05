@@ -343,18 +343,11 @@ class Manufacturer extends BaseModel
         return $output;
     }
 
-    public function deleteManufacturer($manufacturer_id)
+    public static function deleteManufacturer(int $manufacturer_id)
     {
         if (!(int)$manufacturer_id) {
             return false;
         }
-        $manufacturer = self::find((int)$manufacturer_id);
-        $manufacturer?->delete();
-
-        Registry::db()->table('manufacturers_to_stores')
-            ->where('manufacturer_id', '=', (int)$manufacturer_id)
-            ->delete();
-
 
         //delete resources
         try {
@@ -372,7 +365,14 @@ class Manufacturer extends BaseModel
                     $rm->deleteResource($r['resource_id']);
                 }
             }
+
+            Registry::db()->table('manufacturers_to_stores')
+                ->where('manufacturer_id', '=', $manufacturer_id)
+                ->delete();
+            $manufacturer = self::find((int)$manufacturer_id);
+            $manufacturer?->delete();
         } catch (Exception $e) {
+            Registry::log()->critical($e->getMessage());
         }
 
         Registry::cache()->flush('manufacturer');

@@ -63,6 +63,11 @@ class ModelReportViewed extends Model {
 		return $product_data;
 	}
 
+    /**
+     * @return void
+     * @throws \Exception
+     * @deprecated DO NOT USE!
+     */
 	public function reset() {
 		$this->db->query("UPDATE " . $this->db->table_name("products") . " SET viewed = '0'");
 	}

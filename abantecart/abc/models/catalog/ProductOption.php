@@ -3,7 +3,7 @@
  * AbanteCart, Ideal Open Source Ecommerce Solution
  * http://www.abantecart.com
  *
- * Copyright 2011-2022 Belavier Commerce LLC
+ * Copyright 2011-2023 Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
@@ -22,6 +22,7 @@ namespace abc\models\catalog;
 use abc\core\ABC;
 use abc\core\engine\HtmlElementFactory;
 use abc\core\engine\Registry;
+use abc\core\lib\AException;
 use abc\core\lib\AResourceManager;
 use abc\core\lib\AttributeManager;
 use abc\models\BaseModel;
@@ -31,12 +32,11 @@ use Exception;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Dyrynda\Database\Support\CascadeSoftDeletes;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\Rule;
 use Psr\SimpleCache\InvalidArgumentException;
+use ReflectionException;
 
 /**
  * Class ProductOption
@@ -96,47 +96,65 @@ class ProductOption extends BaseModel
 
     protected $rules = [
         /** @see validate() */
-        'product_id'   => [
-            'checks'   => [
+        'product_id' => [
+            'checks' => [
                 'integer',
                 'required',
                 'exists:products',
+                'max:2147483647',
+                'min:0',
             ],
             'messages' => [
-                '*' => ['default_text' => 'Product ID is not Integer or absent in the products table!'],
+                'integer' => ['default_text' => 'Product ID is not Integer!'],
+                'exists' => ['default_text' => 'Product ID absent in products table!'],
+                'max' => ['default_text' => 'Product ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Product ID value must be greater than zero'],
+                'required' => ['default_text' => 'Product ID required']
             ],
         ],
         'attribute_id' => [
-            'checks'   => [
+            'checks' => [
                 'integer',
                 'nullable',
                 'exists:global_attributes',
+                'max:2147483647',
+                'min:0',
             ],
             'messages' => [
-                '*' => ['default_text' => 'Attribute ID is not Integer or not presents in global_attributes table!'],
+                'integer' => ['default_text' => 'Attribute ID is not Integer'],
+                'exists' => ['default_text' => 'Attribute ID not presents in global_attributes table!'],
+                'max' => ['default_text' => 'Attribute ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Attribute ID value must be greater than zero'],
+                'required' => ['default_text' => 'Attribute ID required']
             ],
         ],
-        'group_id'     => [
-            'checks'   => [
+        'group_id' => [
+            'checks' => [
                 'integer',
                 'nullable',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => ['default_text' => 'Group ID is not integer!'],
+                'integer' => ['default_text' => 'Group ID is not integer!'],
+                'max' => ['default_text' => 'Group ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Group ID value must be greater than zero'],
             ],
         ],
-        'sort_order'   => [
-            'checks'   => [
+        'sort_order' => [
+            'checks' => [
                 'integer',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => ':attribute is not integer!',
-                ],
+                'integer' => ['default_text' => ':attribute is not integer!'],
+                'min' => ['default_text' => ':attribute value must be greater than zero'],
+                'max' => ['default_text' => ':attribute must be less than 2147483647'],
             ],
         ],
-        'status'       => [
-            'checks'   => [
+        'status' => [
+            'checks' => [
                 'boolean',
             ],
             'messages' => [
@@ -147,7 +165,7 @@ class ProductOption extends BaseModel
         ],
 
         'element_type' => [
-            'checks'   => [
+            'checks' => [
                 'string',
                 'size:1',
                 /** @see __construct() method */
@@ -160,7 +178,7 @@ class ProductOption extends BaseModel
         ],
 
         'required' => [
-            'checks'   => [
+            'checks' => [
                 'boolean',
             ],
             'messages' => [
@@ -171,7 +189,7 @@ class ProductOption extends BaseModel
         ],
 
         'regexp_pattern' => [
-            'checks'   => [
+            'checks' => [
                 'string',
                 'nullable',
             ],
@@ -226,6 +244,8 @@ class ProductOption extends BaseModel
     /**
      * @return false|array
      * @throws InvalidArgumentException
+     * @throws ReflectionException
+     * @throws AException
      */
     public function getAllData()
     {
@@ -375,20 +395,20 @@ class ProductOption extends BaseModel
         if (is_array($inData['attribute_value_id'])) {
             //add children option values description from global attributes
             $group_description = [];
-            $descr_names = [];
-            foreach ($inData['attribute_value_id'] as $child_option_id => $attribute_value_id) {
+            $descriptionNames = [];
+            foreach ($inData['attribute_value_id'] as $attribute_value_id) {
                 #special insert for grouped options
                 foreach ($am->getAttributeValueDescriptions($attribute_value_id) as $language_id => $name) {
                     $group_description[$language_id][] = [
                         'attr_v_id' => $attribute_value_id,
                         'name'      => $name,
                     ];
-                    $descr_names[$language_id][] = $name;
+                    $descriptionNames[$language_id][] = $name;
                 }
             }
 
             // Insert generic merged name
-            foreach ($descr_names as $language_id => $name) {
+            foreach ($descriptionNames as $language_id => $name) {
                 ProductOptionValueDescription::create(
                     [
                         'product_id'              => $optionValue->product_id,
@@ -468,7 +488,7 @@ class ProductOption extends BaseModel
         } else {
             $inData['placeholder'] = $inData['option_placeholder'];
         }
-        /** @var ProductOption $option */
+
         $option = ProductOption::create($inData);
         $product_option_id = $option->getKey();
 
@@ -514,34 +534,38 @@ class ProductOption extends BaseModel
             return false;
         }
 
-        foreach ($inData['product_option_value_id'] as $valueId => $status) {
-            $option_value_data = [
-                'product_id'        => $inData['product_id'],
-                'product_option_id' => $inData['product_option_id'],
-                'default'           => ($inData['default_value'] == $valueId ? 1 : 0),
-            ];
+        $rowIndexes = array_keys($inData['product_option_value_id']);
+        $dataKeys = array_keys($inData);
 
-            foreach ($inData as $key => $value) {
-                if (is_array($value) && isset($value[$valueId])) {
-                    $option_value_data[$key] = $value[$valueId];
+        foreach ($rowIndexes as $rowIndex) {
+            $rowIndex = is_numeric($rowIndex) ? (int)$rowIndex : $rowIndex;
+
+            $status = $inData['product_option_value_id'][$rowIndex];
+            $option_value_data = [];
+            foreach ($dataKeys as $key) {
+                if (!is_array($inData[$key])) {
+                    $option_value_data[$key] = $inData[$key];
+                } elseif (isset($inData[$key][$rowIndex])) {
+                    $option_value_data[$key] = $inData[$key][$rowIndex];
                 }
             }
 
+            $option_value_data['default'] = ($inData['default_value'] == $rowIndex);
+
             //Check if new, delete or update
-            if ($status == 'delete' && !str_contains($valueId, 'new')) {
+            if ($status == 'delete' && !str_contains($rowIndex, 'new')) {
                 //delete this option value for all languages
                 /** @var ProductOptionValue $value */
-                $value = ProductOptionValue::find($valueId);
+                $value = ProductOptionValue::find($rowIndex);
                 $value?->forceDelete();
             } else {
                 if ($status == 'new') {
                     // Need to create new option value
-                    $inData = $option_value_data;
                     ProductOption::addProductOptionValueAndDescription($option_value_data);
                 } else {
                     //Existing need to update
                     static::updateProductOptionValueAndDescription(
-                        $valueId,
+                        $rowIndex,
                         $option_value_data);
                 }
             }
@@ -550,17 +574,17 @@ class ProductOption extends BaseModel
     }
 
     /**
-     * @param int $pd_opt_val_id
+     * @param int $productOptionValueId
      * @param array $inData
      *
      * @return void
      * @throws Exception
      */
-    public static function updateProductOptionValueAndDescription($pd_opt_val_id, $inData)
+    public static function updateProductOptionValueAndDescription($productOptionValueId, $inData)
     {
         $data = $inData;
-        $language_id = $data['language_id'] ?? static::$current_language_id;
-        $product_id = $data['product_id'];
+        $currentLanguageId = $data['language_id'] ?? static::$current_language_id;
+        $productId = $data['product_id'];
         if (is_array($data['attribute_value_id']) || !$data['attribute_value_id']) {
             unset($data['attribute_value_id']);
         } else {
@@ -578,50 +602,50 @@ class ProductOption extends BaseModel
         if (is_array($inData['attribute_value_id'])) {
             //update children option values from global attributes
             $groupData = [];
-            foreach ($inData['attribute_value_id'] as $child_option_id => $attr_val_id) {
+            foreach ($inData['attribute_value_id'] as $childOptionId => $attributeValueId) {
                 #special serialized data for grouped options
-                $groupData[$child_option_id] = [
-                    'attr_id'   => (int)$child_option_id,
-                    'attr_v_id' => (int)$attr_val_id,
+                $groupData[$childOptionId] = [
+                    'attr_id'   => (int)$childOptionId,
+                    'attr_v_id' => (int)$attributeValueId,
                 ];
             }
             $data['grouped_attribute_data'] = $groupData;
         }
 
-        $optionValue = ProductOptionValue::find($pd_opt_val_id);
+        $optionValue = ProductOptionValue::find($productOptionValueId);
         $optionValue?->update($data);
 
         if (is_array($inData['attribute_value_id'])) {
             //update children option values description from global attributes
-            $group_description = [];
-            $descr_names = [];
-            foreach ($data['attribute_value_id'] as $child_option_id => $attr_val_id) {
+            $groupDescription = [];
+            $descriptionNames = [];
+            foreach ($data['attribute_value_id'] as $attributeValueId) {
                 #special insert for grouped options
-                foreach ($am->getAttributeValueDescriptions($attr_val_id) as $lang_id => $name) {
-                    if ($language_id == $lang_id) {
-                        $group_description[$language_id][] = [
-                            'attr_v_id' => $attr_val_id,
+                foreach ($am->getAttributeValueDescriptions($attributeValueId) as $languageId => $name) {
+                    if ($currentLanguageId == $languageId) {
+                        $groupDescription[$currentLanguageId][] = [
+                            'attr_v_id' => $attributeValueId,
                             'name'      => $name,
                         ];
-                        $descr_names[$language_id][] = $name;
+                        $descriptionNames[$currentLanguageId][] = $name;
                     }
                 }
             }
             // update generic merged name
-            foreach ($descr_names as $lang_id => $name) {
-                if ($language_id == $lang_id && count($group_description[$language_id])) {
-                    $group_description[$language_id][] = $name;
+            foreach ($descriptionNames as $languageId => $name) {
+                if ($currentLanguageId == $languageId && count($groupDescription[$currentLanguageId])) {
+                    $groupDescription[$currentLanguageId][] = $name;
 
                     $upd = ['name' => implode(' / ', $name)];
-                    if ($group_description[$language_id]) {
+                    if ($groupDescription[$currentLanguageId]) {
                         //note: serialized data (array)
-                        $upd['grouped_attribute_names'] = $group_description[$language_id];
+                        $upd['grouped_attribute_names'] = $groupDescription[$currentLanguageId];
                     }
                     ProductOptionValueDescription::where(
                         [
-                            'product_id'              => $product_id,
-                            'product_option_value_id' => $pd_opt_val_id,
-                            'language_id'             => $language_id,
+                            'product_id'              => $productId,
+                            'product_option_value_id' => $productOptionValueId,
+                            'language_id'             => $currentLanguageId,
                         ]
                     )->update($upd);
                 }
@@ -630,9 +654,9 @@ class ProductOption extends BaseModel
             if (!$inData['attribute_value_id']) {
                 $exist = ProductOptionValueDescription::where(
                     [
-                        'product_id'              => $product_id,
-                        'product_option_value_id' => $pd_opt_val_id,
-                        'language_id'             => $language_id,
+                        'product_id'              => $productId,
+                        'product_option_value_id' => $productOptionValueId,
+                        'language_id'             => $currentLanguageId,
                     ]
                 )->first();
                 if ($exist) {
@@ -640,23 +664,23 @@ class ProductOption extends BaseModel
                 } else {
                     ProductOptionValueDescription::create(
                         [
-                            'product_id'              => $product_id,
-                            'product_option_value_id' => $pd_opt_val_id,
+                            'product_id'              => $productId,
+                            'product_option_value_id' => $productOptionValueId,
                             'name'                    => $data['name'],
-                            'language_id'             => $language_id,
+                            'language_id'             => $currentLanguageId,
                         ]
                     );
                 }
             } else {
                 $valueDescriptions = $am->getAttributeValueDescriptions((int)$inData['attribute_value_id']);
-                foreach ($valueDescriptions as $lang_id => $name) {
-                    if ($language_id == $lang_id) {
+                foreach ($valueDescriptions as $languageId => $name) {
+                    if ($currentLanguageId == $languageId) {
                         //Update only language that we currently work with
                         ProductOptionValueDescription::where(
                             [
-                                'product_id'              => $product_id,
-                                'product_option_value_id' => $pd_opt_val_id,
-                                'language_id'             => $language_id,
+                                'product_id'              => $productId,
+                                'product_option_value_id' => $productOptionValueId,
+                                'language_id'             => $currentLanguageId,
                             ]
                         )->update(['name' => $name]);
                     }

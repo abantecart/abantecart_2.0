@@ -1,28 +1,26 @@
 <?php
 /**
  * AbanteCart, Ideal Open Source Ecommerce Solution
- * http://www.abantecart.com
+ * https://www.abantecart.com
  *
- * Copyright 2011-2022 Belavier Commerce LLC
+ * Copyright (c) 2011-2023  Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
  * It is also available at this URL:
- * <http://www.opensource.org/licenses/OSL-3.0>
+ * <https://www.opensource.org/licenses/OSL-3.0>
  *
  * UPGRADE NOTE:
  * Do not edit or add to this file if you wish to upgrade AbanteCart to newer
  * versions in the future. If you wish to customize AbanteCart for your
- * needs please refer to http://www.abantecart.com for more information.
+ * needs please refer to https://www.abantecart.com for more information.
  */
 namespace abc\models\locale;
 
 use abc\models\BaseModel;
 use abc\models\system\TaxRate;
 use Carbon\Carbon;
-use Dyrynda\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class Location
@@ -40,24 +38,23 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Location extends BaseModel
 {
-    use SoftDeletes, CascadeSoftDeletes;
-
     protected $cascadeDeletes = ['tax_rates', 'zones_to_locations'];
 
     protected $primaryKey = 'location_id';
     public $timestamps = false;
 
     protected $casts = [
+        'location_id' => 'int',
         'date_added'    => 'datetime',
         'date_modified' => 'datetime'
     ];
 
     protected $fillable = [
+        'location_id',
         'name',
         'description',
         'date_added',
-        'date_modified',
-        'location_id'
+        'date_modified'
     ];
     protected $rules = [
         'location_id' => [
@@ -65,7 +62,8 @@ class Location extends BaseModel
                 'integer',
                 'required',
                 'sometimes',
-                'min:1'
+                'min:1',
+                'max:2147483647'
             ],
             'messages' => [
                 'integer' => [
@@ -86,6 +84,9 @@ class Location extends BaseModel
                     'default_text' => 'location id must be more 1!',
                     'section' => 'admin'
                 ],
+                'max' => [
+                    'default_text' => ':attribute Location ID must be less than :max'
+                ]
             ]
         ],
         'name' => [

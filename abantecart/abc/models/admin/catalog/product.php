@@ -29,6 +29,7 @@ use abc\core\lib\ALayoutManager;
 use abc\core\lib\AResourceManager;
 use abc\core\lib\contracts\AttributeManagerInterface;
 use abc\models\catalog\Category;
+use abc\models\catalog\Product;
 use abc\models\catalog\ProductOption;
 use abc\models\catalog\ProductOptionValueDescription;
 use abc\modules\events\ABaseEvent;
@@ -1085,7 +1086,7 @@ class ModelCatalogProduct extends Model
         $data = array_merge($data, ['product_special' => $this->getProductSpecials($product_id)]);
         $data = array_merge($data, ['product_download' => $this->getProductDownloads($product_id)]);
         $data = array_merge($data, ['product_category' => $this->getProductCategories($product_id)]);
-        $data = array_merge($data, ['product_store' => $this->getProductStores($product_id)]);
+        $data = array_merge($data, ['product_store' => Product::find($product_id)->getProductStores()->pluck('store_id')->toArray()]);
         $data = array_merge($data, ['product_related' => $this->getProductRelated($product_id)]);
         $data = array_merge($data, ['product_tags' => $this->getProductTags($product_id)]);
         $data = array_merge($data, ['keyword' => $this->getProductSEOKeywords($product_id)]);

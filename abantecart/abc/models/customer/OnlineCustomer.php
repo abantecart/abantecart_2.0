@@ -48,4 +48,20 @@ class OnlineCustomer extends BaseModel
         'referer',
         'date_added',
     ];
+
+    protected $rules = [
+        /** @see validate() */
+        'customer_id' => [
+            'checks' => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Customer ID is not Integer!'],
+                'min' => ['default_text' => 'Customer ID value must be greater than zero'],
+                'max' => ['default_text' => 'Customer ID must be less than 2147483647'],
+            ],
+        ],
+    ];
 }
