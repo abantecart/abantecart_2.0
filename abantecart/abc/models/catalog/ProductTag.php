@@ -51,28 +51,34 @@ class ProductTag extends BaseModel
 
     protected $rules = [
         /** @see validate() */
-        'product_id'  => [
-            'checks'   => [
+        'product_id' => [
+            'checks' => [
                 'integer',
                 'required',
                 'exists:products',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => ['default_text' => 'Product ID is not Integer or absent in products table!'],
+                'integer' => ['default_text' => 'Product ID is not Integer!'],
+                'exists' => ['default_text' => 'Product ID absent in products table!'],
+                'max' => ['default_text' => 'Product ID must be less than 2147483647'],
             ],
         ],
         'language_id' => [
-            'checks'   => [
+            'checks' => [
                 'integer',
                 'required',
                 'exists:languages',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => ['default_text' => 'Language ID is not Integer or not presents in languages table!'],
+                'integer' => ['default_text' => 'Language ID is not Integer!'],
+                'exists' => ['default_text' => 'Language ID absent in languages table!'],
+                'max' => ['default_text' => 'Language ID must be less than 2147483647'],
             ],
         ],
-        'tag'         => [
-            'checks'   => [
+        'tag' => [
+            'checks' => [
                 'string',
                 'required',
                 'max:32',

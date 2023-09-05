@@ -15,6 +15,7 @@
  * versions in the future. If you wish to customize AbanteCart for your
  * needs please refer to http://www.abantecart.com for more information.
  */
+
 namespace abc\models\user;
 
 use abc\models\BaseModel;
@@ -24,17 +25,17 @@ use Carbon\Carbon;
 /**
  * Class AntMessage
  *
- * @property string         $id
- * @property int            $priority
+ * @property string $id
+ * @property int $priority
  * @property Carbon $start_date
  * @property Carbon $end_date
  * @property Carbon $viewed_date
- * @property int            $viewed
- * @property string         $title
- * @property string         $description
- * @property string         $html
- * @property string         $url
- * @property string         $language_code
+ * @property int $viewed
+ * @property string $title
+ * @property string $description
+ * @property string $html
+ * @property string $url
+ * @property string $language_code
  * @property Carbon $date_modified
  *
  * @package abc\models
@@ -45,11 +46,11 @@ class AntMessage extends BaseModel
     public $timestamps = false;
 
     protected $casts = [
-        'priority'      => 'int',
-        'viewed'        => 'int',
-        'start_date'    => 'datetime',
-        'end_date'      => 'datetime',
-        'viewed_date'   => 'datetime',
+        'priority' => 'int',
+        'viewed' => 'int',
+        'start_date' => 'datetime',
+        'end_date' => 'datetime',
+        'viewed_date' => 'datetime',
         'date_modified' => 'datetime'
     ];
 
@@ -71,6 +72,34 @@ class AntMessage extends BaseModel
         'html',
         'url',
         'date_modified',
+    ];
+
+    protected $rules = [
+        /** @see validate() */
+        'priority' => [
+            'checks' => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Priority is not integer!'],
+                'max' => ['default_text' => 'Priority must be less than 2147483647'],
+                'min' => ['default_text' => 'Priority value must be greater than zero'],
+            ],
+        ],
+        'viewed' => [
+            'checks' => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Viewed is not integer!'],
+                'max' => ['default_text' => 'Viewed must be less than 2147483647'],
+                'min' => ['default_text' => 'Viewed value must be greater than zero'],
+            ],
+        ],
     ];
 
     public function __construct(array $attributes = [])

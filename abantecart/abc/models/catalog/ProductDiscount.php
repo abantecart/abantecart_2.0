@@ -73,55 +73,66 @@ class ProductDiscount extends BaseModel
     protected $rules = [
         /** @see validate() */
         'product_id' => [
-            'checks'   => [
+            'checks' => [
                 'integer',
                 'sometimes',
                 'required',
                 'exists:products',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => ['default_text' => 'Product ID is not Integer or absent in the products table!'],
+                'integer' => ['default_text' => 'Product ID is not Integer!'],
+                'exists' => ['default_text' => 'Product ID absent in products table!'],
+                'max' => ['default_text' => 'Product ID must be less than 2147483647'],
             ],
         ],
 
         'customer_group_id' => [
-            'checks'   => [
+            'checks' => [
                 'integer',
                 'sometimes',
                 'required',
+                'min:0',
                 'exists:customer_groups',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => 'Customer Group ID must be an integer or NULL or presents in the customer_groups table!',
-                ],
+                'integer' => ['default_text' => 'Customer Group ID must be an integer '],
+                'exists' => ['default_text' => 'Customer Group ID not presents in the customer_groups table!'],
+                'max' => ['default_text' => 'Customer Group ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Customer Group ID value must be greater than zero'],
+                'required' => ['default_text' => 'Customer Group ID required']
             ],
         ],
 
         'quantity' => [
-            'checks'   => [
+            'checks' => [
                 'integer',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => 'Product Discount Quantity must be an integer!',
-                ],
+                'integer' => ['default_text' => 'Product Discount Quantity must be an integer!'],
+                'min' => ['default_text' => 'Product Discount Quantity must be greater than zero'],
+                'max' => ['default_text' => 'Product Discount Quantity must be less than 2147483647'],
             ],
         ],
 
         'priority' => [
-            'checks'   => [
+            'checks' => [
                 'integer',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => 'Priority must be an integer!',
-                ],
+                'integer' => ['default_text' => 'Priority must be an integer!'],
+                'min' => ['default_text' => 'Priority must be greater than zero'],
+                'max' => ['default_text' => 'Priority must be less than 2147483647'],
             ],
         ],
 
         'price' => [
-            'checks'   => [
+            'checks' => [
                 'numeric',
             ],
             'messages' => [
@@ -132,7 +143,7 @@ class ProductDiscount extends BaseModel
         ],
 
         'date_start' => [
-            'checks'   => [
+            'checks' => [
                 'date_format:Y-m-d H:i:s',
                 'nullable',
             ],
@@ -144,7 +155,7 @@ class ProductDiscount extends BaseModel
         ],
 
         'date_end' => [
-            'checks'   => [
+            'checks' => [
                 'date_format:Y-m-d H:i:s',
                 'nullable',
             ],

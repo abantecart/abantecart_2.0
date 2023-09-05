@@ -1,19 +1,19 @@
 <?php
 /**
  * AbanteCart, Ideal Open Source Ecommerce Solution
- * http://www.abantecart.com
+ * https://www.abantecart.com
  *
- * Copyright 2011-2022 Belavier Commerce LLC
+ * Copyright (c) 2011-2023  Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
  * It is also available at this URL:
- * <http://www.opensource.org/licenses/OSL-3.0>
+ * <https://www.opensource.org/licenses/OSL-3.0>
  *
  * UPGRADE NOTE:
  * Do not edit or add to this file if you wish to upgrade AbanteCart to newer
  * versions in the future. If you wish to customize AbanteCart for your
- * needs please refer to http://www.abantecart.com for more information.
+ * needs please refer to https://www.abantecart.com for more information.
  */
 
 namespace abc\controllers\admin;
@@ -27,11 +27,13 @@ use abc\models\catalog\Category;
 use abc\models\catalog\Manufacturer;
 use abc\models\catalog\ObjectType;
 use abc\models\catalog\Product;
+use abc\models\catalog\ProductDescription;
 use abc\models\catalog\UrlAlias;
 use abc\models\QueryBuilder;
 use abc\models\system\Store;
 use abc\modules\traits\EditProductTrait;
 use H;
+use Illuminate\Validation\ValidationException;
 use Laracasts\Utilities\JavaScript\Transformers\Transformer;
 
 /**
@@ -432,16 +434,19 @@ class ControllerPagesCatalogProduct extends AController
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
         $this->document->setTitle($this->language->get('heading_title'));
-        if ($this->request->is_POST() && $this->validateForm($this->request->post)) {
-            try {
-                $product_data = $this->prepareData($this->request->post);
-                $product = Product::createProduct($product_data);
-                $this->data['product_id'] = $product->product_id;
-                $this->extensions->hk_ProcessData($this, 'product_insert');
-                $this->session->data['success'] = $this->language->get('text_success');
-                abc_redirect($this->html->getSecureURL('catalog/product/update', '&product_id=' . $product->product_id));
-            } catch (\Exception $e) {
-                $this->log->error($e->getMessage() . "\n" . $e->getTraceAsString());
+
+        if ($this->request->is_POST()) {
+            $post = $this->prepareData($this->request->post);
+            if ($this->validateForm($post)) {
+                try {
+                    $product = Product::createProduct($post);
+                    $this->data['product_id'] = $product->product_id;
+                    $this->extensions->hk_ProcessData($this, 'product_insert');
+                    $this->session->data['success'] = $this->language->get('text_success');
+                    abc_redirect($this->html->getSecureURL('catalog/product/update', '&product_id=' . $product->product_id));
+                } catch (\Exception $e) {
+                    $this->log->error($e->getMessage() . "\n" . $e->getTraceAsString());
+                }
             }
         }
 
@@ -471,14 +476,20 @@ class ControllerPagesCatalogProduct extends AController
             unset($this->session->data['success']);
         }
 
-        if ($this->request->is_POST() && $this->validateForm($this->request->post)) {
-            $product_data = $this->prepareData($this->request->post);
+        if ($this->request->is_POST()) {
+            $post = $this->prepareData($this->request->post);
             $product_id = $this->data['product_id'] = (int)$this->request->get['product_id'];
-            Product::updateProduct($product_id, $product_data);
+            if ($this->validateForm($post, $product_id)) {
+                Product::updateProduct($product_id, $post);
 
-            $this->extensions->hk_ProcessData($this, 'product_update');
-            $this->session->data['success'] = $this->language->get('text_success');
-            abc_redirect($this->html->getSecureURL('catalog/product/update', '&product_id=' . $product_id));
+                $this->extensions->hk_ProcessData($this, 'product_update');
+                $this->session->data['success'] = $this->language->get('text_success');
+                abc_redirect($this->html->getSecureURL('catalog/product/update', '&product_id=' . $product_id));
+            }
+        }
+
+        if (!($this->data['product_id'] ?: (int)$this->request->get['product_id'])) {
+            abc_redirect($this->html->getSecureURL('catalog/product/insert'));
         }
 
         // if (isset($this->data['oldForm']) && $this->data['oldForm'] === true) {
@@ -561,9 +572,9 @@ class ControllerPagesCatalogProduct extends AController
                 $product = [];
             }
 
-            $productStores = $this->db->table('products_to_stores')
+            $productStores = (array)$this->db->table('products_to_stores')
                                       ->where('product_id', '=', $product_id)
-                                      ->get()->toArray();
+                ->get()?->toArray();
             $product['product_store'] = array_column($productStores, 'store_id');
 
             $productCategories = $productInfo->categories;
@@ -670,7 +681,7 @@ class ControllerPagesCatalogProduct extends AController
         $contentLanguageId = $this->language->getContentLanguageID();
 
         $product_info = Product::getProductInfo($product_id);
-        if(!$product_info){
+        if (!$product_info && $product_id) {
            abc_redirect($this->html->getSecureURL('catalog/product'));
         }
 
@@ -686,15 +697,20 @@ class ControllerPagesCatalogProduct extends AController
 
         $this->loadLanguage('catalog/object_type');
 
-        $this->setBreadCrumbs($product_info);
+        $currentUrl = $currentText = '';
+        if (!$product_id) {
+            $currentUrl = $this->html->getSecureURL('catalog/product/insert');
+            $currentText = $this->language->get('text_insert') . ' ' . $this->language->get('text_product');
+        }
+        $this->setBreadCrumbs($product_info, $currentUrl, $currentText);
 
         $stores = Store::all()?->toArray();
         $this->data['stores'] = ['' => $this->language->get('text_default')]
-            + array_column($stores, 'name', 'store_id');
+            + array_column((array)$stores, 'name', 'store_id');
 
         $manufacturers = Manufacturer::all()?->toArray();
         $this->data['manufacturers'] = [0 => $this->language->get('text_none')];
-        $this->data['manufacturers'] += array_column($manufacturers, 'name', 'manufacturer_id');
+        $this->data['manufacturers'] += array_column((array)$manufacturers, 'name', 'manufacturer_id');
 
 
         $this->loadModel('localisation/stock_status');
@@ -740,7 +756,7 @@ class ControllerPagesCatalogProduct extends AController
         if (isset($this->request->post['product_category'])) {
             $this->data['product_category'] = $this->request->post['product_category'];
         } elseif (isset($product_info)) {
-            $this->data['product_category'] = array_column($product_info['categories'], 'category_id');
+            $this->data['product_category'] = array_column((array)$product_info['categories'], 'category_id');
         } else {
             $this->data['product_category'] = [];
         }
@@ -748,7 +764,7 @@ class ControllerPagesCatalogProduct extends AController
         if (isset($this->request->post['product_store'])) {
             $this->data['product_store'] = $this->request->post['product_store'];
         } elseif ($product_info) {
-            $this->data['product_store'] = array_column($product_info['stores'], 'store_id');
+            $this->data['product_store'] = array_column((array)$product_info['stores'], 'store_id');
         } else {
             $this->data['product_store'] = [0];
         }
@@ -765,7 +781,7 @@ class ControllerPagesCatalogProduct extends AController
             $this->data['product_tags'] = $this->request->post['product_tags'];
         } elseif (isset($product_info)) {
             $this->data['product_tags'] = $product_info['tags_by_language']
-                ? implode(",", array_column($product_info['tags_by_language'], 'tag'))
+                ? implode(",", array_column((array)$product_info['tags_by_language'], 'tag'))
                 : '';
         } else {
             $this->data['product_tags'] = '';
@@ -818,7 +834,7 @@ class ControllerPagesCatalogProduct extends AController
         $this->data['sort_order'] = $this->data['sort_order'] ?? 1;
 
         $this->data['active'] = 'details';
-        if (!isset($product_id)) {
+        if (!$product_id) {
             $this->data['action'] = $this->html->getSecureURL('catalog/product/insert');
             $this->data['form_title'] = $this->language->get('text_insert').$this->language->get('text_product');
             $this->data['update'] = '';
@@ -829,11 +845,9 @@ class ControllerPagesCatalogProduct extends AController
             $this->data['form_title'] = $this->language->get('text_edit').'&nbsp;'.$this->language->get('text_product');
             $this->data['update'] = $this->html->getSecureURL('listing_grid/product/update_field', '&id='.$product_id);
             $form = new AForm('HS');
-
             //load tabs controller
             $this->addTabs('general');
             $this->addSummary();
-
         }
 
         $form->setForm(
@@ -952,7 +966,7 @@ class ControllerPagesCatalogProduct extends AController
                 $this->data['categories'][$result['category_id']] = $result['name'] . ' (' . $result['store_name'] . ')';
             }
         } else {
-            $this->data['categories'] = array_column($results, 'name', 'category_id');
+            $this->data['categories'] = array_column((array)$results, 'name', 'category_id');
         }
 
         $this->data['form']['fields']['general']['category'] = $form->getFieldHtml(
@@ -1356,33 +1370,45 @@ class ControllerPagesCatalogProduct extends AController
         $this->processTemplate($tpl);
     }
 
-    protected function validateForm($data)
+    protected function validateForm(array $data, $product_id = null)
     {
         if (!$this->user->canModify('catalog/product')) {
-            $this->error['warning'] = $this->language->get_error('error_permission');
-        }
-        $len = mb_strlen($data['name']);
-        if ($len < 1 || $len > 255) {
-            $this->error['name'] = $this->language->get_error('error_name');
+            $this->error['warning'] = $this->language->get('error_permission');
+            return false;
         }
 
-        if (mb_strlen($data['model']) > 64) {
-            $this->error['model'] = $this->language->get_error('error_model');
-        }
+        $error_text = $this->html->isSEOkeywordExists(
+            'product_id=' . $product_id,
+            $data['keyword']
+        );
 
-        if (($error_text = $this->html->isSEOkeywordExists(
-            'product_id=' . $this->request->get['product_id'],
-            $data['keyword'])
-            )
-        ) {
+        if ($error_text) {
             $this->error['keyword'] = $error_text;
         }
 
-        foreach (['length', 'width', 'height', 'weight'] as $name) {
-            $v = abs(H::preformatFloat($data[$name], $this->language->get('decimal_point')));
-            if ($v >= 1000) {
-                $this->error[$name] = $this->language->get('error_measure_value');
+
+        if ($product_id) {
+            $data['product_id'] = $product_id;
+            $product = Product::find($product_id);
+            if (!$product) {
+                $this->error['warning'] = 'Product #' . $product_id . ' not found.';
+                return false;
             }
+        } else {
+            $product = new Product();
+        }
+        $pd = new ProductDescription($data);
+        //first try to get errors from product model
+        try {
+            $product->validate($data);
+        } catch (ValidationException $e) {
+            H::SimplifyValidationErrors($product->errors()['validation'], $this->error);
+        }
+        //then get errors from description model
+        try {
+            $pd->validate($data);
+        } catch (ValidationException $e) {
+            H::SimplifyValidationErrors($pd->errors()['validation'], $this->error);
         }
 
         $this->extensions->hk_ValidateData($this, __FUNCTION__, $data);
@@ -1390,9 +1416,7 @@ class ControllerPagesCatalogProduct extends AController
         if (!$this->error) {
             return true;
         } else {
-            if (!isset($this->error['warning'])) {
-                $this->error['warning'] = $this->language->get_error('error_required_data');
-            }
+            $this->error['warning'] = implode('<br>', $this->error);
             return false;
         }
     }
@@ -1413,12 +1437,14 @@ class ControllerPagesCatalogProduct extends AController
         if (isset($data['date_available'])) {
             $data['date_available'] = H::dateDisplay2ISO($data['date_available']);
         }
-        if (!isset($data['language_id'])) {
-            $data['language_id'] = $this->language->getContentLanguageID();
-        }
-        if (isset($data['manufacturer_id']) && !$data['manufacturer_id']) {
-            $data['manufacturer_id'] = null;
-        }
+
+        $data['maximum'] = (int)$data['maximum'] ?: 2147483647;
+        $data['language_id'] = (int)$data['language_id'] ?: $this->language->getContentLanguageID();
+        $data['manufacturer_id'] = (int)$data['manufacturer_id'] ?: null;
+        $data['tax_class_id'] = (int)$data['tax_class_id'] ?: null;
+        $data['weight_class_id'] = (int)$data['weight_class_id'] ?: null;
+        $data['length_class_id'] = (int)$data['length_class_id'] ?: null;
+
         $data['product_category'] = $data['product_category'] ? : [];
         return $data;
     }

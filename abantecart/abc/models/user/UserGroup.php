@@ -15,6 +15,7 @@
  * versions in the future. If you wish to customize AbanteCart for your
  * needs please refer to http://www.abantecart.com for more information.
  */
+
 namespace abc\models\user;
 
 use abc\models\BaseModel;
@@ -45,7 +46,7 @@ class UserGroup extends BaseModel
     public $timestamps = false;
 
     protected $casts = [
-        'date_added'    => 'datetime',
+        'date_added' => 'datetime',
         'date_modified' => 'datetime'
     ];
 

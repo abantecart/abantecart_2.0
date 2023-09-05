@@ -69,7 +69,8 @@ class Country extends BaseModel
                 'integer',
                 'required',
                 'sometimes',
-                'min:1'
+                'min:1',
+                'max:2147483647'
             ],
             'messages' => [
                 'integer' => [
@@ -90,6 +91,7 @@ class Country extends BaseModel
                     'default_text' => 'country_id must be between 0!',
                     'section' => 'admin'
                 ],
+                'max' => ['default_text' => 'Country ID must be less than 2147483647']
             ],
         ],
         'iso_code_2' => [
@@ -161,6 +163,8 @@ class Country extends BaseModel
         'sort_order' => [
             'checks' => [
                 'integer',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
                 'integer' => [
@@ -169,7 +173,9 @@ class Country extends BaseModel
                     'default_text' => 'Sort order is not integer!',
                     'section' => 'admin'
                 ]
-            ]
+            ],
+            'min' => ['default_text' => 'Sort order must be greater than zero'],
+            'max' => ['default_text' => 'Sort order must be less than 2147483647']
         ],
     ];
 

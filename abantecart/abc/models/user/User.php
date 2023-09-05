@@ -15,6 +15,7 @@
  * versions in the future. If you wish to customize AbanteCart for your
  * needs please refer to http://www.abantecart.com for more information.
  */
+
 namespace abc\models\user;
 
 use abc\models\BaseModel;
@@ -64,10 +65,10 @@ class User extends BaseModel
 
     protected $casts = [
         'user_group_id' => 'int',
-        'status'        => 'int',
-        'ip'            => 'string',
-        'last_login'    => 'datetime',
-        'date_added'    => 'datetime',
+        'status' => 'int',
+        'ip' => 'string',
+        'last_login' => 'datetime',
+        'date_added' => 'datetime',
         'date_modified' => 'datetime'
     ];
 
@@ -88,6 +89,34 @@ class User extends BaseModel
         'last_login',
         'date_added',
         'date_modified',
+    ];
+
+    protected $rules = [
+        /** @see validate() */
+        'user_group_id' => [
+            'checks' => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'User Group ID is not integer!'],
+                'max' => ['default_text' => 'User Group ID must be less than 2147483647'],
+                'min' => ['default_text' => 'User Group ID value must be greater than zero'],
+            ],
+        ],
+        'status' => [
+            'checks' => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Status is not integer!'],
+                'max' => ['default_text' => 'Status must be less than 2147483647'],
+                'min' => ['default_text' => 'Status value must be greater than zero'],
+            ],
+        ],
     ];
 
     /**

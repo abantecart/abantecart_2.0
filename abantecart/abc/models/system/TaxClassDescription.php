@@ -15,6 +15,7 @@
  * versions in the future. If you wish to customize AbanteCart for your
  * needs please refer to http://www.abantecart.com for more information.
  */
+
 namespace abc\models\system;
 
 use abc\models\BaseModel;
@@ -48,12 +49,40 @@ class TaxClassDescription extends BaseModel
 
     protected $casts = [
         'tax_class_id' => 'int',
-        'language_id'  => 'int',
+        'language_id' => 'int',
     ];
 
     protected $fillable = [
         'title',
         'description',
+    ];
+
+    protected $rules = [
+        /** @see validate() */
+        'tax_class_id' => [
+            'checks' => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Tax Class ID is not integer!'],
+                'max' => ['default_text' => 'Tax Class ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Tax Class ID value must be greater than zero'],
+            ],
+        ],
+        'language_id' => [
+            'checks' => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Language ID is not integer!'],
+                'max' => ['default_text' => 'Language ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Language ID value must be greater than zero'],
+            ],
+        ],
     ];
 
     public function tax_class()

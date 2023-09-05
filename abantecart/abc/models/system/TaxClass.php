@@ -47,7 +47,7 @@ class TaxClass extends BaseModel
     public $timestamps = false;
 
     protected $casts = [
-        'date_added'    => 'datetime',
+        'date_added' => 'datetime',
         'date_modified' => 'datetime'
     ];
 

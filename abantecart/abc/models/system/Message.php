@@ -58,4 +58,31 @@ class Message extends BaseModel
         'date_added',
         'date_modified',
     ];
+    protected $rules = [
+        /** @see validate() */
+        'viewed' => [
+            'checks' => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Viewed is not integer!'],
+                'max' => ['default_text' => 'Viewed must be less than 2147483647'],
+                'min' => ['default_text' => 'Viewed value must be greater than zero'],
+            ],
+        ],
+        'repeated' => [
+            'checks' => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Repeated is not integer!'],
+                'max' => ['default_text' => 'Repeated must be less than 2147483647'],
+                'min' => ['default_text' => 'Repeated value must be greater than zero'],
+            ],
+        ],
+    ];
 }
