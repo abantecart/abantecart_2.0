@@ -1698,6 +1698,7 @@ class Product extends BaseModel
                 $option_value['product_id'] = $productId;
                 $option_value['product_option_id'] = $productOptionId;
                 $option_value['attribute_value_id'] = 0;
+                $option_value['default'] = (bool)$option_value['default'];
 
                 $optionValueData = $this->removeSubArrays($option_value);
                 $optionValueObj = new ProductOptionValue();
