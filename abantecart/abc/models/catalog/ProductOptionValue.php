@@ -86,7 +86,7 @@ class ProductOptionValue extends BaseModel
         'attribute_value_id'     => 'int',
         'grouped_attribute_data' => Serialized::class,
         'sort_order'             => 'int',
-        'default' => 'bool',
+        'default' => 'boolean',
         'date_added'             => 'datetime',
         'date_modified'          => 'datetime'
     ];
