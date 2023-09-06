@@ -24,7 +24,10 @@ use abc\models\catalog\Category;
 use abc\models\catalog\Manufacturer;
 use abc\models\catalog\Product;
 use abc\models\catalog\UrlAlias;
+use abc\models\locale\LengthClass;
+use abc\models\locale\WeightClass;
 use abc\models\QueryBuilder;
+use abc\models\system\TaxClassDescription;
 use abc\modules\events\ABaseEvent;
 use abc\core\lib\AException;
 use Exception;
@@ -305,6 +308,22 @@ class ControllerApiCatalogProduct extends AControllerAPI
                 $data['manufacturer_id'] = $manufacturer->manufacturer_id;
                 unset($data['manufacturer']);
             }
+        }
+        if ($data['tax_class'] && $data['tax_class']['descriptions']) {
+            $titles = array_column($data['tax_class']['descriptions'], 'title');
+            if ($titles) {
+                $taxClassId = TaxClassDescription::whereIn('title', $titles)->first();
+                //do not allow import product with unknown tax class
+                $data['tax_class_id'] = $taxClassId ?: -1;
+            }
+        }
+        if ($data['length_class_iso_code']) {
+            $data['length_class_id'] = LengthClass::where('iso_code', $data['length_class_iso_code'])
+                ->first()?->length_class_id;
+        }
+        if ($data['weight_class_iso_code']) {
+            $data['weight_class_id'] = WeightClass::where('iso_code', $data['weight_class_iso_code'])
+                ->first()?->weight_class_id;
         }
 
         return $data;
