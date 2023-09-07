@@ -705,7 +705,7 @@ class ControllerPagesCatalogProduct extends AController
         $this->setBreadCrumbs($product_info, $currentUrl, $currentText);
 
         $stores = Store::all()?->toArray();
-        $this->data['stores'] = ['' => $this->language->get('text_default')]
+        $this->data['stores'] = [0 => $this->language->get('text_default')]
             + array_column((array)$stores, 'name', 'store_id');
 
         $manufacturers = Manufacturer::all()?->toArray();
