@@ -24,6 +24,7 @@ use abc\core\engine\Registry;
 use abc\core\lib\AError;
 use abc\core\lib\AException;
 use abc\core\lib\AJson;
+use abc\models\casts\NullableInt;
 use abc\models\catalog\Product;
 use abc\models\catalog\ProductDescription;
 use abc\models\catalog\ProductDiscount;
@@ -473,6 +474,7 @@ class ControllerResponsesListingGridProduct extends AController
     {
         $this->error = [];
         $data = [$field => $value];
+
         if ($productId) {
             $data['product_id'] = $productId;
         }
@@ -483,11 +485,19 @@ class ControllerResponsesListingGridProduct extends AController
             $this->data['error'] = 'Product #' . $productId . ' not found.';
             return $this->data['error'];
         }
+
         $pd = new ProductDescription($data);
 
         if ($field == 'keyword') {
             $this->data['error'] = $this->html->isSEOkeywordExists('product_id=' . $productId, $value);
         } elseif (in_array($field, $product->getFillable())) {
+            $casts = $product->getCasts();
+            foreach ($casts as $column => $cast) {
+                if ($cast == NullableInt::class && !$data[$column]) {
+                    $data[$column] = null;
+                }
+            }
+
             try {
                 $product->validate($data);
             } catch (ValidationException $e) {
@@ -496,6 +506,12 @@ class ControllerResponsesListingGridProduct extends AController
             }
         } elseif (in_array($field, $pd->getFillable())) {
             $data['language_id'] = $this->language->getContentLanguageID();
+            $casts = $pd->getCasts();
+            foreach ($casts as $column => $cast) {
+                if ($cast == NullableInt::class && !$data[$column]) {
+                    $data[$column] = null;
+                }
+            }
             try {
                 $pd->validate($data);
             } catch (ValidationException $e) {
