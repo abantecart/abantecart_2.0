@@ -170,12 +170,12 @@ class ProductOptionValue extends BaseModel
         'quantity' => [
             'checks' => [
                 'integer',
-                'min:0',
+                'min:-2147483647',
                 'max:2147483647'
             ],
             'messages' => [
                 'integer' => ['default_text' => 'Product Quantity must be an integer!'],
-                'min' => ['default_text' => 'Product Quantity value must be greater than zero'],
+                'min' => ['default_text' => 'Product Quantity value must be greater than -2147483647'],
                 'max' => ['default_text' => 'Product Quantity must be less than 2147483647'],
             ],
         ],

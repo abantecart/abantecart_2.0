@@ -705,7 +705,7 @@ class ControllerPagesCatalogProduct extends AController
         $this->setBreadCrumbs($product_info, $currentUrl, $currentText);
 
         $stores = Store::all()?->toArray();
-        $this->data['stores'] = ['' => $this->language->get('text_default')]
+        $this->data['stores'] = [0 => $this->language->get('text_default')]
             + array_column((array)$stores, 'name', 'store_id');
 
         $manufacturers = Manufacturer::all()?->toArray();
@@ -830,7 +830,7 @@ class ControllerPagesCatalogProduct extends AController
 
         $this->data['status'] = $this->data['status'] ?? 1;
         $this->data['quantity'] = $this->data['quantity'] ?? 1;
-        $this->data['minimum'] = $this->data['minimum'] ?? 1;
+        $this->data['minimum'] = $this->data['minimum'] ?: 1;
         $this->data['sort_order'] = $this->data['sort_order'] ?? 1;
 
         $this->data['active'] = 'details';
@@ -1095,7 +1095,7 @@ class ControllerPagesCatalogProduct extends AController
             [
                 'type' => 'number',
                 'name'  => 'maximum',
-                'value' => (int) $this->data['maximum'],
+                'value' => (int)$this->data['maximum'] ?: '',
                 'style' => 'small-field',
             ]
         );
@@ -1438,7 +1438,8 @@ class ControllerPagesCatalogProduct extends AController
             $data['date_available'] = H::dateDisplay2ISO($data['date_available']);
         }
 
-        $data['maximum'] = (int)$data['maximum'] ?: 2147483647;
+        $data['minimum'] = (int)$data['minimum'] ?: null;
+        $data['maximum'] = (int)$data['maximum'] ?: null;
         $data['language_id'] = (int)$data['language_id'] ?: $this->language->getContentLanguageID();
         $data['manufacturer_id'] = (int)$data['manufacturer_id'] ?: null;
         $data['tax_class_id'] = (int)$data['tax_class_id'] ?: null;
