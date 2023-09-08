@@ -306,9 +306,16 @@ class ControllerApiCatalogProduct extends AControllerAPI
                 ->get()?->first();
             if ($manufacturer) {
                 $data['manufacturer_id'] = $manufacturer->manufacturer_id;
-                unset($data['manufacturer']);
+            }else{
+                $newManufacturer = new Manufacturer();
+                unset($data['manufacturer']['manufacturer_id']);
+                $newManufacturer->fillAndCast($data['manufacturer']);
+                $newManufacturer->save();
+                $data['manufacturer_id'] = $newManufacturer->manufacturer_id;
             }
+            unset($data['manufacturer']);
         }
+
         if ($data['tax_class'] && $data['tax_class']['descriptions']) {
             $titles = array_column($data['tax_class']['descriptions'], 'title');
             if ($titles) {
