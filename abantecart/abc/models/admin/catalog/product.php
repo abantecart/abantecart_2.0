@@ -1707,37 +1707,38 @@ class ModelCatalogProduct extends Model
 //    }
 
     /**
-     * Main method to get complete options data for product
-     *
      * @param int $product_id
      * @param int $group_id
      *
      * @return array
      * @throws \Exception
+     *@deprecated !!!
+     * Main method to get complete options data for product
+     *
      */
-//    public function getProductOptions($product_id, $group_id = 0)
-//    {
-//        $product_option_data = [];
-//        $group_select = '';
-//        if ((int)$group_id) {
-//            $group_select = "AND group_id = '".(int)$group_id."'";
-//        }
-//        $product_option = $this->db->query(
-//            "SELECT *
-//             FROM ".$this->db->table_name("product_options")."
-//             WHERE product_id = '".(int)$product_id."' "
-//            .$group_select.
-//            " ORDER BY sort_order");
-//
-//        foreach ($product_option->rows as $product_option) {
-//            $option_data = $this->getProductOption($product_id, $product_option['product_option_id']);
-//            $option_data['product_option_value'] =
-//                $this->getProductOptionValues($product_id, $product_option['product_option_id']);
-//            $product_option_data[] = $option_data;
-//        }
-//
-//        return $product_option_data;
-//    }
+    public function getProductOptions($product_id, $group_id = 0)
+    {
+        $product_option_data = [];
+        $group_select = '';
+        if ((int)$group_id) {
+            $group_select = "AND group_id = '" . (int)$group_id . "'";
+        }
+        $product_option = $this->db->query(
+            "SELECT *
+             FROM " . $this->db->table_name("product_options") . "
+             WHERE product_id = '" . (int)$product_id . "' "
+            . $group_select .
+            " ORDER BY sort_order");
+
+        foreach ($product_option->rows as $product_option) {
+            $option_data = $this->getProductOption($product_id, $product_option['product_option_id']);
+            $option_data['product_option_value'] =
+                $this->getProductOptionValues($product_id, $product_option['product_option_id']);
+            $product_option_data[] = $option_data;
+        }
+
+        return $product_option_data;
+    }
 
     /**
      *    Main function to be called to update option values.
