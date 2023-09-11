@@ -486,6 +486,13 @@ class ControllerResponsesListingGridProduct extends AController
             return $this->data['error'];
         }
 
+        if ($field == 'maximum') {
+            $data['minimum'] = $product->minimum;
+        }
+        if ($field == 'minimum') {
+            $data['maximum'] = $product->maximum;
+        }
+
         $pd = new ProductDescription($data);
 
         if ($field == 'keyword') {
