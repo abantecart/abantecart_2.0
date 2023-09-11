@@ -1,22 +1,20 @@
 <?php
-/*------------------------------------------------------------------------------
-  $Id$
-
-  AbanteCart, Ideal OpenSource Ecommerce Solution
-  http://www.AbanteCart.com
-
-  Copyright © 2011-2021 Belavier Commerce LLC
-
-  This source file is subject to Open Software License (OSL 3.0)
-  License details is bundled with this package in the file LICENSE.txt.
-  It is also available at this URL:
-  <http://www.opensource.org/licenses/OSL-3.0>
-
- UPGRADE NOTE:
-   Do not edit or add to this file if you wish to upgrade AbanteCart to newer
-   versions in the future. If you wish to customize AbanteCart for your
-   needs please refer to http://www.AbanteCart.com for more information.
-------------------------------------------------------------------------------*/
+/**
+ * AbanteCart, Ideal Open Source Ecommerce Solution
+ * https://www.abantecart.com
+ *
+ * Copyright (c) 2011-2023  Belavier Commerce LLC
+ *
+ * This source file is subject to Open Software License (OSL 3.0)
+ * License details is bundled with this package in the file LICENSE.txt.
+ * It is also available at this URL:
+ * <https://www.opensource.org/licenses/OSL-3.0>
+ *
+ * UPGRADE NOTE:
+ * Do not edit or add to this file if you wish to upgrade AbanteCart to newer
+ * versions in the future. If you wish to customize AbanteCart for your
+ * needs please refer to https://www.abantecart.com for more information.
+ */
 
 namespace abc\core\lib;
 
@@ -38,7 +36,6 @@ use ReflectionException;
 /**
  * Class ACart
  *
- * @property ModelCatalogProduct $model_catalog_product
  * @property ATax $tax
  * @property ADB $db
  * @property AWeight $weight
@@ -275,12 +272,13 @@ class ACart extends ALibBase
         $options = !is_array($options) ? [] : $options;
 
         $stock = true;
-        /**
-         * @var  ModelCatalogProduct $sf_product_mdl
-         */
+        $query = Product::where('product_id', '=', $product_id);
+
+        /** @var  ModelCatalogProduct $sf_product_mdl */
         $sf_product_mdl = $this->load->model('catalog/product', 'storefront');
         //remove restrictions of model in concierge mode
         if ($this->conciergeMode) {
+            $query->withoutGlobalScopes();
             $sf_product_mdl->filter = [];
             if ($custom_price !== null) {
                 $custom_price = (float) $custom_price;
@@ -289,15 +287,21 @@ class ACart extends ALibBase
             $custom_price = null;
         }
 
+        /** @var Product $product */
+        $product = $query->with(
+            'options',
+            'options.description',
+            'option.values',
+            'option.values.description'
+        )->first();
         $elements_with_options = HtmlElementFactory::getElementsWithOptions();
 
-        $productInfo = $sf_product_mdl->getProductDataForCart($product_id);
-        if (count($productInfo) <= 0 || (!$this->conciergeMode && $productInfo['call_to_order'])
+        if (!$product || (!$this->conciergeMode && $product->call_to_order)
         ) {
             return [];
         }
 
-        $stock_checkout = $productInfo['stock_checkout'];
+        $stock_checkout = $product->stock_checkout;
         if (!H::has_value($stock_checkout)) {
             $stock_checkout = $this->config->get('config_stock_checkout');
         }
@@ -432,7 +436,7 @@ class ACart extends ALibBase
             }
             //Still no special price, use regular price
             if (!$price) {
-                $price = $productInfo['price'];
+                $price = $product->price;
             }
 
             //Need to round price after discounts and specials
@@ -473,9 +477,9 @@ class ACart extends ALibBase
 
         //check if we need to check main product stock. Do only if no stock trackable options selected
         if ((!$options || !$op_stock_trackable)
-            && $productInfo['subtract']
-            && $productInfo['quantity'] < $common_quantity
-            && !$productInfo['stock_checkout']
+            && $product->subtract
+            && $product->quantity < $common_quantity
+            && !$product->stock_checkout
         ) {
             $stock = false;
         }
@@ -490,25 +494,22 @@ class ACart extends ALibBase
             }
         }
         if (!$SKUs) {
-            $SKUs = [$productInfo['sku']];
+            $SKUs = [$product->sku];
         }
 
-        $result = $productInfo;
-
-        $result['option']             = $option_data;
-        $result['download']           = $download_data;
-        $result['inventory_quantity'] =
-            $productInfo['subtract']
-                ? (int) $productInfo['quantity']
-                : 1000000;
-
-        $result['quantity']           = $quantity;
-        $result['stock']              = $stock;
-        $result['price']              = $final_price;
-        $result['total']              = $final_price * $quantity;
-        $result['sku']                = implode(", ", $SKUs);
-
-        return $result;
+        return array_merge(
+            (array)$product?->toArray(),
+            [
+                'option'             => $option_data,
+                'download'           => $download_data,
+                'inventory_quantity' => $product->subtract ? (int)$product->quantity : 1000000000,
+                'quantity'           => $quantity,
+                'stock'              => $stock,
+                'price'              => $final_price,
+                'total'              => $final_price * $quantity,
+                'sku'                => implode(", ", $SKUs)
+            ]
+        );
     }
 
     /**
