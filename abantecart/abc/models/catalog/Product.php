@@ -176,7 +176,7 @@ class Product extends BaseModel
         'sort_order'        => 'int',
         'subtract'          => 'int',
         'minimum'           => 'int',
-        'maximum'           => 'int',
+        'maximum' => NullableInt::class,
         'cost'              => 'float',
         'call_to_order'     => 'int',
         'product_type_id'   => 'int',
@@ -552,7 +552,7 @@ class Product extends BaseModel
         'minimum' => [
             'checks' => [
                 'integer',
-                'min:0',
+                'min:1',
                 'max:2147483647'
             ],
             'messages' => [
@@ -565,6 +565,7 @@ class Product extends BaseModel
         'maximum' => [
             'checks' => [
                 'integer',
+                'nullable',
                 'gte:minimum',
                 'max:2147483647'
             ],
@@ -2192,6 +2193,7 @@ class Product extends BaseModel
         }
 
         if (isset($product_data['product_store'])) {
+            $product_data['product_store'] = array_map('intval', $product_data['product_store']);
             $model->stores()->sync($product_data['product_store']);
         }
 
