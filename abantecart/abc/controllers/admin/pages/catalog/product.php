@@ -1088,6 +1088,7 @@ class ControllerPagesCatalogProduct extends AController
                 'name'  => 'minimum',
                 'value' => (int) $this->data['minimum'],
                 'style' => 'small-field',
+                'attr' => 'min="1"'
             ]
         );
 
@@ -1097,6 +1098,7 @@ class ControllerPagesCatalogProduct extends AController
                 'name'  => 'maximum',
                 'value' => (int)$this->data['maximum'] ?: '',
                 'style' => 'small-field',
+                'attr' => 'min="0"'
             ]
         );
 
@@ -1438,7 +1440,7 @@ class ControllerPagesCatalogProduct extends AController
             $data['date_available'] = H::dateDisplay2ISO($data['date_available']);
         }
 
-        $data['minimum'] = (int)$data['minimum'] ?: null;
+        $data['minimum'] = (int)$data['minimum'] ?: 1;
         $data['maximum'] = (int)$data['maximum'] ?: null;
         $data['language_id'] = (int)$data['language_id'] ?: $this->language->getContentLanguageID();
         $data['manufacturer_id'] = (int)$data['manufacturer_id'] ?: null;
