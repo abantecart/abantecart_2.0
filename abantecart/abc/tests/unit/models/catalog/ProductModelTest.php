@@ -203,7 +203,139 @@ class ProductModelTest extends ATestCase
             $errors = $product->errors()['validation'];
         }
         $this->assertCount(0, $errors);
+    }
 
+    public function testMinMaxProduct()
+    {
+        //validate min-max
+        $product = new Product();
+        $errors = [];
+        try {
+            $data = [
+                'uuid'              => '00000000-0000-0000-0000-000000000000',
+                'model'             => 'tesmodeltest',
+                'sku'               => 'testskutest',
+                'location'          => 'somewhere',
+                'quantity'          => 10,
+                'stock_checkout'    => '0',
+                'stock_status_id'   => 1,
+                'manufacturer_id'   => 11,
+                'shipping'          => false,
+                'ship_individually' => false,
+                'free_shipping'     => '0',
+                'shipping_price'    => 0.0,
+                'price'             => 1.00,
+                'tax_class_id'      => 1,
+                'date_available'    => date('Y-m-d H:i:s'),
+                'weight'            => 0.0,
+                'weight_class_id'   => 1,
+                'length'            => 0.0,
+                'width'             => 0.0,
+                'height'            => 0.0,
+                'length_class_id'   => 1,
+                'status'            => 1,
+                'viewed'            => 0,
+                'sort_order'        => 15,
+                'call_to_order'     => 0,
+                'cost'              => 0.95,
+                'subtract'          => 0,
+                'minimum'           => 2,
+                'maximum'           => 0,
+                'product_type_id'   => null,
+                'settings'          => '',
+            ];
+            $product->validate($data);
+        } catch (ValidationException $e) {
+            $errors = $product->errors()['validation'];
+        }
+        $this->assertCount(1, $errors);
+
+        //validate min-max
+        $product = new Product();
+        $errors = [];
+        try {
+            $data = [
+                'uuid'              => '00000000-0000-0000-0000-000000000000',
+                'model'             => 'tesmodeltest',
+                'sku'               => 'testskutest',
+                'location'          => 'somewhere',
+                'quantity'          => 10,
+                'stock_checkout'    => '0',
+                'stock_status_id'   => 1,
+                'manufacturer_id'   => 11,
+                'shipping'          => false,
+                'ship_individually' => false,
+                'free_shipping'     => '0',
+                'shipping_price'    => 0.0,
+                'price'             => 1.00,
+                'tax_class_id'      => 1,
+                'date_available'    => date('Y-m-d H:i:s'),
+                'weight'            => 0.0,
+                'weight_class_id'   => 1,
+                'length'            => 0.0,
+                'width'             => 0.0,
+                'height'            => 0.0,
+                'length_class_id'   => 1,
+                'status'            => 1,
+                'viewed'            => 0,
+                'sort_order'        => 15,
+                'call_to_order'     => 0,
+                'cost'              => 0.95,
+                'subtract'          => 0,
+                'minimum'           => 1,
+                'maximum'           => 1,
+                'product_type_id'   => null,
+                'settings'          => '',
+            ];
+            $product->validate($data);
+        } catch (ValidationException $e) {
+            $errors = $product->errors()['validation'];
+        }
+        $this->assertCount(0, $errors);
+
+
+        //validate min-max
+        $product = new Product();
+        $errors = [];
+        try {
+            $data = [
+                'uuid'              => '00000000-0000-0000-0000-000000000000',
+                'model'             => 'tesmodeltest',
+                'sku'               => 'testskutest',
+                'location'          => 'somewhere',
+                'quantity'          => 10,
+                'stock_checkout'    => '0',
+                'stock_status_id'   => 1,
+                'manufacturer_id'   => 11,
+                'shipping'          => false,
+                'ship_individually' => false,
+                'free_shipping'     => '0',
+                'shipping_price'    => 0.0,
+                'price'             => 1.00,
+                'tax_class_id'      => 1,
+                'date_available'    => date('Y-m-d H:i:s'),
+                'weight'            => 0.0,
+                'weight_class_id'   => 1,
+                'length'            => 0.0,
+                'width'             => 0.0,
+                'height'            => 0.0,
+                'length_class_id'   => 1,
+                'status'            => 1,
+                'viewed'            => 0,
+                'sort_order'        => 15,
+                'call_to_order'     => 0,
+                'cost'              => 0.95,
+                'subtract'          => 0,
+                'minimum'           => 1,
+                'maximum'           => null,
+                'product_type_id'   => null,
+                'settings'          => '',
+            ];
+            $product->validate($data);
+        } catch (ValidationException $e) {
+            $errors = $product->errors()['validation'];
+        }
+        $this->assertCount(0, $errors);
     }
 
     /**

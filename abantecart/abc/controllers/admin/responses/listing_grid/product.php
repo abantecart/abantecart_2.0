@@ -243,6 +243,9 @@ class ControllerResponsesListingGridProduct extends AController
                             if ($f == 'status' && !isset($this->request->post['status'][$id])) {
                                 $this->request->post['status'][$id] = 0;
                             }
+                            if ($f == 'maximum') {
+                                $this->request->post['maximum'][$id] = $this->request->post['maximum'][$id] ?: null;
+                            }
 
                             if (isset($this->request->post[$f][$id])) {
                                 $err = $this->validateField($id, $f, $this->request->post[$f][$id]);
@@ -319,6 +322,12 @@ class ControllerResponsesListingGridProduct extends AController
                 }
                 if ($key == 'date_available') {
                     $value = H::dateDisplay2ISO($value);
+                }
+                if ($key == 'maximum') {
+                    $value = abs((int)$value) ?: null;
+                }
+                if ($key == 'minimum') {
+                    $value = max((int)$value, 1);
                 }
                 $data = [$key => $value];
                 Product::updateProduct($productId, $data);
@@ -484,6 +493,13 @@ class ControllerResponsesListingGridProduct extends AController
         if (!$product) {
             $this->data['error'] = 'Product #' . $productId . ' not found.';
             return $this->data['error'];
+        }
+
+        if ($field == 'maximum') {
+            $data['minimum'] = $product->minimum ?: 1;
+        }
+        if ($field == 'minimum') {
+            $data['maximum'] = $product->maximum ?: null;
         }
 
         $pd = new ProductDescription($data);
