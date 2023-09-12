@@ -31,6 +31,7 @@ use abc\models\storefront\ModelCheckoutExtension;
 use abc\models\storefront\ModelTotalTotal;
 use Exception;
 use H;
+use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionException;
 
 /**
@@ -46,54 +47,30 @@ use ReflectionException;
  */
 class ACart extends ALibBase
 {
-    /**
-     * @var Registry
-     */
+    /** @var Registry */
     protected $registry;
-    /**
-     * @var ASession
-     */
+    /** @var ASession */
     protected $session;
-    /**
-     * @var ALanguage
-     */
+    /** @var ALanguage */
     protected $language;
     protected $cart_data = [];
-    /**
-     * @var array
-     */
+    /** @var array */
     protected $cust_data = [];
-    /**
-     * @var float
-     */
+    /** @var float */
     protected $sub_total;
-    /**
-     * @var array
-     */
+    /** @var array */
     protected $taxes = [];
-    /**
-     * @var float
-     */
+    /** @var float */
     protected $total_value;
-    /**
-     * @var float
-     */
+    /** @var float */
     protected $final_total;
-    /**
-     * @var array
-     */
+    /** @var array */
     protected $total_data;
-    /**
-     * @var ACustomer
-     */
+    /** @var ACustomer */
     protected $customer;
-    /**
-     * @var AttributeInterface
-     */
+    /** @var AttributeInterface */
     protected $attribute;
-    /**
-     * @var APromotion
-     */
+    /** @var APromotion */
     protected $promotion;
 
     public $conciergeMode = false;
@@ -163,8 +140,7 @@ class ACart extends ALibBase
      *
      * @return array
      * @throws AException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
-     * @throws ReflectionException
+     * @throws InvalidArgumentException | ReflectionException
      */
     public function getProducts($recalculate = false)
     {
@@ -238,7 +214,7 @@ class ACart extends ALibBase
      * @return array
      * @throws AException
      * @throws ReflectionException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function getProduct($key, $recalculate = false)
     {
@@ -261,7 +237,7 @@ class ACart extends ALibBase
      *
      * @return array
      * @throws AException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function buildProductDetails($product_id, $quantity = 0, $options = [], $custom_price = null)
     {
@@ -279,6 +255,9 @@ class ACart extends ALibBase
         //remove restrictions of model in concierge mode
         if ($this->conciergeMode) {
             $query->withoutGlobalScopes();
+            //set sign to get disabled products, options etc
+            Product::$isAdmin = true;
+
             $sf_product_mdl->filter = [];
             if ($custom_price !== null) {
                 $custom_price = (float) $custom_price;
@@ -291,15 +270,24 @@ class ACart extends ALibBase
         $product = $query->with(
             'options',
             'options.description',
-            'option.values',
-            'option.values.description'
+            'options.values',
+            'options.values.description'
         )->first();
-        $elements_with_options = HtmlElementFactory::getElementsWithOptions();
+        $elementsWithOptions = HtmlElementFactory::getElementsWithOptions();
 
-        if (!$product || (!$this->conciergeMode && $product->call_to_order)
+        if (
+            !$product
+            || (!$this->conciergeMode && $product->call_to_order)
         ) {
             return [];
         }
+
+
+        $product->setRelation('options', $product->options->keyBy('product_option_id'));
+        $product->options->map(function ($opt) {
+            $opt->setRelation('values', $opt->values->keyBy('product_option_value_id'));
+        });
+
 
         $stock_checkout = $product->stock_checkout;
         if (!H::has_value($stock_checkout)) {
@@ -317,17 +305,17 @@ class ACart extends ALibBase
                 continue;
             }
 
-            $option_query = $sf_product_mdl->getProductOption($product_id, $product_option_id);
-            $element_type = $option_query['element_type'];
-            $option_value_query = [];
+            $optionData = $product->options[$product_option_id];
+            $elementType = $optionData->element_type;
+
+            $optionValueData = [];
             $option_value_queries = [];
 
-            if (!in_array($element_type, $elements_with_options)) {
+            if (!in_array($elementType, $elementsWithOptions)) {
                 //This is single value element, get all values and expect only one
-                $option_value_query = $sf_product_mdl->getProductOptionValues($product_id, $product_option_id);
-                $option_value_query = $option_value_query[0];
+                $optionValueData = $optionData->values->first();
                 //Set value from input
-                $option_value_query['name'] = $this->db->escape($product_option_value_id);
+                $optionValueData['name'] = $this->db->escape($product_option_value_id);
             } else {
                 //is multivalue option type
                 if (is_array($product_option_value_id)) {
@@ -335,62 +323,62 @@ class ACart extends ALibBase
                         $option_value_queries[$val_id] = $sf_product_mdl->getProductOptionValue($product_id, $val_id);
                     }
                 } else {
-                    $option_value_query = $sf_product_mdl->getProductOptionValue(
+                    $optionValueData = $sf_product_mdl->getProductOptionValue(
                         $product_id,
                         (int) $product_option_value_id
                     );
                 }
             }
 
-            if ($option_value_query) {
+            if ($optionValueData) {
                 //if group option load price from parent value
-                if ($option_value_query['group_id'] && !in_array($option_value_query['group_id'], $groups)) {
+                if ($optionValueData['group_id'] && !in_array($optionValueData['group_id'], $groups)) {
                     $group_value_query = $sf_product_mdl->getProductOptionValue(
                         $product_id,
-                        $option_value_query['group_id']
+                        $optionValueData['group_id']
                     );
-                    $option_value_query['prefix'] = $group_value_query['prefix'];
-                    $option_value_query['price'] = $group_value_query['price'];
-                    $groups[] = $option_value_query['group_id'];
+                    $optionValueData['prefix'] = $group_value_query['prefix'];
+                    $optionValueData['price'] = $group_value_query['price'];
+                    $groups[] = $optionValueData['group_id'];
                 }
                 $option_data[] = [
                     'product_option_id'       => $product_option_id,
-                    'product_option_value_id' => $option_value_query['product_option_value_id'],
-                    'name'                    => $option_query['name'],
-                    'element_type'            => $element_type,
-                    'settings'                => $option_query['settings'],
-                    'value'                   => $option_value_query['name'],
-                    'prefix'                  => $option_value_query['prefix'],
+                    'product_option_value_id' => $optionValueData['product_option_value_id'],
+                    'name'                    => $optionData['name'],
+                    'element_type'            => $elementType,
+                    'settings'                => $optionData['settings'],
+                    'value'                   => $optionValueData['name'],
+                    'prefix'                  => $optionValueData['prefix'],
                     'price'                   => ($custom_price !== null
                         ? $custom_price
-                        : $option_value_query['price']
+                        : $optionValueData['price']
                     ),
-                    'sku'                     => $option_value_query['sku'],
+                    'sku'                     => $optionValueData['sku'],
                     'inventory_quantity'      => (
-                    $option_value_query['subtract']
-                        ? (int) $option_value_query['quantity']
+                    $optionValueData['subtract']
+                        ? (int)$optionValueData['quantity']
                         : 1000000
                     ),
-                    'weight'                  => $option_value_query['weight'],
-                    'weight_type'             => $option_value_query['weight_type'],
+                    'weight'                  => $optionValueData['weight'],
+                    'weight_type'             => $optionValueData['weight_type'],
                 ];
 
                 //check if need to track stock and we have it
-                if ($option_value_query['subtract']
-                    && $option_value_query['quantity'] < $quantity
+                if ($optionValueData['subtract']
+                    && $optionValueData['quantity'] < $quantity
                     && !$stock_checkout
                 ) {
                     $stock = false;
                 }
-                $op_stock_trackable += $option_value_query['subtract'];
-                unset($option_value_query);
+                $op_stock_trackable += $optionValueData['subtract'];
+                unset($optionValueData);
             } else {
                 if ($option_value_queries) {
                     foreach ($option_value_queries as $item) {
                         $option_data[] = [
                             'product_option_id'       => $product_option_id,
                             'product_option_value_id' => $item['product_option_value_id'],
-                            'name'                    => $option_query['name'],
+                            'name' => $optionData['name'],
                             'value'                   => $item['name'],
                             'prefix'                  => $item['prefix'],
                             'price'                   => (
@@ -407,7 +395,7 @@ class ACart extends ALibBase
                         if ($item['subtract'] && $item['quantity'] < $quantity) {
                             $stock = false;
                         }
-                        $op_stock_trackable += $option_value_query['subtract'];
+                        $op_stock_trackable += $optionValueData['subtract'];
                     }
                     unset($option_value_queries);
                 }
@@ -584,7 +572,7 @@ class ACart extends ALibBase
      * @return string
      * @throws AException
      * @throws ReflectionException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function add($product_id, $qty = 1, $options = [], $custom_price = null, $order_product_id = null)
     {
@@ -673,7 +661,7 @@ class ACart extends ALibBase
      *
      * @throws AException
      * @throws ReflectionException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function update($key, $qty)
     {
@@ -722,7 +710,7 @@ class ACart extends ALibBase
      * @return int
      * @throws AException
      * @throws ReflectionException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function getWeight($product_ids = [])
     {
@@ -780,7 +768,7 @@ class ACart extends ALibBase
      * @return array
      * @throws AException
      * @throws ReflectionException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function basicShippingProducts()
     {
@@ -801,7 +789,7 @@ class ACart extends ALibBase
      * @return array
      * @throws AException
      * @throws ReflectionException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function specialShippingProducts()
     {
@@ -823,7 +811,7 @@ class ACart extends ALibBase
      * @return bool
      * @throws AException
      * @throws ReflectionException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function areAllFreeShipping()
     {
@@ -882,7 +870,7 @@ class ACart extends ALibBase
      * @return float
      * @throws AException
      * @throws ReflectionException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      * @throws ReflectionException
      */
     public function getSubTotal($recalculate = false)
@@ -906,7 +894,7 @@ class ACart extends ALibBase
      * @return array
      * @throws AException
      * @throws ReflectionException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function getTaxes()
     {
@@ -922,7 +910,7 @@ class ACart extends ALibBase
      * @return array
      * @throws AException
      * @throws ReflectionException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function getAppliedTaxes($recalculate = false)
     {
@@ -978,7 +966,7 @@ class ACart extends ALibBase
      * @return float
      * @throws AException
      * @throws ReflectionException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function getTotal($recalculate = false)
     {
@@ -1003,7 +991,7 @@ class ACart extends ALibBase
      *
      * @return float
      * @throws AException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      * @throws ReflectionException
      */
     public function getFinalTotal($recalculate = false)
@@ -1065,7 +1053,7 @@ class ACart extends ALibBase
      * @return array
      * @throws AException
      * @throws ReflectionException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function getFinalTotalData($recalculate = false)
     {
@@ -1089,7 +1077,7 @@ class ACart extends ALibBase
      * @return array
      * @throws AException
      * @throws ReflectionException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function buildTotalDisplay($recalculate = false)
     {
@@ -1116,7 +1104,7 @@ class ACart extends ALibBase
      * @return float
      * @throws AException
      * @throws ReflectionException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function getTotalAmount($recalc = false)
     {
@@ -1129,7 +1117,7 @@ class ACart extends ALibBase
      * @return bool
      * @throws AException
      * @throws ReflectionException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function hasMinRequirement()
     {
@@ -1146,7 +1134,7 @@ class ACart extends ALibBase
      * @return bool
      * @throws AException
      * @throws ReflectionException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function hasMaxRequirement()
     {
@@ -1187,7 +1175,7 @@ class ACart extends ALibBase
      * @return bool
      * @throws AException
      * @throws ReflectionException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function hasStock()
     {
@@ -1207,7 +1195,7 @@ class ACart extends ALibBase
      * @return bool
      * @throws AException
      * @throws ReflectionException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function hasShipping()
     {
@@ -1228,7 +1216,7 @@ class ACart extends ALibBase
      * @return bool
      * @throws AException
      * @throws ReflectionException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function hasDownload()
     {

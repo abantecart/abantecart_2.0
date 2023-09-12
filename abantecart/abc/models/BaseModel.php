@@ -76,6 +76,8 @@ use ReflectionMethod;
  * @method static QueryBuilder rightJoin(string $table, Closure|string $first, string|null $operator = null, string|null $second = null, string $type = 'inner', bool $where = false) QueryBuilder
  * @method static QueryBuilder|Builder OrderBy(string $column, string $order = 'asc') QueryBuilder
  * @method static QueryBuilder|Builder withoutGlobalScopes()
+ * @method static Collection keyBy(Closure|string $keyName)
+ * @method static Collection map(Closure $func)
  *
  * @const  string DELETED_AT
  */
@@ -233,12 +235,15 @@ abstract class BaseModel extends OrmModel
      */
     public static $searchParams = [];
 
+    public static $isAdmin = null;
+
     /**
      * @param array $attributes
      */
     public function __construct(array $attributes = [])
     {
         $this->actor = H::recognizeUser();
+
         //set current language for getting single description from relation
         if (!static::$current_language_id) {
             static::$current_language_id = static::getCurrentLanguageID();
@@ -262,6 +267,13 @@ abstract class BaseModel extends OrmModel
         }
     }
 
+    /**
+     * @return bool
+     */
+    public function isAdmin()
+    {
+        return static::$isAdmin ?? (ABC::env('IS_ADMIN') === true);
+    }
     public function getActorDetails()
     {
         return $this->actor;

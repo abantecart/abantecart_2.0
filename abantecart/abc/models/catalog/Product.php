@@ -1298,9 +1298,10 @@ class Product extends BaseModel
     public function options()
     {
         $instance = $this->hasMany(ProductOption::class, 'product_id');
-        if( ABC::env('IS_ADMIN') !== true ) {
+        if (!static::$isAdmin) {
             $instance->getQuery()->where('status', '=', 1);
         }
+        $instance->getQuery()->orderBy('sort_order');
         return $instance;
     }
 
@@ -2415,7 +2416,7 @@ class Product extends BaseModel
                 'products.product_id'
             )->where('orders.order_status_id', '>', 0)
             ->where('order_products.product_id', '>', 0);
-        if (ABC::env('IS_ADMIN') !== true) {
+        if (!static::$isAdmin) {
             //show only enabled and available products for storefront!
             $query->where('products.date_available', '<=', Carbon::now()->toDateTimeString())
                 ->active('products');
@@ -2715,7 +2716,7 @@ class Product extends BaseModel
         $filter['language_id'] = (int)$filter['language_id'] ?: static::$current_language_id;
 
         if (!isset($filter['store_id'])) {
-            $filter['store_id'] = ABC::env('IS_ADMIN') === true
+            $filter['store_id'] = static::$isAdmin
                 ? (int)Registry::session()->data['current_store_id']
                 : (int)Registry::config()->get('config_store_id');
         } else {
@@ -2924,7 +2925,7 @@ class Product extends BaseModel
         }
 
         //show only enabled and available products for storefront!
-        if (ABC::env('IS_ADMIN') !== true) {
+        if (!static::$isAdmin) {
             if ($filter['date']) {
                 if ($filter['date'] instanceof Carbon) {
                     $now = $filter['date']->toDateTimeString();
