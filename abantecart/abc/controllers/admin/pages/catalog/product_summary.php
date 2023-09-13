@@ -155,7 +155,7 @@ class ControllerPagesCatalogProductSummary extends AController
 
         $output = [];
         // check is product available
-        if (Carbon::parse($product->date_available)->gt(Carbon::now())) {
+        if ($product->date_available->startOfDay()->gt(Carbon::now())) {
             $output[] = $this->language->get('text_product_unavailable');
         }
 
