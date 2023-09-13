@@ -32,6 +32,7 @@ use abc\models\catalog\UrlAlias;
 use abc\models\QueryBuilder;
 use abc\models\system\Store;
 use abc\modules\traits\EditProductTrait;
+use Carbon\Carbon;
 use H;
 use Illuminate\Validation\ValidationException;
 use Laracasts\Utilities\JavaScript\Transformers\Transformer;
@@ -1447,8 +1448,13 @@ class ControllerPagesCatalogProduct extends AController
         $data['tax_class_id'] = (int)$data['tax_class_id'] ?: null;
         $data['weight_class_id'] = (int)$data['weight_class_id'] ?: null;
         $data['length_class_id'] = (int)$data['length_class_id'] ?: null;
-
         $data['product_category'] = $data['product_category'] ? : [];
+        if ($data['date_available']) {
+            $data['date_available'] = Carbon::parse($data['date_available'])->startOfDay()->toDateTimeString();
+        } else {
+            $data['date_available'] = Carbon::today()->startOfDay()->toDateTimeString();
+        }
+
         return $data;
     }
 }
