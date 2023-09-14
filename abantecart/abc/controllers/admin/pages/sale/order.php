@@ -634,7 +634,7 @@ class ControllerPagesSaleOrder extends AController
                 'disable_edit'     => in_array($order_product['order_status_id'], $this->data['cancel_statuses']),
                 'order_product_id' => $order_product['order_product_id'],
                 'product_id'       => $order_product['product_id'],
-                'product_status' => $product->status,
+                'product_status' => $product?->status,
                 'order_status_id'  => $order_product['order_status_id'],
                 'order_status'     => ($orderStatus
                     ? $orderStatus->name
