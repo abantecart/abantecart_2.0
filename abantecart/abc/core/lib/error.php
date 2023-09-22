@@ -1,27 +1,28 @@
 <?php
-/*------------------------------------------------------------------------------
-  $Id$
-
-  AbanteCart, Ideal OpenSource Ecommerce Solution
-  http://www.AbanteCart.com
-
-  Copyright © 2011-2017 Belavier Commerce LLC
-
-  This source file is subject to Open Software License (OSL 3.0)
-  License details is bundled with this package in the file LICENSE.txt.
-  It is also available at this URL:
-  <http://www.opensource.org/licenses/OSL-3.0>
-
- UPGRADE NOTE:
-   Do not edit or add to this file if you wish to upgrade AbanteCart to newer
-   versions in the future. If you wish to customize AbanteCart for your
-   needs please refer to http://www.AbanteCart.com for more information.
-------------------------------------------------------------------------------*/
+/**
+ * AbanteCart, Ideal Open Source Ecommerce Solution
+ * https://www.abantecart.com
+ *
+ * Copyright (c) 2011-2023  Belavier Commerce LLC
+ *
+ * This source file is subject to Open Software License (OSL 3.0)
+ * License details is bundled with this package in the file LICENSE.txt.
+ * It is also available at this URL:
+ * <https://www.opensource.org/licenses/OSL-3.0>
+ *
+ * UPGRADE NOTE:
+ * Do not edit or add to this file if you wish to upgrade AbanteCart to newer
+ * versions in the future. If you wish to customize AbanteCart for your
+ * needs please refer to https://www.abantecart.com for more information.
+ */
 
 namespace abc\core\lib;
 
 use abc\core\ABC;
+use abc\core\engine\ALoader;
 use abc\core\engine\Registry;
+use Exception;
+use JetBrains\PhpStorm\NoReturn;
 
 
 class AError
@@ -117,7 +118,7 @@ class AError
         } else {
             $log = $this->registry->get('log');
         }
-        $log->write($this->error_descriptions[$this->code].':  '.$this->version.' '.$this->msg);
+        $log->error($this->error_descriptions[$this->code] . ':  ' . $this->version . ' ' . $this->msg);
 
         return $this;
     }
@@ -128,6 +129,7 @@ class AError
      * @param string $subject
      *
      * @return AError
+     * @throws Exception
      */
     public function toMessages($subject = '')
     {
@@ -136,7 +138,7 @@ class AError
              * @var $messages AMessage
              */
             $messages = $this->registry->get('messages');
-            $title = $subject ? $subject : $this->error_descriptions[$this->code];
+            $title = $subject ?: $this->error_descriptions[$this->code];
             $messages->saveError($title, $this->msg);
         }
 
@@ -157,7 +159,7 @@ class AError
     /**
      * add error message to JSON output
      *
-     * @param string $status_text_and_code - any human readable
+     * @param string $status_text_and_code - any human-readable
      *                                     text string with 3 digit at the end to represent HTTP response code
      *                                     For ex. VALIDATION_ERROR_406
      *
@@ -171,10 +173,10 @@ class AError
      *                                     reload_page -> true to reload page after dialog close
      *                                     TODO: Add redirect_url on dialog close
      *
-     * @return mixed
+     * @void
      * @throws AException
      */
-    public function toJSONResponse($status_text_and_code, $err_data = [])
+    #[NoReturn] public function toJSONResponse($status_text_and_code, $err_data = [])
     {
         //detect HTTP response status code based on readable text status
         preg_match('/(\d+)$/', $status_text_and_code, $match);
@@ -200,15 +202,14 @@ class AError
              */
             $response = $this->registry->get('response');
             /**
-             * @var \abc\core\engine\ALoader $load
+             * @var ALoader $load
              */
             $load = $this->registry->get('load');
             $response->addHeader($http_header_txt);
             $response->addJSONHeader();
             $load->library('json');
             $response->setOutput(AJson::encode($err_data));
-
-            return null;
+            $response->output();
         } else {
             //for some reason we do not have registry. do direct output and exit
             if (!headers_sent()) {
@@ -217,8 +218,8 @@ class AError
             }
             include_once(ABC::env('DIR_LIB').'json.php');
             echo AJson::encode($err_data);
-            exit;
         }
+        exit;
     }
 
 }
