@@ -225,6 +225,10 @@ class ControllerCommonHeader extends AController
         );
         $this->view->assign('today_customer_count', $today_customer_count);
 
+        if($this->config->get('config_maintenance')){
+            $this->view->assign('maintenance_warning',$this->language->get('text_maintenance_notice'));
+        }
+
         $this->loadModel('catalog/review');
         $today_review_count = $this->model_catalog_review->getTotalToday();
         $this->view->assign('today_review_count', $today_review_count);
