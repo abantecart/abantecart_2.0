@@ -761,4 +761,8 @@
 		<key>error_system</key>
 		<value><![CDATA[ Application Error. Please see <a href="%s">error log</a> for details! ]]></value>
 	</definition>
+	<definition>
+		<key>text_maintenance_notice</key>
+		<value><![CDATA[Notice: Maintenance mode is on.]]></value>
+	</definition>
 </definitions>
