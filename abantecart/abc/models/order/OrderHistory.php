@@ -60,32 +60,40 @@ class OrderHistory extends BaseModel
 
     protected $rules = [
         /** @see validate() */
-        'order_id'        => [
-            'checks'   => [
+        'order_id' => [
+            'checks' => [
                 'integer',
                 'required',
                 'exists:orders',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => ':attribute is not integer or not presents in orders table!',
-                ],
+                'integer' => ['default_text' => ':attribute is not integer!'],
+                'max' => ['default_text' => ':attribute must be less than 2147483647'],
+                'min' => ['default_text' => ':attribute value must be greater than zero'],
+                'exists' => ['default_text' => ':attribute not exists in orders table'],
+                'required' => ['default_text' => ':attribute required']
             ],
         ],
         'order_status_id' => [
-            'checks'   => [
+            'checks' => [
                 'integer',
                 'required',
                 'exists:order_statuses',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => ':attribute is not integer or absent in order_statuses table!',
-                ],
+                'integer' => ['default_text' => ':attribute is not integer'],
+                'max' => ['default_text' => ':attribute must be less than 2147483647'],
+                'min' => ['default_text' => ':attribute value must be greater than zero'],
+                'exists' => ['default_text' => ':attribute not exists in order_statuses table'],
+                'required' => ['default_text' => ':attribute required']
             ],
         ],
-        'notify'          => [
-            'checks'   => [
+        'notify' => [
+            'checks' => [
                 'boolean',
             ],
             'messages' => [
@@ -94,8 +102,8 @@ class OrderHistory extends BaseModel
                 ],
             ],
         ],
-        'comment'         => [
-            'checks'   => [
+        'comment' => [
+            'checks' => [
                 'string',
                 'max:1500',
             ],

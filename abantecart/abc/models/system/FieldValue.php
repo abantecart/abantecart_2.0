@@ -1,19 +1,19 @@
 <?php
 /**
  * AbanteCart, Ideal Open Source Ecommerce Solution
- * http://www.abantecart.com
+ * https://www.abantecart.com
  *
- * Copyright 2011-2022 Belavier Commerce LLC
+ * Copyright (c) 2011-2023  Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
  * It is also available at this URL:
- * <http://www.opensource.org/licenses/OSL-3.0>
+ * <https://www.opensource.org/licenses/OSL-3.0>
  *
  * UPGRADE NOTE:
  * Do not edit or add to this file if you wish to upgrade AbanteCart to newer
  * versions in the future. If you wish to customize AbanteCart for your
- * needs please refer to http://www.abantecart.com for more information.
+ * needs please refer to https://www.abantecart.com for more information.
  */
 namespace abc\models\system;
 
@@ -34,8 +34,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class FieldValue extends BaseModel
 {
-    use SoftDeletes;
-
     protected $primaryKey = 'value_id';
     public $timestamps = false;
 
@@ -48,6 +46,34 @@ class FieldValue extends BaseModel
         'field_id',
         'value',
         'language_id',
+    ];
+
+    protected $rules = [
+        /** @see validate() */
+        'field_id' => [
+            'checks' => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Field ID is not integer!'],
+                'max' => ['default_text' => 'Field ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Field ID value must be greater than zero'],
+            ],
+        ],
+        'language_id' => [
+            'checks' => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Language ID is not integer!'],
+                'max' => ['default_text' => 'Language ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Language ID value must be greater than zero'],
+            ],
+        ],
     ];
 
     public function field()

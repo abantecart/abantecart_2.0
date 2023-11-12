@@ -1,20 +1,19 @@
 <?php
 /**
  * AbanteCart, Ideal Open Source Ecommerce Solution
- * http://www.abantecart.com
+ * https://www.abantecart.com
  *
- * Copyright 2011-2022 Belavier Commerce LLC
+ * Copyright (c) 2011-2023  Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
  * It is also available at this URL:
- * <http://www.opensource.org/licenses/OSL-3.0>
+ * <https://www.opensource.org/licenses/OSL-3.0>
  *
  * UPGRADE NOTE:
  * Do not edit or add to this file if you wish to upgrade AbanteCart to newer
  * versions in the future. If you wish to customize AbanteCart for your
- * needs please refer to http://www.abantecart.com for more information.
- *
+ * needs please refer to https://www.abantecart.com for more information.
  */
 
 namespace abc\models\catalog;
@@ -79,28 +78,33 @@ class ProductDescription extends BaseModel
 
     protected $rules = [
         /** @see validate() */
-        'product_id'       => [
-            'checks'   => [
+        'product_id' => [
+            'checks' => [
                 'integer',
                 'required',
+                'sometimes',
                 'exists:products',
             ],
             'messages' => [
-                '*' => ['default_text' => 'Product ID is not Integer or absent in products table!'],
+                'exists' => ['default_text' => 'Product ID absent in products table!'],
+                'integer' => ['default_text' => 'Product ID is not Integer!'],
+                'required' => ['default_text' => 'Product ID required']
             ],
         ],
-        'language_id'      => [
-            'checks'   => [
+        'language_id' => [
+            'checks' => [
                 'integer',
                 'required',
-                'exists:languages'
+                'exists:languages',
             ],
             'messages' => [
-                '*' => ['default_text' => 'Language ID is not Integer or not presents in languages table!'],
+                'exist' => ['default_text' => 'Language ID is not presents in languages table!'],
+                'integer' => ['default_text' => 'Language ID is not Integer!'],
+                'required' => ['default_text' => 'Language ID required']
             ],
         ],
-        'name'             => [
-            'checks'   => [
+        'name' => [
+            'checks' => [
                 'string',
                 'sometimes',
                 'required',
@@ -108,15 +112,15 @@ class ProductDescription extends BaseModel
             ],
             'messages' => [
                 '*' => [
-                    'language_key'   => 'error_name',
+                    'language_key' => 'error_name',
                     'language_block' => 'catalog/product',
-                    'default_text'   => 'Product Name must be greater than 3 and less than 255 characters!',
-                    'section'        => 'admin',
+                    'default_text' => 'Product Name must be greater than 3 and less than 255 characters!',
+                    'section' => 'admin',
                 ],
             ],
         ],
-        'meta_keywords'    => [
-            'checks'   => [
+        'meta_keywords' => [
+            'checks' => [
                 'string',
                 'max:255',
             ],
@@ -127,7 +131,7 @@ class ProductDescription extends BaseModel
             ],
         ],
         'meta_description' => [
-            'checks'   => [
+            'checks' => [
                 'string',
                 'max:255',
             ],
@@ -137,8 +141,8 @@ class ProductDescription extends BaseModel
                 ],
             ],
         ],
-        'description'      => [
-            'checks'   => [
+        'description' => [
+            'checks' => [
                 'string',
             ],
             'messages' => [
@@ -147,8 +151,8 @@ class ProductDescription extends BaseModel
                 ],
             ],
         ],
-        'blurb'            => [
-            'checks'   => [
+        'blurb' => [
+            'checks' => [
                 'string',
             ],
             'messages' => [
@@ -184,5 +188,4 @@ class ProductDescription extends BaseModel
     {
         return $this->belongsTo(Language::class, 'language_id');
     }
-
 }

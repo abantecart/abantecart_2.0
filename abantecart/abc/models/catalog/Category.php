@@ -112,27 +112,35 @@ class Category extends BaseModel
     protected $rules = [
         /** @see validate() */
         'category_id' => [
-            'checks'   => [
+            'checks' => [
                 'integer',
                 'sometimes',
                 'required',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => ['default_text' => 'Category ID is not integer!'],
+                'integer' => ['default_text' => 'Category ID is not integer!'],
+                'max' => ['default_text' => 'Category ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Category ID value must be greater than zero'],
+                'required' => ['default_text' => 'Category ID required']
             ],
         ],
-        'parent_id'   => [
-            'checks'   => [
+        'parent_id' => [
+            'checks' => [
                 'integer',
                 'nullable',
                 'exists:categories,category_id',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => ['default_text' => 'Parent ID is not integer or absent in categories table!'],
+                'integer' => ['default_text' => 'Parent ID is not integer!'],
+                'max' => ['default_text' => 'Parent ID must be less than 2147483647'],
+                'exists' => ['default_text' => 'Parent ID not absent in categories table']
             ],
         ],
-        'uuid'        => [
-            'checks'   => [
+        'uuid' => [
+            'checks' => [
                 'string',
                 'nullable',
             ],
@@ -140,8 +148,8 @@ class Category extends BaseModel
                 '*' => ['default_text' => 'UUID is not a string!'],
             ],
         ],
-        'path'        => [
-            'checks'   => [
+        'path' => [
+            'checks' => [
                 'string',
                 'sometimes',
                 'required',
@@ -153,51 +161,60 @@ class Category extends BaseModel
         ],
 
         'total_products_count' => [
-            'checks'   => [
+            'checks' => [
                 'integer',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => ':attribute is not integer!',
-                ],
+                'integer' => ['default_text' => ':attribute is not integer!'],
+                'min' => ['default_text' => ':attribute value must be greater than zero'],
+                'max' => ['default_text' => ':attribute must be less than 2147483647']
             ],
         ],
 
         'active_products_count' => [
-            'checks'   => [
+            'checks' => [
                 'integer',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => ':attribute is not integer!',
-                ],
+                'integer' => ['default_text' => ':attribute is not integer!'],
+                'min' => ['default_text' => ':attribute value must be greater than zero'],
+                'max' => ['default_text' => ':attribute must be less than 2147483647']
             ],
         ],
 
         'children_count' => [
-            'checks'   => [
+            'checks' => [
                 'integer',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => ':attribute is not integer!',
-                ],
+                'integer' => ['default_text' => ':attribute is not integer!'],
+                'min' => ['default_text' => ':attribute value must be greater than zero'],
+                'max' => ['default_text' => ':attribute must be less than 2147483647']
             ],
         ],
 
         'sort_order' => [
-            'checks'   => [
+            'checks' => [
                 'integer',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => ':attribute is not integer!',
-                ],
+                'integer' => ['default_text' => ':attribute is not integer!'],
+                'min' => ['default_text' => ':attribute value must be greater than zero'],
+                'max' => ['default_text' => ':attribute must be less than 2147483647']
+
             ],
         ],
 
         'status' => [
-            'checks'   => [
+            'checks' => [
                 'boolean',
             ],
             'messages' => [
@@ -495,7 +512,12 @@ class Category extends BaseModel
 
         $category_data = [];
 
-        $query = static::select();
+        $query = static::select(
+            [
+                'categories.*',
+                'category_descriptions.*'
+            ]
+        );
         $query->leftJoin(
             'category_descriptions',
             'categories.category_id',
@@ -503,6 +525,9 @@ class Category extends BaseModel
             'category_descriptions.category_id'
         );
         if (!is_null($storeId)) {
+            $storeId = is_array($storeId)
+                ? array_map('intval', $storeId)
+                : (int)$storeId;
             $query->rightJoin(
                 'categories_to_stores',
                 function ($join) use ($storeId) {
@@ -511,9 +536,18 @@ class Category extends BaseModel
                         'categories.category_id',
                         '=',
                         'categories_to_stores.category_id'
-                    )->where('categories_to_stores.store_id', '=', (int)$storeId);
+                    );
+                    if (is_array($storeId)) {
+                        $join->whereIn('categories_to_stores.store_id', $storeId);
+                    } else {
+                        $join->where('categories_to_stores.store_id', '=', $storeId);
+                    }
                 }
-            );
+            )->leftJoin('stores', 'categories_to_stores.store_id', '=', 'stores.store_id')
+                ->addSelect('stores.name as store_name');
+            if (is_array($storeId)) {
+                $query->orderBy('categories_to_stores.store_id');
+            }
         }
 
         if ((int)$parentId > 0) {
@@ -1182,7 +1216,6 @@ class Category extends BaseModel
                         ->where('sss.key', '=', 'config_ssl_url');
                 }
             )->where('category_id', '=', (int)$category_id)
-            ->useCache('category')
             ->get();
         if ($storeInfo) {
             return json_decode($storeInfo, true);

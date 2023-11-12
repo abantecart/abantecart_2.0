@@ -1,22 +1,20 @@
 <?php
-/*------------------------------------------------------------------------------
-  $Id$
-
-  AbanteCart, Ideal OpenSource Ecommerce Solution
-  http://www.AbanteCart.com
-
-  Copyright © 2011-2023 Belavier Commerce LLC
-
-  This source file is subject to Open Software License (OSL 3.0)
-  License details is bundled with this package in the file LICENSE.txt.
-  It is also available at this URL:
-  <http://www.opensource.org/licenses/OSL-3.0>
-
- UPGRADE NOTE:
-   Do not edit or add to this file if you wish to upgrade AbanteCart to newer
-   versions in the future. If you wish to customize AbanteCart for your
-   needs please refer to http://www.AbanteCart.com for more information.
-------------------------------------------------------------------------------*/
+/**
+ * AbanteCart, Ideal Open Source Ecommerce Solution
+ * https://www.abantecart.com
+ *
+ * Copyright (c) 2011-2023  Belavier Commerce LLC
+ *
+ * This source file is subject to Open Software License (OSL 3.0)
+ * License details is bundled with this package in the file LICENSE.txt.
+ * It is also available at this URL:
+ * <https://www.opensource.org/licenses/OSL-3.0>
+ *
+ * UPGRADE NOTE:
+ * Do not edit or add to this file if you wish to upgrade AbanteCart to newer
+ * versions in the future. If you wish to customize AbanteCart for your
+ * needs please refer to https://www.abantecart.com for more information.
+ */
 
 namespace abc\controllers\admin;
 
@@ -26,24 +24,23 @@ use abc\core\engine\Registry;
 use abc\core\lib\AError;
 use abc\core\lib\AException;
 use abc\core\lib\AJson;
-use abc\models\admin\ModelCatalogProduct;
+use abc\models\casts\NullableInt;
 use abc\models\catalog\Product;
+use abc\models\catalog\ProductDescription;
 use abc\models\catalog\ProductDiscount;
 use abc\models\catalog\ProductSpecial;
+use abc\models\QueryBuilder;
 use Exception;
 use H;
+use Illuminate\Validation\ValidationException;
 use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionException;
 use stdClass;
 
-/**
- * Class ControllerResponsesListingGridProduct
- *
- * @package abc\controllers\admin
- * @property ModelCatalogProduct $model_catalog_product
- */
+
 class ControllerResponsesListingGridProduct extends AController
 {
+    public $error = [];
     public function main()
     {
         $page = (int)$this->request->post['page'] ?: 1;
@@ -99,7 +96,7 @@ class ControllerResponsesListingGridProduct extends AController
         $results = Product::getProducts($this->data['search_parameters']);
         //push result into public scope to get access from extensions
         $this->data['results'] = $results;
-
+        /** @see QueryBuilder::get() */
         $total = $results::getFoundRowsCount();
         $total_pages = $total > 0 ? ceil($total / $limit) : 0;
         $response = new stdClass();
@@ -142,7 +139,7 @@ class ControllerResponsesListingGridProduct extends AController
                 $thumbnail['thumb_html'],
                 $this->html->buildInput(
                     [
-                        'name'  => 'product_description[' . $result['product_id'] . '][name]',
+                        'name' => 'name[' . $result['product_id'] . ']',
                         'value' => $result['name'],
                     ]
                 ),
@@ -186,7 +183,6 @@ class ControllerResponsesListingGridProduct extends AController
             return;
         }
 
-        $this->loadModel('catalog/product');
         $this->loadLanguage('catalog/product');
 
         switch ($this->request->post['oper']) {
@@ -236,7 +232,7 @@ class ControllerResponsesListingGridProduct extends AController
                 break;
             case 'save':
                 $allowedFields = array_merge(
-                    ['product_description', 'model', 'call_to_order', 'price', 'quantity', 'status'],
+                    ['name', 'model', 'call_to_order', 'price', 'quantity', 'status'],
                     (array)$this->data['allowed_fields']
                 );
                 $ids = explode(',', $this->request->post['id']);
@@ -247,15 +243,18 @@ class ControllerResponsesListingGridProduct extends AController
                             if ($f == 'status' && !isset($this->request->post['status'][$id])) {
                                 $this->request->post['status'][$id] = 0;
                             }
+                            if ($f == 'maximum') {
+                                $this->request->post['maximum'][$id] = $this->request->post['maximum'][$id] ?: null;
+                            }
 
                             if (isset($this->request->post[$f][$id])) {
-                                $err = $this->validateField($f, $this->request->post[$f][$id]);
+                                $err = $this->validateField($id, $f, $this->request->post[$f][$id]);
                                 if (!empty($err)) {
                                     $error = new AError('');
                                     $error->toJSONResponse(
                                         'VALIDATION_ERROR_406',
                                         [
-                                            'error_text' => $err
+                                            'error_text' => $err . ' (' . $this->request->post[$f][$id] . ')'
                                         ]
                                     );
                                     return;
@@ -268,6 +267,7 @@ class ControllerResponsesListingGridProduct extends AController
                             $this->extensions->hk_ProcessData($this, 'update', ['product_id' => $id]);
                         }
                     }
+                    $this->response->setOutput($this->language->get('text_success'));
                 }
                 break;
             case 'relate':
@@ -275,6 +275,7 @@ class ControllerResponsesListingGridProduct extends AController
                 if (!empty($ids)) {
                     Product::relateProducts($ids);
                 }
+                $this->response->setOutput($this->language->get('text_success'));
                 break;
         }
 
@@ -308,13 +309,12 @@ class ControllerResponsesListingGridProduct extends AController
         }
 
         $this->loadLanguage('catalog/product');
-        $this->loadModel('catalog/product');
 
-        $product_id = (int)$this->request->get['id'];
-        if ($product_id) {
+        $productId = (int)$this->request->get['id'];
+        if ($productId) {
             //request sent from edit form. ID in url
             foreach ($this->request->post as $key => $value) {
-                $err = $this->validateField($key, $value);
+                $err = $this->validateField($productId, $key, $value);
                 if (!empty($err)) {
                     $error = new AError('');
                     $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
@@ -323,29 +323,36 @@ class ControllerResponsesListingGridProduct extends AController
                 if ($key == 'date_available') {
                     $value = H::dateDisplay2ISO($value);
                 }
+                if ($key == 'maximum') {
+                    $value = abs((int)$value) ?: null;
+                }
+                if ($key == 'minimum') {
+                    $value = max((int)$value, 1);
+                }
                 $data = [$key => $value];
-                Product::updateProduct($product_id, $data);
+                Product::updateProduct($productId, $data);
             }
-            $this->extensions->hk_ProcessData($this, 'update_field', ['product_id' => $product_id]);
+            $this->extensions->hk_ProcessData($this, 'update_field', ['product_id' => $productId]);
             return;
         }
 
         //request sent from jGrid. ID is key of array
         $allowedFields = array_merge(
-            ['product_description', 'model', 'price', 'call_to_order', 'quantity', 'status'],
+            ['name', 'model', 'price', 'call_to_order', 'quantity', 'status'],
             (array)$this->data['allowed_fields']
         );
+        //NOTE: structure of data from jqGrid is $_POST[{fieldname}][{productID}] => value
         foreach ($allowedFields as $f) {
             if (isset($this->request->post[$f])) {
-                foreach ($this->request->post[$f] as $k => $v) {
-                    $err = $this->validateField($f, $v);
+                foreach ($this->request->post[$f] as $productId => $v) {
+                    $err = $this->validateField($productId, $f, $v);
                     if (!empty($err)) {
                         $error = new AError('');
                         $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
                         return;
                     }
-                    Product::updateProduct($k, [$f => $v]);
-                    $this->extensions->hk_ProcessData($this, 'update_field', ['product_id' => $k]);
+                    Product::updateProduct($productId, [$f => $v]);
+                    $this->extensions->hk_ProcessData($this, 'update_field', ['product_id' => $productId]);
                 }
             }
         }
@@ -371,14 +378,9 @@ class ControllerResponsesListingGridProduct extends AController
         }
 
         $this->loadLanguage('catalog/product');
-        $this->loadModel('catalog/product');
-        if (isset($this->request->get['id'])) {
+        if ($this->request->get['id']) {
             //request sent from edit form. ID in url
-            foreach ($this->request->post as $key => $value) {
-                $data = [$key => $value];
-                $discount = ProductDiscount::find($this->request->get['id']);
-                $discount?->update($data);
-            }
+            ProductDiscount::find($this->request->get['id'])?->update($this->request->post);
 
             $this->extensions->hk_ProcessData(
                 $this,
@@ -416,15 +418,9 @@ class ControllerResponsesListingGridProduct extends AController
         }
 
         $this->loadLanguage('catalog/product');
-        $this->loadModel('catalog/product');
-        if (isset($this->request->get['id'])) {
+        if ($this->request->get['id']) {
             //request sent from edit form. ID in url
-            foreach ($this->request->post as $key => $value) {
-                $data = [$key => $value];
-                $special = ProductSpecial::find($this->request->get['id']);
-                $special?->update($data);
-            }
-
+            ProductSpecial::find($this->request->get['id'])?->update($this->request->post);
             $this->extensions->hk_ProcessData(
                 $this,
                 __FUNCTION__,
@@ -460,7 +456,6 @@ class ControllerResponsesListingGridProduct extends AController
         }
 
         $this->loadLanguage('catalog/product');
-        $this->loadModel('catalog/product');
         if (isset($this->request->get['id'])) {
             //request sent from edit form. ID in url
             foreach ($this->request->post as $key => $value) {
@@ -484,33 +479,63 @@ class ControllerResponsesListingGridProduct extends AController
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
     }
 
-    protected function validateField($field, $value)
+    protected function validateField(int $productId, string $field, $value)
     {
-        $this->data['error'] = '';
-        switch ($field) {
-            case 'product_description' :
-                if (isset($value['name']) && ((mb_strlen($value['name']) < 1) || (mb_strlen($value['name']) > 255))) {
-                    $this->data['error'] = $this->language->get('error_name');
-                }
-                break;
-            case 'model' :
-                if (mb_strlen($value) > 64) {
-                    $this->data['error'] = $this->language->get('error_model');
-                }
-                break;
-            case 'keyword' :
-                $this->data['error'] = $this->html->isSEOkeywordExists('product_id=' . $this->request->get['id'], $value);
-                break;
-            case 'length' :
-            case 'width'  :
-            case 'height' :
-            case 'weight' :
-                $v = abs(H::preformatFloat($value, $this->language->get('decimal_point')));
-                if ($v >= 1000) {
-                    $this->data['error'] = $this->language->get('error_measure_value');
-                }
-                break;
+        $this->error = [];
+        $data = [$field => $value];
+
+        if ($productId) {
+            $data['product_id'] = $productId;
         }
+
+        $this->data['error'] = '';
+        $product = Product::find($productId);
+        if (!$product) {
+            $this->data['error'] = 'Product #' . $productId . ' not found.';
+            return $this->data['error'];
+        }
+
+        if ($field == 'maximum') {
+            $data['minimum'] = $product->minimum ?: 1;
+        }
+        if ($field == 'minimum') {
+            $data['maximum'] = $product->maximum ?: null;
+        }
+
+        $pd = new ProductDescription($data);
+
+        if ($field == 'keyword') {
+            $this->data['error'] = $this->html->isSEOkeywordExists('product_id=' . $productId, $value);
+        } elseif (in_array($field, $product->getFillable())) {
+            $casts = $product->getCasts();
+            foreach ($casts as $column => $cast) {
+                if ($cast == NullableInt::class && !$data[$column]) {
+                    $data[$column] = null;
+                }
+            }
+
+            try {
+                $product->validate($data);
+            } catch (ValidationException $e) {
+                H::SimplifyValidationErrors($product->errors()['validation'], $this->error);
+                $this->data['error'] .= implode("\n", $this->error);
+            }
+        } elseif (in_array($field, $pd->getFillable())) {
+            $data['language_id'] = $this->language->getContentLanguageID();
+            $casts = $pd->getCasts();
+            foreach ($casts as $column => $cast) {
+                if ($cast == NullableInt::class && !$data[$column]) {
+                    $data[$column] = null;
+                }
+            }
+            try {
+                $pd->validate($data);
+            } catch (ValidationException $e) {
+                H::SimplifyValidationErrors($pd->errors()['validation'], $this->error);
+                $this->data['error'] .= implode("\n", $this->error);
+            }
+        }
+
         $this->extensions->hk_ValidateData($this, __FUNCTION__, $field, $value);
 
         return $this->data['error'];

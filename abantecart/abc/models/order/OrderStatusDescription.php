@@ -46,41 +46,47 @@ class OrderStatusDescription extends BaseModel
     protected $rules = [
 
         'order_status_id' => [
-            'checks'   => [
+            'checks' => [
                 'int',
                 'exists:order_statuses',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => ':attribute is not integer or absent in order_statuses table!',
-                ],
+                'int' => ['default_text' => ':attribute is not integer or absent in order_statuses table!'],
+                'max' => ['default_text' => ':attribute must be less than 2147483647'],
+                'min' => ['default_text' => ':attribute value must be greater than zero'],
+                'exists' => ['default_text' => ':attribute not exists in order_statuses table']
             ],
         ],
 
         'language_id' => [
-            'checks'   => [
+            'checks' => [
                 'int',
                 'exists:languages',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => ':attribute is not integer or absent in languages table!',
-                ],
+                'int' => ['default_text' => ':attribute is not integer or absent in languages table!'],
+                'max' => ['default_text' => ':attribute must be less than 2147483647'],
+                'min' => ['default_text' => ':attribute value must be greater than zero'],
+                'exists' => ['default_text' => ':attribute not exists in languages table']
             ],
         ],
 
         'name' => [
-            'checks'   => [
+            'checks' => [
                 'string',
                 'max:32',
                 'required',
             ],
             'messages' => [
                 '*' => [
-                    'language_key'   => 'error_name',
+                    'language_key' => 'error_name',
                     'language_block' => 'localisation/order_status',
-                    'section'        => 'admin',
-                    'default_text'   => ':attribute must be string 32 characters length!',
+                    'section' => 'admin',
+                    'default_text' => ':attribute must be string 32 characters length!',
                 ],
             ],
         ],

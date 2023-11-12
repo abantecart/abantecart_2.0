@@ -76,35 +76,45 @@ class BlockDescription extends BaseModel
     protected $rules = [
         /** @see validate() */
         'custom_block_id' => [
-            'checks'   => [
+            'checks' => [
                 'int',
                 'required',
-                'sometimes'
+                'sometimes',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => ['default_text' => 'Custom Block ID is empty!'],
+                'int' => ['default_text' => 'Custom Block ID is not integer!'],
+                'max' => ['default_text' => 'Custom Block ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Custom Block ID value must be greater than zero'],
+                'required' => ['default_text' => 'Custom Block ID required']
             ],
         ],
-        'language_id'     => [
-            'checks'   => [
+        'language_id' => [
+            'checks' => [
                 'int',
                 'required',
-                'sometimes'
+                'sometimes',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => ['default_text' => 'Language ID is not integer!'],
+                'int' => ['default_text' => 'Language ID is not integer!'],
+                'max' => ['default_text' => 'Language ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Language ID value must be greater than zero'],
+                'required' => ['default_text' => 'Language ID required']
             ],
         ],
-        'block_wrapper'   => [
-            'checks'   => [
+        'block_wrapper' => [
+            'checks' => [
                 'string'
             ],
             'messages' => [
                 '*' => ['default_text' => 'Block Wrapper (Template Route) is empty!'],
             ],
         ],
-        'block_framed'    => [
-            'checks'   => [
+        'block_framed' => [
+            'checks' => [
                 'bool'
             ],
             'messages' => [

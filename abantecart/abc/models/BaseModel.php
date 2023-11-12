@@ -1,19 +1,19 @@
 <?php
 /**
  * AbanteCart, Ideal Open Source Ecommerce Solution
- * http://www.abantecart.com
+ * https://www.abantecart.com
  *
- * Copyright 2011-2022 Belavier Commerce LLC
+ * Copyright (c) 2011-2023  Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
  * It is also available at this URL:
- * <http://www.opensource.org/licenses/OSL-3.0>
+ * <https://www.opensource.org/licenses/OSL-3.0>
  *
  * UPGRADE NOTE:
  * Do not edit or add to this file if you wish to upgrade AbanteCart to newer
  * versions in the future. If you wish to customize AbanteCart for your
- * needs please refer to http://www.abantecart.com for more information.
+ * needs please refer to https://www.abantecart.com for more information.
  */
 
 namespace abc\models;
@@ -22,7 +22,6 @@ use abc\core\ABC;
 use abc\core\engine\Registry;
 use abc\core\lib\Abac;
 use abc\core\lib\AException;
-use abc\models\catalog\Product;
 use abc\modules\injections\models\ModelSearch;
 use Carbon\Carbon;
 use Chelout\RelationshipEvents\Concerns\HasBelongsToEvents;
@@ -64,6 +63,7 @@ use ReflectionMethod;
  * @method static integer max(string $id) int
  * @method static QueryBuilder with(string|array ...$relations) QueryBuilder
  * @method static QueryBuilder selectRaw(string $sql, $bindings = []) QueryBuilder
+ * @method static int count()
  * @method static QueryBuilder distinct(array $columns) QueryBuilder
  * @method static OrmModel|static updateOrCreate(array $attributes = [], array $values = [])
  * @method static OrmModel|static firstOrCreate(array $attributes = [], array $values = [])
@@ -94,6 +94,12 @@ abstract class BaseModel extends OrmModel
     const CREATED_AT = 'date_added';
     const UPDATED_AT = 'date_modified';
     const DELETED_AT = 'date_deleted';
+
+    public $timestamps = [
+        'date_added',
+        'date_modified',
+    ];
+
     public static $defaultDatetimeStringFormat = 'Y-m-d H:i:s';
 
     const CLI = 0;

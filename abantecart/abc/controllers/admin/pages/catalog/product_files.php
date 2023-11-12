@@ -24,6 +24,7 @@ use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AResource;
 use abc\models\catalog\Product;
+use abc\modules\traits\EditProductTrait;
 use H;
 
 if (!class_exists('abc\core\ABC') || !ABC::env('IS_ADMIN')) {
@@ -32,6 +33,7 @@ if (!class_exists('abc\core\ABC') || !ABC::env('IS_ADMIN')) {
 
 class ControllerPagesCatalogProductFiles extends AController
 {
+    use EditProductTrait;
     public $error = [];
 
     public function main()
@@ -40,7 +42,6 @@ class ControllerPagesCatalogProductFiles extends AController
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
         $this->loadLanguage('catalog/files');
-        $this->document->setTitle($this->language->get('heading_title'));
         $this->loadModel('catalog/download');
         $productId = $this->request->get['product_id'];
         $downloadId = $this->request->get['download_id'];
@@ -91,41 +92,15 @@ class ControllerPagesCatalogProductFiles extends AController
             unset($this->session->data['success']);
         }
 
-        $this->document->initBreadcrumb(
-            [
-                'href'      => $this->html->getSecureURL('index/home'),
-                'text'      => $this->language->get('text_home'),
-                'separator' => false,
-            ]
+        $this->setBreadCrumbs(
+            $productInfo,
+            $this->html->getSecureURL('catalog/product_files', '&product_id=' . $productId),
+            $this->language->get('tab_files')
         );
-        $this->document->addBreadcrumb(
-            [
-                'href'      => $this->html->getSecureURL('catalog/product'),
-                'text'      => $this->language->get('heading_title'),
-                'separator' => ' :: ',
-            ]
-        );
-        $this->document->addBreadcrumb(
-            [
-                'href'      => $this->html->getSecureURL('catalog/product/update', '&product_id=' . $productId),
-                'text'      => $productInfo['name'],
-                'separator' => ' :: ',
-            ]
-        );
-        $this->document->addBreadcrumb(
-            [
-                'href'      => $this->html->getSecureURL('catalog/product_files', '&product_id=' . $productId),
-                'text'      => $this->language->get('tab_files'),
-                'separator' => ' :: ',
-                'current'   => true,
-            ]
-        );
+        $this->document->setTitle($productInfo['name'] . ' ' . $this->language->get('tab_files'));
 
-        $this->data['active'] = 'files';
-        //load tabs controller
-        $tabs_obj = $this->dispatch('pages/catalog/product_tabs', [$this->data]);
-        $this->data['product_tabs'] = $tabs_obj->dispatchGetOutput();
-        unset($tabs_obj);
+        $this->addTabs('files');
+        $this->addSummary();
 
         $this->loadModel('catalog/download');
         $this->data['downloads'] = [];
@@ -230,7 +205,6 @@ class ControllerPagesCatalogProductFiles extends AController
             $this->data['embed_url'] = $this->html->getSecureURL('common/do_embed/product', '&product_id=' . $productId);
         }
 
-        $this->addChild('pages/catalog/product_summary', 'summary_form', 'pages/catalog/product_summary.tpl');
         $this->view->assign('help_url', $this->gen_help_url('product_files'));
         $this->view->assign('form_language_switch', $this->html->getContentLanguageSwitcher());
         $this->view->batchAssign($this->data);

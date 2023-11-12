@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2022 Belavier Commerce LLC
+  Copyright © 2011-2023 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -24,6 +24,8 @@ use abc\core\ABC;
 use abc\core\engine\AController;
 use abc\core\engine\AForm;
 use abc\core\lib\ALayoutManager;
+use abc\models\catalog\Product;
+use abc\modules\traits\EditProductTrait;
 use H;
 
 if (!class_exists('abc\core\ABC') || !ABC::env('IS_ADMIN')) {
@@ -32,39 +34,31 @@ if (!class_exists('abc\core\ABC') || !ABC::env('IS_ADMIN')) {
 
 class ControllerPagesCatalogProductLayout extends AController
 {
+    use EditProductTrait;
     public function main()
     {
         $page_controller = 'pages/product/product';
         $page_key_param = 'product_id';
-        $product_id = (int)$this->request->get['product_id'];
-        $page_url = $this->html->getSecureURL('catalog/product_layout', '&product_id=' . $product_id);
 
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
+        $productId = (int)$this->request->get['product_id'];
+        $page_url = $this->html->getSecureURL('catalog/product_layout', '&product_id=' . $productId);
 
         $this->loadLanguage('catalog/product');
         $this->loadLanguage('design/layout');
-        $this->document->setTitle($this->language->get('heading_title'));
-        $this->loadModel('catalog/product');
 
-        if (H::has_value($product_id) && $this->request->is_GET()) {
-            $product_info = $this->model_catalog_product->getProduct($product_id);
-            if (!$product_info) {
-                unset($this->session->data['success']);
-                $this->session->data['warning'] = $this->language->get('error_product_not_found');
-                abc_redirect($this->html->getSecureURL('catalog/product'));
-            }
-
+        $this->data['product_info'] = $productInfo = Product::getProductInfo($productId);
+        if (!$productInfo) {
+            $this->session->data['warning'] = $this->language->get('error_product_not_found');
+            abc_redirect($this->html->getSecureURL('catalog/product'));
         }
 
         $this->data['help_url'] = $this->gen_help_url('product_layout');
-        $this->data['product_description'] = $this->model_catalog_product->getProductDescriptions($product_id);
         $this->data['heading_title'] = $this->language->get('text_edit')
             . $this->language->get('text_product')
             . ' - '
-            . $this->data['product_description'][$this->session->data['content_language_id']]['name'];
-
-        $this->document->setTitle($this->data['heading_title']);
+            . $productInfo['name'];
 
         // Alert messages
         if (isset($this->session->data['warning'])) {
@@ -76,49 +70,21 @@ class ControllerPagesCatalogProductLayout extends AController
             unset($this->session->data['success']);
         }
 
-        $this->document->initBreadcrumb(
-            [
-                'href' => $this->html->getSecureURL('index/home'),
-                'text' => $this->language->get('text_home'),
-                'separator' => FALSE
-            ]);
-        $this->document->addBreadcrumb(
-            [
-                'href' => $this->html->getSecureURL('catalog/product'),
-                'text' => $this->language->get('heading_title'),
-                'separator' => ' :: '
-            ]);
-        $this->document->addBreadcrumb(
-            [
-                'href' => $this->html->getSecureURL('catalog/product/update', '&product_id=' . $product_id),
-                'text' => $this->data['heading_title'],
-                'separator' => ' :: '
-            ]);
-        $this->document->addBreadcrumb(
-            [
-                'href' => $page_url,
-                'text' => $this->language->get('tab_layout'),
-                'separator' => ' :: ',
-                'current' => true
-            ]);
-        //active tab
-        $this->data['active'] = 'layout';
-        //load tabs controller
-        $tabs_obj = $this->dispatch('pages/catalog/product_tabs', [$this->data]);
-        $this->data['product_tabs'] = $tabs_obj->dispatchGetOutput();
-        unset($tabs_obj);
+        $this->setBreadCrumbs($productInfo, $page_url, $this->language->get('tab_layout'));
+        $this->document->setTitle($productInfo['name'] . ' ' . $this->language->get('tab_layout'));
 
-        $this->addChild('pages/catalog/product_summary', 'summary_form', 'pages/catalog/product_summary.tpl');
+        $this->addTabs('layout');
+        $this->addSummary();
 
         $templateTextId = $this->request->get['tmpl_id'] ?? $this->config->get('config_storefront_template');
         $layout = new ALayoutManager($templateTextId);
         //get existing page layout or generic
-        $page_layout = $layout->getPageLayoutIDs($page_controller, $page_key_param, $product_id);
+        $page_layout = $layout->getPageLayoutIDs($page_controller, $page_key_param, $productId);
         $page_id = (int)$page_layout['page_id'];
         $layout_id = (int)$page_layout['layout_id'];
 
         $params = [
-            'product_id' => $product_id,
+            'product_id' => $productId,
             'page_id'    => $page_id,
             'layout_id'  => $layout_id,
             'tmpl_id'    => $templateTextId,
@@ -131,10 +97,12 @@ class ControllerPagesCatalogProductLayout extends AController
         foreach ($directories as $directory) {
             $this->data['templates'][] = basename($directory);
         }
-        $enabled_templates = $this->extensions->getExtensionsList([
-            'filter' => 'template',
-            'status' => 1,
-        ]);
+        $enabled_templates = $this->extensions->getExtensionsList(
+            [
+                'filter' => 'template',
+                'status' => 1,
+            ]
+        );
         foreach ($enabled_templates->rows as $template) {
             $this->data['templates'][] = $template['key'];
         }
@@ -142,17 +110,20 @@ class ControllerPagesCatalogProductLayout extends AController
         $action = $this->html->getSecureURL('catalog/product_layout/save');
         // Layout form data
         $form = new AForm('HT');
-        $form->setForm([
-            'form_name' => 'layout_form',
-        ]);
+        $form->setForm(
+            [
+                'form_name' => 'layout_form',
+            ]
+        );
 
         $this->data['form_begin'] = $form->getFieldHtml(
             [
-                'type' => 'form',
-                'name' => 'layout_form',
-                'attr' => 'data-confirm-exit="true"',
+                'type'   => 'form',
+                'name'   => 'layout_form',
+                'attr'   => 'data-confirm-exit="true"',
                 'action' => $action
-            ]);
+            ]
+        );
 
         $this->data['hidden_fields'] = '';
         foreach ($params as $name => $value) {
@@ -162,7 +133,8 @@ class ControllerPagesCatalogProductLayout extends AController
                     'type'  => 'hidden',
                     'name'  => $name,
                     'value' => $value
-                ]);
+                ]
+            );
         }
 
         $this->data['page_url'] = $page_url;
@@ -177,6 +149,8 @@ class ControllerPagesCatalogProductLayout extends AController
         //build pages and available layouts for cloning
         $this->data['pages'] = $layout->getAllPages();
         $av_layouts = ["0" => $this->language->get('text_select_copy_layout')];
+
+
         foreach ($this->data['pages'] as $page) {
             if ($page['layout_id'] != $layout_id) {
                 $av_layouts[$page['layout_id']] = $page['layout_name'];
@@ -184,25 +158,34 @@ class ControllerPagesCatalogProductLayout extends AController
         }
 
         $form = new AForm('HT');
-        $form->setForm([
-            'form_name' => 'cp_layout_frm',
-        ]);
+        $form->setForm(
+            [
+                'form_name' => 'cp_layout_frm',
+            ]
+        );
 
         $this->data['cp_layout_select'] = $form->getFieldHtml(
-            ['type' => 'selectbox',
-             'name' => 'layout_change',
-             'value' => '',
-             'options' => $av_layouts]);
+            [
+                'type'    => 'selectbox',
+                'name'    => 'layout_change',
+                'value'   => '',
+                'options' => $av_layouts
+            ]
+        );
 
         $this->data['cp_layout_frm'] = $form->getFieldHtml(
-            ['type' => 'form',
-             'name' => 'cp_layout_frm',
-             'attr' => 'class="aform form-inline"',
-             'action' => $action]);
+            [
+                'type'   => 'form',
+                'name'   => 'cp_layout_frm',
+                'attr'   => 'class="aform form-inline"',
+                'action' => $action
+            ]
+        );
         if ($this->config->get('config_embed_status')) {
             $this->data['embed_url'] = $this->html->getSecureURL(
                 'common/do_embed/product',
-                '&product_id=' . $this->request->get['product_id']);
+                '&product_id=' . $this->request->get['product_id']
+            );
         }
 
         $this->view->batchAssign($this->data);
@@ -219,13 +202,13 @@ class ControllerPagesCatalogProductLayout extends AController
 
         $page_controller = 'pages/product/product';
         $page_key_param = 'product_id';
-        $product_id = $this->request->post['product_id'];
+        $productId = (int)$this->request->post['product_id'];
 
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
         $this->loadLanguage('catalog/product');
 
-        if (!H::has_value($product_id)) {
+        if (!$productId) {
             unset($this->session->data['success']);
             $this->session->data['warning'] = $this->language->get('error_product_not_found');
             abc_redirect($this->html->getSecureURL('catalog/product/update'));
@@ -233,35 +216,38 @@ class ControllerPagesCatalogProductLayout extends AController
 
         // need to know if unique page existing
         $post = $this->request->post;
+
+        $this->data['product_info'] = $productInfo = Product::with('description', 'descriptions')
+            ->find($productId)
+            ?->toArray();
+        $post['layout_name'] = 'Product: ' . $productInfo['description']['name'];
+
         $tmpl_id = $post['tmpl_id'];
         $lm = new ALayoutManager($tmpl_id);
-        $pages = $lm->getPages($page_controller, $page_key_param, $product_id);
-        if (count($pages)) {
+        $pages = $lm->getPages($page_controller, $page_key_param, $productId);
+
+        if ($pages) {
             $page_id = (int)$pages[0]['page_id'];
             $layout_id = (int)$pages[0]['layout_id'];
         } else {
             $page_info = [
                 'controller' => $page_controller,
                 'key_param'  => $page_key_param,
-                'key_value'  => $product_id
+                'key_value' => $productId
             ];
 
-            $this->loadModel('catalog/product');
-            $product_info = $this->model_catalog_product->getProductDescriptions($product_id);
-            if ($product_info) {
-                foreach ($product_info as $language_id => $description) {
-                    if (!(int)$language_id) {
-                        continue;
-                    }
-                    $page_info['page_descriptions'][$language_id] = $description;
-                }
+            if ($productInfo['descriptions']) {
+                $page_info['page_descriptions'] = array_combine(
+                    array_column($productInfo['descriptions'], 'language_id'),
+                    $productInfo['descriptions']
+                );
             }
             $page_id = $lm->savePage($page_info);
+            //save new layout
             $layout_id = null;
-            // need to generate layout name
-            $default_language_id = $this->language->getDefaultLanguageID();
-            $post['layout_name'] = 'Product: ' . $product_info[$default_language_id]['name'];
+            $post['new'] = 1;
         }
+
 
         //create new instance with specific template/page/layout data
         $lm = new ALayoutManager($tmpl_id, $page_id, $layout_id);
@@ -270,14 +256,14 @@ class ControllerPagesCatalogProductLayout extends AController
             $lm->clonePageLayout($post['layout_change'], $layout_id, $post['layout_name']);
             $this->session->data['success'] = $this->language->get('text_success_layout');
         } else {
-            //save new layout
             $layout_data = $lm->prepareInput($post);
             if ($layout_data) {
-                $layout_data['new'] = 1;
                 $lm->savePageLayout($layout_data);
                 $this->session->data['success'] = $this->language->get('text_success_layout');
             }
         }
-        abc_redirect($this->html->getSecureURL('catalog/product_layout', '&product_id=' . $product_id));
+        //update controller data
+        $this->extensions->hk_UpdateData($this, __FUNCTION__);
+        abc_redirect($this->html->getSecureURL('catalog/product_layout', '&product_id=' . $productId));
     }
 }

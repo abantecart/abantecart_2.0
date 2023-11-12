@@ -1,22 +1,20 @@
 <?php
-/*------------------------------------------------------------------------------
-  $Id$
-
-  AbanteCart, Ideal OpenSource Ecommerce Solution
-  http://www.AbanteCart.com
-
-  Copyright © 2011-2021 Belavier Commerce LLC
-
-  This source file is subject to Open Software License (OSL 3.0)
-  License details is bundled with this package in the file LICENSE.txt.
-  It is also available at this URL:
-  <http://www.opensource.org/licenses/OSL-3.0>
-
- UPGRADE NOTE:
-   Do not edit or add to this file if you wish to upgrade AbanteCart to newer
-   versions in the future. If you wish to customize AbanteCart for your
-   needs please refer to http://www.AbanteCart.com for more information.
-------------------------------------------------------------------------------*/
+/**
+ * AbanteCart, Ideal Open Source Ecommerce Solution
+ * https://www.abantecart.com
+ *
+ * Copyright (c) 2011-2023  Belavier Commerce LLC
+ *
+ * This source file is subject to Open Software License (OSL 3.0)
+ * License details is bundled with this package in the file LICENSE.txt.
+ * It is also available at this URL:
+ * <https://www.opensource.org/licenses/OSL-3.0>
+ *
+ * UPGRADE NOTE:
+ * Do not edit or add to this file if you wish to upgrade AbanteCart to newer
+ * versions in the future. If you wish to customize AbanteCart for your
+ * needs please refer to https://www.abantecart.com for more information.
+ */
 
 namespace abc\controllers\admin;
 
@@ -48,11 +46,6 @@ use Exception;
 use H;
 use Illuminate\Validation\ValidationException;
 
-/**
- * Class ControllerPagesSaleOrder
- *
- * @package abc\controllers\admin
- */
 class ControllerPagesSaleOrder extends AController
 {
     use SaleOrderTrait;
@@ -65,17 +58,21 @@ class ControllerPagesSaleOrder extends AController
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
         $this->document->setTitle($this->language->get('heading_title'));
-        $this->document->initBreadcrumb([
-            'href'      => $this->html->getSecureURL('index/home'),
-            'text'      => $this->language->get('text_home'),
-            'separator' => false,
-        ]);
-        $this->document->addBreadcrumb([
-            'href'      => $this->html->getSecureURL('sale/order'),
-            'text'      => $this->language->get('heading_title'),
-            'separator' => ' :: ',
-            'current'   => true,
-        ]);
+        $this->document->initBreadcrumb(
+            [
+                'href'      => $this->html->getSecureURL('index/home'),
+                'text'      => $this->language->get('text_home'),
+                'separator' => false,
+            ]
+        );
+        $this->document->addBreadcrumb(
+            [
+                'href'      => $this->html->getSecureURL('sale/order'),
+                'text'      => $this->language->get('heading_title'),
+                'separator' => ' :: ',
+                'current'   => true,
+            ]
+        );
 
         if (isset($this->session->data['error'])) {
             $this->data['error_warning'] = $this->session->data['error'];
@@ -100,9 +97,9 @@ class ControllerPagesSaleOrder extends AController
         }
 
         //outer parameters to filter the result
-        $extra_params = $this->request->get['customer_id'] ? '&customer_id='.$this->request->get['customer_id'] : '';
-        $extra_params .= $this->request->get['product_id'] ? '&product_id='.$this->request->get['product_id'] : '';
-        $extra_params .= $this->request->get['status'] ? '&status='.$this->request->get['status'] : '';
+        $extra_params = $this->request->get['customer_id'] ? '&customer_id=' . $this->request->get['customer_id'] : '';
+        $extra_params .= $this->request->get['product_id'] ? '&product_id=' . $this->request->get['product_id'] : '';
+        $extra_params .= $this->request->get['status'] ? '&status=' . $this->request->get['status'] : '';
 
         $grid_settings = [
             //id of grid
@@ -144,35 +141,35 @@ class ControllerPagesSaleOrder extends AController
                     'text'     => $this->language->get('text_edit'),
                     'href'     => $this->html->getSecureURL('sale/order/details', '&order_id=%ID%'),
                     'children' => array_merge([
-                        'details'   => [
+                        'details'  => [
                             'text' => $this->language->get('tab_order_details'),
                             'href' => $this->html->getSecureURL(
                                 'sale/order/details',
                                 '&order_id=%ID%'
                             ),
                         ],
-                        'shipping'  => [
+                        'shipping' => [
                             'text' => $this->language->get('tab_shipping'),
                             'href' => $this->html->getSecureURL(
                                 'sale/order/shipping',
                                 '&order_id=%ID%'
                             ),
                         ],
-                        'payment'   => [
+                        'payment'  => [
                             'text' => $this->language->get('tab_payment'),
                             'href' => $this->html->getSecureURL(
                                 'sale/order/payment',
                                 '&order_id=%ID%'
                             ),
                         ],
-                        'files'     => [
+                        'files'    => [
                             'text' => $this->language->get('tab_files'),
                             'href' => $this->html->getSecureURL(
                                 'sale/order/files',
                                 '&order_id=%ID%'
                             ),
                         ],
-                        'history'   => [
+                        'history'  => [
                             'text' => $this->language->get('tab_history'),
                             'href' => $this->html->getSecureURL(
                                 'sale/order/history',
@@ -239,8 +236,8 @@ class ControllerPagesSaleOrder extends AController
         ];
 
         $results = OrderStatus::with('description')
-                              ->where('display_status', '=', '1')
-                              ->get();
+            ->where('display_status', '=', '1')
+            ->get();
         $statuses = [
             'default' => $this->language->get('text_select_status'),
             'all'     => $this->language->get('text_all_orders'),
@@ -252,7 +249,7 @@ class ControllerPagesSaleOrder extends AController
         $form = new AForm();
         $form->setForm(
             [
-                 'form_name' => 'order_grid_search',
+                'form_name' => 'order_grid_search',
             ]
         );
 
@@ -299,21 +296,25 @@ class ControllerPagesSaleOrder extends AController
                 'type'    => 'selectbox',
                 'name'    => 'status',
                 'options' => $statuses,
-                'value'   => ($this->request->get['status'] ? : $search_params['status']),
+                'value' => ($this->request->get['status'] ?: $search_params['status']),
             ]
         );
         $this->view->assign('js_date_format', H::format4Datepicker($this->language->get('date_format_short')));
-        $grid_search_form['fields']['date_start'] = $form->getFieldHtml([
-            'type'    => 'date',
-            'name'    => 'date_start',
-            'attr' => 'placeholder="'.$this->language->get('date_from').'"',
-        ]);
+        $grid_search_form['fields']['date_start'] = $form->getFieldHtml(
+            [
+                'type' => 'date',
+                'name' => 'date_start',
+                'attr' => 'placeholder="' . $this->language->get('date_from') . '"',
+            ]
+        );
 
-        $grid_search_form['fields']['date_end'] = $form->getFieldHtml([
-            'type'    => 'date',
-            'name'    => 'date_end',
-            'attr' => 'placeholder="'.$this->language->get('date_to').'"',
-        ]);
+        $grid_search_form['fields']['date_end'] = $form->getFieldHtml(
+            [
+                'type' => 'date',
+                'name' => 'date_end',
+                'attr' => 'placeholder="' . $this->language->get('date_to') . '"',
+            ]
+        );
         $grid_settings['search_form'] = true;
 
         $grid = $this->dispatch('common/listing_grid', [$grid_settings]);
@@ -383,12 +384,12 @@ class ControllerPagesSaleOrder extends AController
                     $this->model_catalog_download->editOrderDownload($order_download_id, $item);
                 }
             }
-            abc_redirect($this->html->getSecureURL('sale/order/details', '&order_id='.$order_id));
+            abc_redirect($this->html->getSecureURL('sale/order/details', '&order_id=' . $order_id));
         }
 
         if ($this->error) {
             $this->session->data['error'] = implode(' ', $this->error);
-            abc_redirect($this->html->getSecureURL('sale/order/details', '&order_id='.$order_id));
+            abc_redirect($this->html->getSecureURL('sale/order/details', '&order_id=' . $order_id));
         }
 
         $this->data['order_info'] = $order_info;
@@ -411,27 +412,32 @@ class ControllerPagesSaleOrder extends AController
             $this->data['balance_disabled'] = (!$this->config->get('balance_status'));
         }
 
-        $this->document->initBreadcrumb([
-            'href'      => $this->html->getSecureURL('index/home'),
-            'text'      => $this->language->get('text_home'),
-            'separator' => false,
-        ]);
+        $this->document->initBreadcrumb(
+            [
+                'href'      => $this->html->getSecureURL('index/home'),
+                'text'      => $this->language->get('text_home'),
+                'separator' => false,
+            ]
+        );
 
-        $this->document->addBreadcrumb([
-            'href'      => $this->html->getSecureURL('sale/order'),
-            'text'      => $this->language->get('heading_title'),
-            'separator' => ' :: ',
-        ]);
         $this->document->addBreadcrumb(
             [
-               'href'      => $this->html->getSecureURL(
-                   'sale/order/details',
-                   '&order_id='.$order_id
-               ),
-               'text'      => $this->language->get('heading_title').' #'.$order_id,
-               'separator' => ' :: ',
-               'current'   => true,
-           ]
+                'href'      => $this->html->getSecureURL('sale/order'),
+                'text'      => $this->language->get('heading_title'),
+                'separator' => ' :: ',
+            ]
+        );
+
+        $this->document->addBreadcrumb(
+            [
+                'href'      => $this->html->getSecureURL(
+                    'sale/order/details',
+                    '&order_id=' . $order_id
+                ),
+                'text'      => $this->language->get('heading_title') . ' #' . $order_id,
+                'separator' => ' :: ',
+                'current'   => true,
+            ]
         );
 
         if (isset($this->session->data['attention'])) {
@@ -447,9 +453,9 @@ class ControllerPagesSaleOrder extends AController
             $this->data['success'] = '';
         }
 
-        $this->data['heading_title'] = $this->language->get('heading_title').' #'.$order_id;
+        $this->data['heading_title'] = $this->language->get('heading_title') . ' #' . $order_id;
         $this->data['token'] = $this->session->data['token'];
-        $this->data['invoice_url'] = $this->html->getSecureURL('sale/invoice', '&order_id='.$order_id);
+        $this->data['invoice_url'] = $this->html->getSecureURL('sale/invoice', '&order_id=' . $order_id);
         $this->data['button_invoice'] = $this->html->buildElement(
             [
                 'type' => 'button',
@@ -457,11 +463,11 @@ class ControllerPagesSaleOrder extends AController
                 'text' => $this->language->get('button_generate'),
             ]
         );
+
         $this->data['invoice_generate'] = $this->html->getSecureURL('sale/invoice/generate');
-        $this->data['category_products'] = $this->html->getSecureURL('product/product/category');
         $this->data['product_update'] = $this->html->getSecureURL('catalog/product/update');
         $this->data['order_id'] = $order_id;
-        $this->data['action'] = $this->html->getSecureURL('sale/order/details', '&order_id='.$order_id);
+        $this->data['action'] = $this->html->getSecureURL('sale/order/details', '&order_id=' . $order_id);
         $this->data['cancel'] = $this->html->getSecureURL('sale/order');
 
         if ($viewport_mode != 'modal') {
@@ -470,7 +476,7 @@ class ControllerPagesSaleOrder extends AController
 
         // These only change for insert, not edit. To be added later
         $this->data['ip'] = $order_info['ip'];
-        $this->data['history'] = $this->html->getSecureURL('sale/order/history', '&order_id='.$order_id);
+        $this->data['history'] = $this->html->getSecureURL('sale/order/history', '&order_id=' . $order_id);
         $this->data['store_name'] = $order_info['store_name'];
         $this->data['store_url'] = $order_info['store_url'];
         $this->data['comment'] = nl2br($order_info['comment']);
@@ -483,16 +489,16 @@ class ControllerPagesSaleOrder extends AController
         );
         $this->data['date_added'] = H::dateISO2Display(
             $order_info['date_added'],
-            $this->language->get('date_format_short').' '.$this->language->get('time_format')
+            $this->language->get('date_format_short') . ' ' . $this->language->get('time_format')
         );
         if ($order_info['customer_id']) {
             $this->data['customer_href'] = $this->html->getSecureURL(
                 'sale/customer/update',
-                '&customer_id='.$order_info['customer_id']
+                '&customer_id=' . $order_info['customer_id']
             );
             $this->data['customer_vhref'] = $this->html->getSecureURL(
                 'r/common/viewport/modal',
-                '&viewport_rt=sale/customer/update&customer_id='.$order_info['customer_id']
+                '&viewport_rt=sale/customer/update&customer_id=' . $order_info['customer_id']
             );
         }
 
@@ -506,34 +512,34 @@ class ControllerPagesSaleOrder extends AController
         $this->data['customer_group'] = CustomerGroup::find($order_info['customer_group_id'])->name;
 
         if ($order_info['invoice_id']) {
-            $this->data['invoice_id'] = $order_info['invoice_prefix'].$order_info['invoice_id'];
+            $this->data['invoice_id'] = $order_info['invoice_prefix'] . $order_info['invoice_id'];
         } else {
             $this->data['invoice_id'] = '';
         }
 
         foreach ($this->data['fields'] as $f) {
-            if (isset ($this->request->post [$f])) {
-                $this->data [$f] = $this->request->post [$f];
-            } elseif (isset($order_info[$f])) {
-                $this->data[$f] = $order_info[$f];
-            } else {
-                $this->data[$f] = '';
-            }
+            $this->data[$f] = $this->request->post[$f] ?? $order_info[$f] ?? '';
         }
 
-        $this->data['email'] = $this->html->buildInput([
-            'name'  => 'email',
-            'value' => $order_info['email'],
-        ]);
-        $this->data['telephone'] = $this->html->buildInput([
-            'name'  => 'telephone',
-            'value' => $order_info['telephone'],
-        ]);
+        $this->data['email'] = $this->html->buildInput(
+            [
+                'name'  => 'email',
+                'value' => $order_info['email'],
+            ]
+        );
+        $this->data['telephone'] = $this->html->buildInput(
+            [
+                'name'  => 'telephone',
+                'value' => $order_info['telephone'],
+            ]
+        );
 
-        $this->data['fax'] = $this->html->buildInput([
-            'name'  => 'fax',
-            'value' => $order_info['fax'],
-        ]);
+        $this->data['fax'] = $this->html->buildInput(
+            [
+                'name'  => 'fax',
+                'value' => $order_info['fax'],
+            ]
+        );
 
         if (isset($order_info['im'])) {
             foreach ($order_info['im'] as $protocol => $setting) {
@@ -543,12 +549,10 @@ class ControllerPagesSaleOrder extends AController
             }
         }
 
-        $this->loadModel('catalog/product');
         $this->data['categories'] = Category::getCategories();
 
         $this->data['order_products'] = [];
-
-        $order_products = OrderProduct::where('order_id', '=', $order_id)->get()->toArray();
+        $order_products = OrderProduct::where('order_id', '=', $order_id)->get()?->toArray();
 
         foreach ($order_products as $order_product) {
             $option_data = [];
@@ -566,12 +570,12 @@ class ControllerPagesSaleOrder extends AController
                     }
 
                     if (is_file($file)) {
-                        $value = '<a href="'.$this->html->getSecureURL(
+                        $value = '<a href="' . $this->html->getSecureURL(
                                 'tool/files/download',
-                                '&filename='.urlencode($filename).'&order_option_id='.(int) $option['order_option_id']
-                            ).'" title=" to download file" target="_blank">'.$value.'</a>';
+                                '&filename=' . urlencode($filename) . '&order_option_id=' . (int)$option['order_option_id']
+                            ) . '" title=" to download file" target="_blank">' . $value . '</a>';
                     } else {
-                        $value = '<span title="file '.$file.' is unavailable">'.$value.'</span>';
+                        $value = '<span title="file ' . $file . ' is unavailable">' . $value . '</span>';
                     }
                 } elseif ($option['element_type'] == 'C' && $value == 1) {
                     $value = '';
@@ -584,7 +588,7 @@ class ControllerPagesSaleOrder extends AController
 
                     $value = str_replace('\r\n', "\n", $value);
                     if (mb_strlen($value) > 64) {
-                        $value = mb_substr($value, 0, 64).'...';
+                        $value = mb_substr($value, 0, 64) . '...';
                     }
                 }
 
@@ -598,15 +602,15 @@ class ControllerPagesSaleOrder extends AController
             }
 
             //check if this product is still available, so we can use recalculation against the cart
-            $product = $this->model_catalog_product->getProduct($order_product['product_id']);
-            if (!$this->config->get('config_allow_order_recalc')) {
-                if (empty($product) || !$product['status'] || $product['call_to_order']) {
+            $product = Product::find($order_product['product_id']);
+            if ($product && !$this->config->get('config_allow_order_recalc')) {
+                if (!$product->status || $product->call_to_order) {
                     $this->data['no_recalc_allowed'] = true;
-                    $product['status'] = 0;
+                    $product->status = 0;
                 } else {
-                    if (H::dateISO2Int($product['date_available']) > time()) {
+                    if (H::dateISO2Int($product->date_available) > time()) {
                         $this->data['no_recalc_allowed'] = true;
-                        $product['status'] = 0;
+                        $product->status = 0;
                     }
                 }
             }
@@ -615,21 +619,22 @@ class ControllerPagesSaleOrder extends AController
             $orderStatuses = OrderStatus::getOrderStatusConfig();
             $this->data['cancel_statuses'] = [];
             foreach ($orderStatuses as $oStatus) {
-                if (in_array('return_to_stock', (array) $oStatus['config']['actions'])) {
+                if (in_array('return_to_stock', (array)$oStatus['config']['actions'])) {
                     $this->data['cancel_statuses'][] = $oStatus['order_status_id'];
                 }
             }
+            /** @var OrderStatusDescription $orderStatus */
             $orderStatus = OrderStatusDescription::where(
                 [
-                    'order_status_id' => (int) $order_product['order_status_id'],
-                    'language_id'     => (int) $order_info['language_id'],
+                    'order_status_id' => (int)$order_product['order_status_id'],
+                    'language_id'     => (int)$order_info['language_id'],
                 ]
             )->first();
             $this->data['order_products'][] = [
                 'disable_edit'     => in_array($order_product['order_status_id'], $this->data['cancel_statuses']),
                 'order_product_id' => $order_product['order_product_id'],
                 'product_id'       => $order_product['product_id'],
-                'product_status'   => $product['status'],
+                'product_status' => $product?->status,
                 'order_status_id'  => $order_product['order_status_id'],
                 'order_status'     => ($orderStatus
                     ? $orderStatus->name
@@ -663,34 +668,36 @@ class ControllerPagesSaleOrder extends AController
                     ) * $order_product['quantity'],
                 'href'             => $this->html->getSecureURL(
                     'catalog/product/update',
-                    '&product_id='.$order_product['product_id']
+                    '&product_id=' . $order_product['product_id']
                 ),
             ];
         }
 
         $this->data['currency'] = $this->currency->getCurrency($order_info['currency']);
         $this->data['totals'] = OrderTotal::where('order_id', '=', $order_id)
-                                          ->orderBy('sort_order')
-                                          ->get()
-                                          ->toArray();
+            ->orderBy('sort_order')
+            ->get()
+            ->toArray();
 
         //check which totals cannot reapply
-        foreach ($this->data['totals'] as &$ototal) {
-            if ($this->config->get($ototal['key'].'_status')) {
-                $ototal['unavailable'] = false;
+        foreach ($this->data['totals'] as &$oTotal) {
+            if ($this->config->get($oTotal['key'] . '_status')) {
+                $oTotal['unavailable'] = false;
             } else {
-                $ototal['unavailable'] = true;
+                $oTotal['unavailable'] = true;
             }
         }
 
         $this->data['form_title'] = $this->language->get('edit_title_details');
-        $this->data['update'] = $this->html->getSecureURL('listing_grid/order/update_field', '&id='.$order_id);
+        $this->data['update'] = $this->html->getSecureURL('listing_grid/order/update_field', '&id=' . $order_id);
         $form = new AForm('HS');
 
-        $form->setForm([
-            'form_name' => 'orderFrm',
-            'update'    => $this->data['update'],
-        ]);
+        $form->setForm(
+            [
+                'form_name' => 'orderFrm',
+                'update'    => $this->data['update'],
+            ]
+        );
 
         $this->data['form']['id'] = 'orderFrm';
         $this->data['form']['form_open'] = $form->getFieldHtml(
@@ -723,7 +730,7 @@ class ControllerPagesSaleOrder extends AController
         $total_ext = $this->extensions->getExtensionsList(['filter' => 'total']);
 
         //trick for hook
-        $allowed_totals = array_merge(['coupon'], (array) $this->data['manual_totals']);
+        $allowed_totals = array_merge(['coupon'], (array)$this->data['manual_totals']);
 
         $manual_total_list = ['' => $this->language->get('text_select')];
         foreach ($total_ext->rows as $ext) {
@@ -731,7 +738,7 @@ class ControllerPagesSaleOrder extends AController
                 continue;
             }
 
-            if ($this->config->get($ext['key'].'_status')) {
+            if ($this->config->get($ext['key'] . '_status')) {
                 $manual_total_list[$ext['key']] = $this->extensions->getExtensionName($ext['key']);
             }
         }
@@ -754,21 +761,14 @@ class ControllerPagesSaleOrder extends AController
 
         $this->data['validate_coupon_url'] = $this->html->getSecureURL(
             'r/sale/order/validateCoupon',
-            '&order_id='.$order_id
+            '&order_id=' . $order_id
         );
 
         //if virtual product (no shipment);
-        if (!$this->data['shipping_method']) {
-            $this->data['form']['fields']['shipping_method'] = $this->language->get('text_not_applicable');
-        } else {
-            $this->data['form']['fields']['shipping_method'] = $this->data['shipping_method'];
-        }
+        $this->data['form']['fields']['shipping_method'] = $this->data['shipping_method'] ?: $this->language->get('text_not_applicable');
+
         // no payment
-        if (!$this->data['payment_method']) {
-            $this->data['form']['fields']['payment_method'] = $this->language->get('text_not_applicable');
-        } else {
-            $this->data['form']['fields']['payment_method'] = $this->data['payment_method'];
-        }
+        $this->data['form']['fields']['payment_method'] = $this->data['payment_method'] ?: $this->language->get('text_not_applicable');
 
         $this->data['add_product'] = $this->html->buildElement(
             [
@@ -779,7 +779,7 @@ class ControllerPagesSaleOrder extends AController
                 'style'         => 'aform_noaction chosen',
                 'ajax_url'      => $this->html->getSecureURL(
                     'r/product/product/products',
-                    '&currency_code='.$this->data['currency']['code']
+                    '&currency_code=' . $this->data['currency']['code']
                 ),
                 'placeholder'   => $this->language->get('text_select_from_lookup'),
                 'option_attr'   => ['price'],
@@ -791,18 +791,18 @@ class ControllerPagesSaleOrder extends AController
 
         $this->data['add_product_url'] = $this->html->getSecureURL(
             'r/product/product/orderProductForm',
-            '&order_id='.$order_id
-            .'&mode=json'
-            .'&currency='.$order_info['currency']
+            '&order_id=' . $order_id
+            . '&mode=json'
+            . '&currency=' . $order_info['currency']
         );
         $this->data['recalculate_totals_url'] = $this->html->getSecureURL(
             'r/sale/order/recalculateExistingOrderTotals',
-            '&order_id='.$order_id
+            '&order_id=' . $order_id
         );
 
         $this->data['delete_order_total'] = $this->html->getSecureURL(
             'sale/order/delete_total',
-            '&order_id='.$order_id
+            '&order_id=' . $order_id
         );
 
         $saved_list_data = json_decode(html_entity_decode($this->request->cookie['grid_params']));
@@ -867,7 +867,7 @@ class ControllerPagesSaleOrder extends AController
             abc_redirect(
                 $this->html->getSecureURL(
                     'sale/order/shipping',
-                    '&order_id='.$this->request->get['order_id']
+                    '&order_id=' . $this->request->get['order_id']
                 )
             );
         }
@@ -883,28 +883,36 @@ class ControllerPagesSaleOrder extends AController
             $this->language->setCurrentContentLanguage($order_info['language_id']);
         }
 
-        $this->document->initBreadcrumb([
-            'href'      => $this->html->getSecureURL('index/home'),
-            'text'      => $this->language->get('text_home'),
-            'separator' => false,
-        ]);
+        $this->document->initBreadcrumb(
+            [
+                'href'      => $this->html->getSecureURL('index/home'),
+                'text'      => $this->language->get('text_home'),
+                'separator' => false,
+            ]
+        );
 
-        $this->document->addBreadcrumb([
-            'href'      => $this->html->getSecureURL('sale/order'),
-            'text'      => $this->language->get('heading_title'),
-            'separator' => ' :: ',
-        ]);
-        $this->document->addBreadcrumb([
-            'href'      => $this->html->getSecureURL('sale/order/details', '&order_id='.$order_id),
-            'text'      => $this->language->get('heading_title').' #'.$order_id,
-            'separator' => ' :: ',
-        ]);
-        $this->document->addBreadcrumb([
-            'href'      => $this->html->getSecureURL('sale/order/shipping', '&order_id='.$order_id),
-            'text'      => $this->language->get('tab_shipping'),
-            'separator' => ' :: ',
-            'current'   => true,
-        ]);
+        $this->document->addBreadcrumb(
+            [
+                'href'      => $this->html->getSecureURL('sale/order'),
+                'text'      => $this->language->get('heading_title'),
+                'separator' => ' :: ',
+            ]
+        );
+        $this->document->addBreadcrumb(
+            [
+                'href'      => $this->html->getSecureURL('sale/order/details', '&order_id=' . $order_id),
+                'text'      => $this->language->get('heading_title') . ' #' . $order_id,
+                'separator' => ' :: ',
+            ]
+        );
+        $this->document->addBreadcrumb(
+            [
+                'href'      => $this->html->getSecureURL('sale/order/shipping', '&order_id=' . $order_id),
+                'text'      => $this->language->get('tab_shipping'),
+                'separator' => ' :: ',
+                'current'   => true,
+            ]
+        );
 
         if (isset($this->session->data['success'])) {
             $this->data['success'] = $this->session->data['success'];
@@ -914,72 +922,80 @@ class ControllerPagesSaleOrder extends AController
         }
 
         $this->data['order_id'] = $order_id;
-        $this->data['invoice_url'] = $this->html->getSecureURL('sale/invoice', '&order_id='.$order_id);
+        $this->data['invoice_url'] = $this->html->getSecureURL('sale/invoice', '&order_id=' . $order_id);
         $this->data['button_invoice'] = $this->html->buildButton([
             'name'  => 'invoice',
             'text'  => $this->language->get('text_invoice'),
             'style' => 'button3',
         ]);
-        $this->data['action'] = $this->html->getSecureURL('sale/order/shipping', '&order_id='.$order_id);
+        $this->data['action'] = $this->html->getSecureURL('sale/order/shipping', '&order_id=' . $order_id);
         $this->data['cancel'] = $this->html->getSecureURL('sale/order');
         $this->data['common_zone'] = $this->html->getSecureURL('common/zone');
 
         $this->_initTabs('shipping');
 
         foreach ($this->data['fields'] as $f) {
-            if (isset ($this->request->post [$f])) {
-                $this->data [$f] = $this->request->post [$f];
-            } elseif (isset($order_info[$f])) {
-                $this->data[$f] = $order_info[$f];
-            }
+            $this->data[$f] = $this->request->post[$f] ?? $order_info[$f] ?? null;
         }
 
         $this->data['form_title'] = $this->language->get('edit_title_shipping');
-        $this->data['update'] = $this->html->getSecureURL('listing_grid/order/update_field', '&id='.$order_id);
+        $this->data['update'] = $this->html->getSecureURL('listing_grid/order/update_field', '&id=' . $order_id);
         $form = new AForm('HS');
 
-        $form->setForm([
-            'form_name' => 'orderFrm',
-            'update'    => $this->data['update'],
-        ]);
+        $form->setForm(
+            [
+                'form_name' => 'orderFrm',
+                'update'    => $this->data['update'],
+            ]
+        );
 
         $this->data['form']['id'] = 'orderFrm';
-        $this->data['form']['form_open'] = $form->getFieldHtml([
-            'type'   => 'form',
-            'name'   => 'orderFrm',
-            'attr'   => 'data-confirm-exit="true" class="aform form-horizontal"',
-            'action' => $this->data['action'],
-        ]);
-        $this->data['form']['submit'] = $form->getFieldHtml([
-            'type'  => 'button',
-            'name'  => 'submit',
-            'text'  => $this->language->get('button_save'),
-            'style' => 'button1',
-        ]);
-        $this->data['form']['cancel'] = $form->getFieldHtml([
-            'type'  => 'button',
-            'name'  => 'cancel',
-            'text'  => $this->language->get('button_cancel'),
-            'style' => 'button2',
-        ]);
+        $this->data['form']['form_open'] = $form->getFieldHtml(
+            [
+                'type'   => 'form',
+                'name'   => 'orderFrm',
+                'attr'   => 'data-confirm-exit="true" class="aform form-horizontal"',
+                'action' => $this->data['action'],
+            ]
+        );
+        $this->data['form']['submit'] = $form->getFieldHtml(
+            [
+                'type'  => 'button',
+                'name'  => 'submit',
+                'text'  => $this->language->get('button_save'),
+                'style' => 'button1',
+            ]
+        );
+        $this->data['form']['cancel'] = $form->getFieldHtml(
+            [
+                'type'  => 'button',
+                'name'  => 'cancel',
+                'text'  => $this->language->get('button_cancel'),
+                'style' => 'button2',
+            ]
+        );
 
         foreach ($this->data['fields'] as $f) {
             if ($f == 'shipping_zone') {
                 break;
             }
             $name = str_replace('shipping_', '', $f);
-            $this->data['form']['fields'][$name] = $form->getFieldHtml([
-                'type'  => 'input',
-                'name'  => $f,
-                'value' => $this->data[$f],
-            ]);
+            $this->data['form']['fields'][$name] = $form->getFieldHtml(
+                [
+                    'type'  => 'input',
+                    'name'  => $f,
+                    'value' => $this->data[$f],
+                ]
+            );
         }
 
-        $this->data['form']['fields']['fax'] = $form->getFieldHtml([
-            'type'  => 'input',
-            'name'  => 'fax',
-            'value' => $this->data['fax'],
-        ]);
+        $this->data['form']['fields']['fax'] = $form->getFieldHtml(
+            [
+                'type'  => 'input',
+                'name'  => 'fax',
+                'value' => $this->data['fax'],
+            ]
+        );
 
         $this->loadModel('localisation/country');
         $this->data['countries'] = $this->model_localisation_country->getCountries();
@@ -1002,19 +1018,23 @@ class ControllerPagesSaleOrder extends AController
             $this->data['shipping_country_id'] = $this->config->get('config_country_id');
         }
 
-        $this->data['form']['fields']['country'] = $form->getFieldHtml([
-            'type'    => 'selectbox',
-            'name'    => 'shipping_country_id',
-            'value'   => $this->data['shipping_country_id'],
-            'options' => $countries,
-        ]);
+        $this->data['form']['fields']['country'] = $form->getFieldHtml(
+            [
+                'type'    => 'selectbox',
+                'name'    => 'shipping_country_id',
+                'value'   => $this->data['shipping_country_id'],
+                'options' => $countries,
+            ]
+        );
 
-        $this->data['form']['fields']['zone'] = $form->getFieldHtml([
-            'type'    => 'selectbox',
-            'name'    => 'shipping_zone_id',
-            'value'   => '',
-            'options' => [],
-        ]);
+        $this->data['form']['fields']['zone'] = $form->getFieldHtml(
+            [
+                'type'    => 'selectbox',
+                'name'    => 'shipping_zone_id',
+                'value'   => '',
+                'options' => [],
+            ]
+        );
 
         $this->addChild('pages/sale/order_summary', 'summary_form', 'pages/sale/order_summary.tpl');
         $this->view->assign('help_url', $this->gen_help_url('order_shipping'));
@@ -1070,7 +1090,7 @@ class ControllerPagesSaleOrder extends AController
             abc_redirect(
                 $this->html->getSecureURL(
                     'sale/order/payment',
-                    '&order_id='.$this->request->get['order_id']
+                    '&order_id=' . $this->request->get['order_id']
                 )
             );
 
@@ -1078,7 +1098,7 @@ class ControllerPagesSaleOrder extends AController
             abc_redirect(
                 $this->html->getSecureURL(
                     'sale/order/payment',
-                    '&order_id='.$this->request->get['order_id']
+                    '&order_id=' . $this->request->get['order_id']
                 )
             );
         }
@@ -1094,28 +1114,36 @@ class ControllerPagesSaleOrder extends AController
             $this->language->setCurrentContentLanguage($order_info['language_id']);
         }
 
-        $this->document->initBreadcrumb([
-            'href'      => $this->html->getSecureURL('index/home'),
-            'text'      => $this->language->get('text_home'),
-            'separator' => false,
-        ]);
+        $this->document->initBreadcrumb(
+            [
+                'href'      => $this->html->getSecureURL('index/home'),
+                'text'      => $this->language->get('text_home'),
+                'separator' => false,
+            ]
+        );
 
-        $this->document->addBreadcrumb([
-            'href'      => $this->html->getSecureURL('sale/order'),
-            'text'      => $this->language->get('heading_title'),
-            'separator' => ' :: ',
-        ]);
-        $this->document->addBreadcrumb([
-            'href'      => $this->html->getSecureURL('sale/order/details', '&order_id='.$order_id),
-            'text'      => $this->language->get('heading_title').' #'.$order_id,
-            'separator' => ' :: ',
-        ]);
-        $this->document->addBreadcrumb([
-            'href'      => $this->html->getSecureURL('sale/order/payment', '&order_id='.$order_id),
-            'text'      => $this->language->get('tab_payment'),
-            'separator' => ' :: ',
-            'current'   => true,
-        ]);
+        $this->document->addBreadcrumb(
+            [
+                'href'      => $this->html->getSecureURL('sale/order'),
+                'text'      => $this->language->get('heading_title'),
+                'separator' => ' :: ',
+            ]
+        );
+        $this->document->addBreadcrumb(
+            [
+                'href'      => $this->html->getSecureURL('sale/order/details', '&order_id=' . $order_id),
+                'text'      => $this->language->get('heading_title') . ' #' . $order_id,
+                'separator' => ' :: ',
+            ]
+        );
+        $this->document->addBreadcrumb(
+            [
+                'href'      => $this->html->getSecureURL('sale/order/payment', '&order_id=' . $order_id),
+                'text'      => $this->language->get('tab_payment'),
+                'separator' => ' :: ',
+                'current'   => true,
+            ]
+        );
 
         if (isset($this->session->data['success'])) {
             $this->data['success'] = $this->session->data['success'];
@@ -1125,7 +1153,7 @@ class ControllerPagesSaleOrder extends AController
         }
 
         $this->data['order_id'] = $order_id;
-        $this->data['invoice_url'] = $this->html->getSecureURL('sale/invoice', '&order_id='.$order_id);
+        $this->data['invoice_url'] = $this->html->getSecureURL('sale/invoice', '&order_id=' . $order_id);
         $this->data['button_invoice'] = $this->html->buildButton(
             [
                 'name'  => 'invoice',
@@ -1134,7 +1162,7 @@ class ControllerPagesSaleOrder extends AController
             ]
         );
 
-        $this->data['action'] = $this->html->getSecureURL('sale/order/payment', '&order_id='.$order_id);
+        $this->data['action'] = $this->html->getSecureURL('sale/order/payment', '&order_id=' . $order_id);
         $this->data['cancel'] = $this->html->getSecureURL('sale/order');
         $this->data['common_zone'] = $this->html->getSecureURL('common/zone');
 
@@ -1149,13 +1177,15 @@ class ControllerPagesSaleOrder extends AController
         }
 
         $this->data['form_title'] = $this->language->get('edit_title_payment');
-        $this->data['update'] = $this->html->getSecureURL('listing_grid/order/update_field', '&id='.$order_id);
+        $this->data['update'] = $this->html->getSecureURL('listing_grid/order/update_field', '&id=' . $order_id);
         $form = new AForm('HS');
 
-        $form->setForm([
-            'form_name' => 'orderFrm',
-            'update'    => $this->data['update'],
-        ]);
+        $form->setForm(
+            [
+                'form_name' => 'orderFrm',
+                'update'    => $this->data['update'],
+            ]
+        );
 
         $this->data['form']['id'] = 'orderFrm';
         $this->data['form']['form_open'] = $form->getFieldHtml(
@@ -1174,23 +1204,27 @@ class ControllerPagesSaleOrder extends AController
                 'style' => 'button1',
             ]
         );
-        $this->data['form']['cancel'] = $form->getFieldHtml([
-            'type'  => 'button',
-            'name'  => 'cancel',
-            'text'  => $this->language->get('button_cancel'),
-            'style' => 'button2',
-        ]);
+        $this->data['form']['cancel'] = $form->getFieldHtml(
+            [
+                'type'  => 'button',
+                'name'  => 'cancel',
+                'text'  => $this->language->get('button_cancel'),
+                'style' => 'button2',
+            ]
+        );
 
         foreach ($this->data['fields'] as $f) {
             if ($f == 'payment_zone') {
                 break;
             }
             $name = str_replace('payment_', '', $f);
-            $this->data['form']['fields'][$name] = $form->getFieldHtml([
-                'type'  => 'input',
-                'name'  => $f,
-                'value' => $this->data[$f],
-            ]);
+            $this->data['form']['fields'][$name] = $form->getFieldHtml(
+                [
+                    'type'  => 'input',
+                    'name'  => $f,
+                    'value' => $this->data[$f],
+                ]
+            );
         }
 
         $this->loadModel('localisation/country');
@@ -1244,15 +1278,13 @@ class ControllerPagesSaleOrder extends AController
         $this->data = [];
         $this->document->setTitle($this->language->get('heading_title'));
 
-        $order_id = (int) $this->request->get['order_id'];
+        $order_id = (int)$this->request->get['order_id'];
 
         $order_info = Order::getOrderArray($order_id, 'any');
         $post = $this->request->post;
         $post['order_status_id'] = $order_info['order_status_id'];
 
-        if ($this->request->is_POST()
-            && $this->validateHistoryForm($order_id, $post)
-        ) {
+        if ($this->request->is_POST() && $this->validateHistoryForm($order_id, $post)) {
             $post = $this->request->post;
             $this->db->beginTransaction();
             try {
@@ -1268,6 +1300,7 @@ class ControllerPagesSaleOrder extends AController
                 $this->session->data['success'] = $this->language->get('text_success');
                 H::event('admin\SendOrderStatusNotifyEmail', [new ABaseEvent($data)]);
             } catch (Exception $e) {
+                $this->log->critical($e->getMessage() . "\n" . $e->getTraceAsString());
                 $this->session->data['error'] = H::getAppErrorText();
                 $this->db->rollback();
             }
@@ -1275,7 +1308,7 @@ class ControllerPagesSaleOrder extends AController
             abc_redirect(
                 $this->html->getSecureURL(
                     'sale/order/history',
-                    '&order_id='.$this->request->get['order_id']
+                    '&order_id=' . $this->request->get['order_id']
                 )
             );
         }
@@ -1286,7 +1319,7 @@ class ControllerPagesSaleOrder extends AController
         }
         if ($this->error) {
             $this->session->data['error'] = implode('<br>', $this->error);
-            abc_redirect($this->html->getSecureURL('sale/order/history', '&order_id='.$order_id));
+            abc_redirect($this->html->getSecureURL('sale/order/history', '&order_id=' . $order_id));
         }
 
         //set content language to order language ID.
@@ -1295,28 +1328,36 @@ class ControllerPagesSaleOrder extends AController
             $this->language->setCurrentContentLanguage($order_info['language_id']);
         }
 
-        $this->document->initBreadcrumb([
-            'href'      => $this->html->getSecureURL('index/home'),
-            'text'      => $this->language->get('text_home'),
-            'separator' => false,
-        ]);
+        $this->document->initBreadcrumb(
+            [
+                'href'      => $this->html->getSecureURL('index/home'),
+                'text'      => $this->language->get('text_home'),
+                'separator' => false,
+            ]
+        );
 
-        $this->document->addBreadcrumb([
-            'href'      => $this->html->getSecureURL('sale/order'),
-            'text'      => $this->language->get('heading_title'),
-            'separator' => ' :: ',
-        ]);
-        $this->document->addBreadcrumb([
-            'href'      => $this->html->getSecureURL('sale/order/details', '&order_id='.$order_id),
-            'text'      => $this->language->get('heading_title').' #'.$order_id,
-            'separator' => ' :: ',
-        ]);
-        $this->document->addBreadcrumb([
-            'href'      => $this->html->getSecureURL('sale/order/history', '&order_id='.$order_id),
-            'text'      => $this->language->get('tab_history'),
-            'separator' => ' :: ',
-            'current'   => true,
-        ]);
+        $this->document->addBreadcrumb(
+            [
+                'href'      => $this->html->getSecureURL('sale/order'),
+                'text'      => $this->language->get('heading_title'),
+                'separator' => ' :: ',
+            ]
+        );
+        $this->document->addBreadcrumb(
+            [
+                'href'      => $this->html->getSecureURL('sale/order/details', '&order_id=' . $order_id),
+                'text'      => $this->language->get('heading_title') . ' #' . $order_id,
+                'separator' => ' :: ',
+            ]
+        );
+        $this->document->addBreadcrumb(
+            [
+                'href'      => $this->html->getSecureURL('sale/order/history', '&order_id=' . $order_id),
+                'text'      => $this->language->get('tab_history'),
+                'separator' => ' :: ',
+                'current'   => true,
+            ]
+        );
 
         if (isset($this->session->data['success'])) {
             $this->data['success'] = $this->session->data['success'];
@@ -1338,94 +1379,112 @@ class ControllerPagesSaleOrder extends AController
         }
 
         $this->data['order_id'] = $order_id;
-        $this->data['invoice_url'] = $this->html->getSecureURL('sale/invoice', '&order_id='.$order_id);
-        $this->data['button_invoice'] = $this->html->buildButton([
-            'name'  => 'invoice',
-            'text'  => $this->language->get('text_invoice'),
-            'style' => 'button3',
-        ]);
+        $this->data['invoice_url'] = $this->html->getSecureURL('sale/invoice', '&order_id=' . $order_id);
+        $this->data['button_invoice'] = $this->html->buildButton(
+            [
+                'name'  => 'invoice',
+                'text'  => $this->language->get('text_invoice'),
+                'style' => 'button3',
+            ]
+        );
         $this->data['order_history'] = $this->html->getSecureURL('sale/order_history');
         $this->data['cancel'] = $this->html->getSecureURL('sale/order');
 
         $this->_initTabs('history');
 
-        $this->data['action'] = $this->html->getSecureURL('sale/order/history', '&order_id='.$order_id);
-        $this->data['form_title'] = $this->language->get('text_edit').' '.$this->language->get('tab_history');
+        $this->data['action'] = $this->html->getSecureURL('sale/order/history', '&order_id=' . $order_id);
+        $this->data['form_title'] = $this->language->get('text_edit') . ' ' . $this->language->get('tab_history');
         $form = new AForm('ST');
 
-        $form->setForm([
-            'form_name' => 'orderFrm',
-            'update'    => $this->data['update'],
-        ]);
+        $form->setForm(
+            [
+                'form_name' => 'orderFrm',
+                'update'    => $this->data['update'],
+            ]
+        );
 
         $this->data['form']['id'] = 'orderFrm';
-        $this->data['form']['form_open'] = $form->getFieldHtml([
-            'type'   => 'form',
-            'name'   => 'orderFrm',
-            'attr'   => 'data-confirm-exit="true" class="aform form-horizontal"',
-            'action' => $this->data['action'],
-        ]);
-        $this->data['form']['submit'] = $form->getFieldHtml([
-            'type'  => 'button',
-            'name'  => 'submit',
-            'text'  => $this->language->get('button_add_history'),
-            'style' => 'button1',
-        ]);
-        $this->data['form']['cancel'] = $form->getFieldHtml([
-            'type'  => 'button',
-            'name'  => 'cancel',
-            'text'  => $this->language->get('button_cancel'),
-            'style' => 'button2',
-        ]);
+        $this->data['form']['form_open'] = $form->getFieldHtml(
+            [
+                'type'   => 'form',
+                'name'   => 'orderFrm',
+                'attr'   => 'data-confirm-exit="true" class="aform form-horizontal"',
+                'action' => $this->data['action'],
+            ]
+        );
+        $this->data['form']['submit'] = $form->getFieldHtml(
+            [
+                'type'  => 'button',
+                'name'  => 'submit',
+                'text'  => $this->language->get('button_add_history'),
+                'style' => 'button1',
+            ]
+        );
+        $this->data['form']['cancel'] = $form->getFieldHtml(
+            [
+                'type'  => 'button',
+                'name'  => 'cancel',
+                'text'  => $this->language->get('button_cancel'),
+                'style' => 'button2',
+            ]
+        );
 
         if (in_array(
             $this->order_status->getStatusById($order_info['order_status_id']),
-            (array) ABC::env('ORDER')['not_reversal_statuses']
+            (array)ABC::env('ORDER')['not_reversal_statuses']
         )) {
             $attr = 'readonly';
         } else {
             $attr = '';
         }
-        $this->data['form']['fields']['order_status'] = $form->getFieldHtml([
-            'type'             => 'selectbox',
-            'name'             => 'order_status_id',
-            'value'            => $order_info['order_status_id'],
-            'options'          => $statuses,
-            'disabled_options' => $disabled_statuses,
-            'attr'             => $attr
-        ]);
+        $this->data['form']['fields']['order_status'] = $form->getFieldHtml(
+            [
+                'type'             => 'selectbox',
+                'name'             => 'order_status_id',
+                'value'            => $order_info['order_status_id'],
+                'options'          => $statuses,
+                'disabled_options' => $disabled_statuses,
+                'attr'             => $attr
+            ]
+        );
 
-        $this->data['form']['fields']['notify'] = $form->getFieldHtml([
-            'type'    => 'checkbox',
-            'name'    => 'notify',
-            'value'   => 1,
-            'checked' => false,
-            'style'   => 'btn_switch',
-        ]);
+        $this->data['form']['fields']['notify'] = $form->getFieldHtml(
+            [
+                'type'    => 'checkbox',
+                'name'    => 'notify',
+                'value'   => 1,
+                'checked' => false,
+                'style'   => 'btn_switch',
+            ]
+        );
 
-        $this->data['form']['fields']['append'] = $form->getFieldHtml([
-            'type'  => 'checkbox',
-            'name'  => 'append',
-            'value' => 1,
-            'style' => 'btn_switch',
-        ]);
-        $this->data['form']['fields']['comment'] = $form->getFieldHtml([
-            'type'  => 'textarea',
-            'name'  => 'comment',
-            'style' => 'large-field',
-        ]);
+        $this->data['form']['fields']['append'] = $form->getFieldHtml(
+            [
+                'type'  => 'checkbox',
+                'name'  => 'append',
+                'value' => 1,
+                'style' => 'btn_switch',
+            ]
+        );
+        $this->data['form']['fields']['comment'] = $form->getFieldHtml(
+            [
+                'type'  => 'textarea',
+                'name'  => 'comment',
+                'style' => 'large-field',
+            ]
+        );
 
         $this->data['histories'] = [];
         $results = OrderHistory::with('order_status_description')
-                               ->where('order_id', '=', $this->request->get['order_id'])
-                               ->orderBy('date_added')
-                               ->get()
-                               ->toArray();
+            ->where('order_id', '=', $this->request->get['order_id'])
+            ->orderBy('date_added')
+            ->get()
+            ->toArray();
         foreach ($results as $result) {
             $this->data['histories'][] = [
                 'date_added' => H::dateISO2Display(
                     $result['date_added'],
-                    $this->language->get('date_format_short').' '.$this->language->get('time_format')
+                    $this->language->get('date_format_short') . ' ' . $this->language->get('time_format')
                 ),
                 'status'     => $result['order_status_description']['name'],
                 'comment'    => nl2br($result['comment']),
@@ -1458,7 +1517,7 @@ class ControllerPagesSaleOrder extends AController
 
         $this->document->setTitle($this->language->get('title_payment_details'));
 
-        $order_id = (int) $this->request->get['order_id'];
+        $order_id = (int)$this->request->get['order_id'];
         $this->data['order_id'] = $order_id;
 
         $order_info = Order::getOrderArray($order_id, 'any');
@@ -1475,25 +1534,31 @@ class ControllerPagesSaleOrder extends AController
             $this->language->setCurrentContentLanguage($order_info['language_id']);
         }
 
-        $this->document->initBreadcrumb([
-            'href'      => $this->html->getSecureURL('index/home'),
-            'text'      => $this->language->get('text_home'),
-            'separator' => false,
-        ]);
+        $this->document->initBreadcrumb(
+            [
+                'href'      => $this->html->getSecureURL('index/home'),
+                'text'      => $this->language->get('text_home'),
+                'separator' => false,
+            ]
+        );
 
-        $this->document->addBreadcrumb([
-            'href'      => $this->html->getSecureURL('sale/order'),
-            'text'      => $this->language->get('heading_title'),
-            'separator' => ' :: ',
-        ]);
-        $this->document->addBreadcrumb([
-            'href'      => $this->html->getSecureURL('sale/order/payment_details', '&order_id='.$order_id),
-            'text'      => $this->language->get('title_payment_details').' #'.$order_info['order_id'],
-            'separator' => ' :: ',
-            'current'   => true,
-        ]);
+        $this->document->addBreadcrumb(
+            [
+                'href'      => $this->html->getSecureURL('sale/order'),
+                'text'      => $this->language->get('heading_title'),
+                'separator' => ' :: ',
+            ]
+        );
+        $this->document->addBreadcrumb(
+            [
+                'href'      => $this->html->getSecureURL('sale/order/payment_details', '&order_id=' . $order_id),
+                'text'      => $this->language->get('title_payment_details') . ' #' . $order_info['order_id'],
+                'separator' => ' :: ',
+                'current'   => true,
+            ]
+        );
 
-        $this->data['invoice_url'] = $this->html->getSecureURL('sale/invoice', '&order_id='.$order_id);
+        $this->data['invoice_url'] = $this->html->getSecureURL('sale/invoice', '&order_id=' . $order_id);
         $this->_initTabs('payment_details');
 
         //NOTE: This is an empty controller to be hooked from extensions
@@ -1521,11 +1586,11 @@ class ControllerPagesSaleOrder extends AController
         //check is order exists
         $order = Order::find($order_id);
         if (!$order) {
-            $this->error['not_found'] = 'Order #'.$order_id.' not found!';
+            $this->error['not_found'] = 'Order #' . $order_id . ' not found!';
         }
 
         if ($data['product'] && !is_array($data['product'])) {
-            $this->error['products_list'] = 'Products List of Order #'.$order_id.' must be an array!';
+            $this->error['products_list'] = 'Products List of Order #' . $order_id . ' must be an array!';
         }
 
         if ($data['product']) {
@@ -1536,16 +1601,16 @@ class ControllerPagesSaleOrder extends AController
                     $orderProduct = OrderProduct::find($item['order_product_id']);
                     if (!$orderProduct) {
                         $this->error['order_product_not_found'] =
-                            'Order Product #'.$item['order_product_id'].' not found!';
+                            'Order Product #' . $item['order_product_id'] . ' not found!';
                         break;
                     }
                     $prev_quantity = $orderProduct->quantity;
                     if ($prev_quantity != $item['quantity'] && $item['quantity'] != 0) {
-                        $this->error['product_error'] = 'Product #'.$item['product_id']
-                            .' already deleted! You cannot to change it\'s quantity in order!';
+                        $this->error['product_error'] = 'Product #' . $item['product_id']
+                            . ' already deleted! You cannot to change it\'s quantity in order!';
                         break;
                     }
-                } elseif ((int) $item['order_product_id'] > 0) {
+                } elseif ((int)$item['order_product_id'] > 0) {
                     //remove options from post data for existing order product.
                     //do not allow change options!
                     unset($this->request->post['product'][$item['order_product_id']]['option']);
@@ -1554,16 +1619,12 @@ class ControllerPagesSaleOrder extends AController
         }
 
         if ($data['order_totals'] && !is_array($data['order_totals'])) {
-            $this->error['totals_list'] = 'Totals List of Order #'.$order_id.' must be an array!';
+            $this->error['totals_list'] = 'Totals List of Order #' . $order_id . ' must be an array!';
         }
 
         $this->extensions->hk_ValidateData($this, $data);
 
-        if (!$this->error) {
-            return true;
-        } else {
-            return false;
-        }
+        return (!$this->error);
     }
 
     protected function validateHistoryForm($order_id, $data)
@@ -1582,7 +1643,7 @@ class ControllerPagesSaleOrder extends AController
 
         if (in_array(
             $this->order_status->getStatusById($data['order_status_id']),
-            (array) ABC::env('ORDER')['not_reversal_statuses']
+            (array)ABC::env('ORDER')['not_reversal_statuses']
         )) {
             $this->error['not_reversal_status'] = 'This Order status is not reversal!';
         }
@@ -1661,10 +1722,7 @@ class ControllerPagesSaleOrder extends AController
 
             $this->session->data['success'] = $this->language->get('text_success');
             abc_redirect(
-                $this->html->getSecureURL(
-                    'sale/order/files',
-                    '&order_id='.$this->request->get['order_id']
-                )
+                $this->html->getSecureURL('sale/order/files', '&order_id=' . $this->request->get['order_id'])
             );
         }
 
@@ -1677,30 +1735,34 @@ class ControllerPagesSaleOrder extends AController
             $this->language->setCurrentContentLanguage($order_info['language_id']);
         }
 
-        if (empty($order_info)) {
+        if (!$order_info) {
             $this->session->data['error'] = $this->language->get('error_order_load');
             abc_redirect($this->html->getSecureURL('sale/order'));
         }
 
-        $this->document->initBreadcrumb([
-            'href'      => $this->html->getSecureURL('index/home'),
-            'text'      => $this->language->get('text_home'),
-            'separator' => false,
-        ]);
+        $this->document->initBreadcrumb(
+            [
+                'href'      => $this->html->getSecureURL('index/home'),
+                'text'      => $this->language->get('text_home'),
+                'separator' => false,
+            ]
+        );
 
-        $this->document->addBreadcrumb([
-            'href'      => $this->html->getSecureURL('sale/order'),
-            'text'      => $this->language->get('heading_title'),
-            'separator' => ' :: ',
-        ]);
+        $this->document->addBreadcrumb(
+            [
+                'href'      => $this->html->getSecureURL('sale/order'),
+                'text'      => $this->language->get('heading_title'),
+                'separator' => ' :: ',
+            ]
+        );
 
         $this->document->addBreadcrumb(
             [
                 'href'      => $this->html->getSecureURL(
                     'sale/order/files',
-                    '&order_id='.$this->request->get['order_id']
+                    '&order_id=' . $this->request->get['order_id']
                 ),
-                'text'      => $this->language->get('heading_title').' #'.$order_info['order_id'],
+                'text'      => $this->language->get('heading_title') . ' #' . $order_info['order_id'],
                 'separator' => ' :: ',
                 'current'   => true,
             ]
@@ -1713,11 +1775,11 @@ class ControllerPagesSaleOrder extends AController
             $this->data['success'] = '';
         }
 
-        $this->data['heading_title'] = $this->language->get('heading_title').' #'.$order_info['order_id'];
+        $this->data['heading_title'] = $this->language->get('heading_title') . ' #' . $order_info['order_id'];
         $this->data['token'] = $this->session->data['token'];
         $this->data['invoice_url'] = $this->html->getSecureURL(
             'sale/invoice',
-            '&order_id='.(int) $this->request->get['order_id']
+            '&order_id=' . (int)$this->request->get['order_id']
         );
         $this->data['button_invoice'] = $this->html->buildButton(
             [
@@ -1726,12 +1788,11 @@ class ControllerPagesSaleOrder extends AController
             ]
         );
         $this->data['invoice_generate'] = $this->html->getSecureURL('sale/invoice/generate');
-        $this->data['category_products'] = $this->html->getSecureURL('product/product/category');
         $this->data['product_update'] = $this->html->getSecureURL('catalog/product/update');
         $this->data['order_id'] = $this->request->get['order_id'];
         $this->data['action'] = $this->html->getSecureURL(
             'sale/order/files',
-            '&order_id='.$this->request->get['order_id']
+            '&order_id=' . $this->request->get['order_id']
         );
 
         $this->data['cancel'] = $this->html->getSecureURL('sale/order');
@@ -1756,7 +1817,7 @@ class ControllerPagesSaleOrder extends AController
         $this->data['form_title'] = $this->language->get('edit_title_files');
         $this->data['update'] = $this->html->getSecureURL(
             'listing_grid/order/update_field',
-            '&id='.$this->request->get['order_id']
+            '&id=' . $this->request->get['order_id']
         );
         $form = new AForm('HS');
         $form->setForm([
@@ -1765,31 +1826,37 @@ class ControllerPagesSaleOrder extends AController
         ]);
 
         $this->data['form']['id'] = 'orderFrm';
-        $this->data['form']['form_open'] = $form->getFieldHtml([
-            'type'   => 'form',
-            'name'   => 'orderFrm',
-            'attr'   => 'data-confirm-exit="true" class="aform form-horizontal"',
-            'action' => $this->data['action'],
-        ]);
-        $this->data['form']['submit'] = $form->getFieldHtml([
-            'type'  => 'button',
-            'name'  => 'submit',
-            'text'  => $this->language->get('button_save'),
-            'style' => 'button1',
-        ]);
-        $this->data['form']['cancel'] = $form->getFieldHtml([
-            'type'  => 'button',
-            'name'  => 'cancel',
-            'text'  => $this->language->get('button_cancel'),
-            'style' => 'button2',
-        ]);
+        $this->data['form']['form_open'] = $form->getFieldHtml(
+            [
+                'type'   => 'form',
+                'name'   => 'orderFrm',
+                'attr'   => 'data-confirm-exit="true" class="aform form-horizontal"',
+                'action' => $this->data['action'],
+            ]
+        );
+        $this->data['form']['submit'] = $form->getFieldHtml(
+            [
+                'type'  => 'button',
+                'name'  => 'submit',
+                'text'  => $this->language->get('button_save'),
+                'style' => 'button1',
+            ]
+        );
+        $this->data['form']['cancel'] = $form->getFieldHtml(
+            [
+                'type'  => 'button',
+                'name'  => 'cancel',
+                'text'  => $this->language->get('button_cancel'),
+                'style' => 'button2',
+            ]
+        );
 
         $this->loadModel('catalog/download');
         $all_downloads = $this->model_catalog_download->getDownloads();
 
         $options = ['' => $this->language->get('text_push_download')];
         foreach ($all_downloads as $d) {
-            $options[$d['download_id']] = $d['name'].' ('.$d['mask'].')';
+            $options[$d['download_id']] = $d['name'] . ' (' . $d['mask'] . ')';
         }
 
         $this->addChild('pages/sale/order_summary', 'summary_form', 'pages/sale/order_summary.tpl');
@@ -1810,7 +1877,7 @@ class ControllerPagesSaleOrder extends AController
 
             $this->loadModel('catalog/download');
             foreach ($order_downloads as $product_id => $order_download) {
-                $downloads = (array) $order_download['downloads'];
+                $downloads = (array)$order_download['downloads'];
                 $this->data['order_downloads'][$product_id]['product_name'] = $order_download['product_name'];
                 $this->data['order_downloads'][$product_id]['product_thumbnail'] = $thumbnails[$product_id];
 
@@ -1822,7 +1889,7 @@ class ControllerPagesSaleOrder extends AController
                     foreach ($download_info['download_history'] as &$h) {
                         $h['time'] = H::dateISO2Display(
                             $h['date_added'],
-                            $this->language->get('date_format_short').' '.$this->language->get('time_format')
+                            $this->language->get('date_format_short') . ' ' . $this->language->get('time_format')
                         );
                     }
                     unset($h);
@@ -1832,12 +1899,14 @@ class ControllerPagesSaleOrder extends AController
                     if ($status_text) {
                         $status = $status_text;
                     } else {
-                        $status = $form->getFieldHtml([
-                            'type'  => 'checkbox',
-                            'name'  => 'downloads['.(int)$download_info['order_download_id'].'][status]',
-                            'value' => $download_info['status'],
-                            'style' => 'btn_switch',
-                        ]);
+                        $status = $form->getFieldHtml(
+                            [
+                                'type'  => 'checkbox',
+                                'name'  => 'downloads[' . (int)$download_info['order_download_id'] . '][status]',
+                                'value' => $download_info['status'],
+                                'style' => 'btn_switch',
+                            ]
+                        );
                     }
 
                     $this->data['order_downloads'][$product_id]['downloads'][] = [
@@ -1845,7 +1914,7 @@ class ControllerPagesSaleOrder extends AController
                         'attributes'       => $attributes,
                         'href'             => $this->html->getSecureURL(
                             'catalog/product_files',
-                            '&product_id='.$product_id.'&download_id='.$download_info['download_id']
+                            '&product_id=' . $product_id . '&download_id=' . $download_info['download_id']
                         ),
                         'resource'         => $download_info['filename'],
                         'is_file'          => $is_file,
@@ -1854,8 +1923,8 @@ class ControllerPagesSaleOrder extends AController
                         'remaining'        => $form->getFieldHtml(
                             [
                                 'type'        => 'input',
-                                'name'        => 'downloads['.(int) $download_info['order_download_id']
-                                    .'][remaining_count]',
+                                'name' => 'downloads[' . (int)$download_info['order_download_id']
+                                    . '][remaining_count]',
                                 'value'       => $download_info['remaining_count'],
                                 'placeholder' => '-',
                                 'style'       => 'small-field',
@@ -1864,7 +1933,7 @@ class ControllerPagesSaleOrder extends AController
                         'expire_date'      => $form->getFieldHtml(
                             [
                                 'type'       => 'date',
-                                'name'       => 'downloads['.(int) $download_info['order_download_id'].'][expire_date]',
+                                'name' => 'downloads[' . (int)$download_info['order_download_id'] . '][expire_date]',
                                 'value'      => ($download_info['expire_date'] ? H::dateISO2Display(
                                     $download_info['expire_date']
                                 ) : ''),
@@ -1878,7 +1947,7 @@ class ControllerPagesSaleOrder extends AController
                     ];
                     $this->data['order_downloads'][$product_id]['push_download'] = $form->getFieldHtml([
                         'type'        => 'selectbox',
-                        'name'        => 'push['.(int)$download_info['order_download_id'].']',
+                        'name' => 'push[' . (int)$download_info['order_download_id'] . ']',
                         'value'       => '',
                         'options'     => $options,
                         'style'       => 'chosen no-save',
@@ -1888,10 +1957,7 @@ class ControllerPagesSaleOrder extends AController
             }
         } else {
             abc_redirect(
-                $this->html->getSecureURL(
-                    'sale/order/details',
-                    '&order_id='.$this->request->get['order_id']
-                )
+                $this->html->getSecureURL('sale/order/details', '&order_id=' . $this->request->get['order_id'])
             );
         }
 
@@ -1910,7 +1976,7 @@ class ControllerPagesSaleOrder extends AController
         $this->loadLanguage('sale/order');
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
-        $customer_id = (int) $this->request->get['customer_id'];
+        $customer_id = (int)$this->request->get['customer_id'];
 
         if (!$this->session->data['admin_order']
             //check customer id in the session data too! What if switched to another customer?
@@ -1923,7 +1989,7 @@ class ControllerPagesSaleOrder extends AController
 
         if (!$customer_id) {
             if ($order_info['customer_id']) {
-                $customer_id = (int) $order_info['customer_id'];
+                $customer_id = (int)$order_info['customer_id'];
             } else {
                 abc_redirect($this->html->getSecureURL('sale/customer'));
             }
@@ -1932,11 +1998,13 @@ class ControllerPagesSaleOrder extends AController
         $order_info['customer_id'] = $customer_id;
 
         $this->document->setTitle($this->language->get('text_create_order'));
-        $this->document->initBreadcrumb([
-            'href'      => $this->html->getSecureURL('index/home'),
-            'text'      => $this->language->get('text_home'),
-            'separator' => false,
-        ]);
+        $this->document->initBreadcrumb(
+            [
+                'href'      => $this->html->getSecureURL('index/home'),
+                'text'      => $this->language->get('text_home'),
+                'separator' => false,
+            ]
+        );
 
         $currency = new ACurrency($this->registry);
         if ($order_info['currency']) {
@@ -1973,7 +2041,7 @@ class ControllerPagesSaleOrder extends AController
                 if (!$order_id) {
                     throw new LibException(['cannot to save newly created order']);
                 }
-                $checkout->setOrderId((int) $order_id);
+                $checkout->setOrderId($order_id);
 
                 $this->extensions->hk_ProcessData($this, 'before_confirm_order');
 
@@ -1982,7 +2050,7 @@ class ControllerPagesSaleOrder extends AController
 
                 unset($this->session->data['admin_order']);
                 $this->db->commit();
-                abc_redirect($this->html->getSecureURL('sale/order/details', '&order_id='.$order_id));
+                abc_redirect($this->html->getSecureURL('sale/order/details', '&order_id=' . $order_id));
             } catch (LibException $e) {
                 $this->db->rollback();
                 $error_text = $e->getMessages();
@@ -1999,23 +2067,25 @@ class ControllerPagesSaleOrder extends AController
             }
         }
 
-        $flName = $checkout->getCustomer()->getFirstName().' '.$checkout->getCustomer()->getLastName();
+        $flName = $checkout->getCustomer()->getFirstName() . ' ' . $checkout->getCustomer()->getLastName();
         $this->document->addBreadcrumb(
             [
-                'href'      => $this->html->getSecureURL('sale/customers/update', '&customer_id='.$customer_id),
+                'href' => $this->html->getSecureURL('sale/customers/update', '&customer_id=' . $customer_id),
                 'text'      => $flName,
                 'separator' => ' :: ',
             ]
         );
 
-        $this->document->addBreadcrumb([
-            'href'      => $this->html->getSecureURL('sale/order/createOrder'),
-            'text'      => $this->language->get('text_create_order'),
-            'separator' => ' :: ',
-            'current'   => true,
-        ]);
+        $this->document->addBreadcrumb(
+            [
+                'href'      => $this->html->getSecureURL('sale/order/createOrder'),
+                'text'      => $this->language->get('text_create_order'),
+                'separator' => ' :: ',
+                'current'   => true,
+            ]
+        );
 
-        $this->data['form_title'] = $this->language->get('text_create_order').' - '.$flName;
+        $this->data['form_title'] = $this->language->get('text_create_order') . ' - ' . $flName;
 
         $form = new AForm('HS');
         $this->data['form']['form_open'] = $form->getFieldHtml(
@@ -2033,37 +2103,37 @@ class ControllerPagesSaleOrder extends AController
         $curr = $this->currency->getCurrency($this->config->get('config_currency'));
 
         $this->data['balance'] = $this->language->get('text_balance')
-            .' '.$curr['symbol_left']
-            .round($balance, 2)
-            .$curr['symbol_right'];
+            . ' ' . $curr['symbol_left']
+            . round($balance, 2)
+            . $curr['symbol_right'];
 
         $this->data['actas'] = $this->html->buildElement(
             [
-                 'type'   => 'button',
-                 'text'   => $this->language->get('button_actas'),
-                 'href'   => $this->html->getSecureURL(
-                     'sale/customer/actonbehalf',
-                     '&customer_id='.$customer_id
-                 ),
-                 'target' => 'new',
-             ]
+                'type'   => 'button',
+                'text'   => $this->language->get('button_actas'),
+                'href'   => $this->html->getSecureURL(
+                    'sale/customer/actonbehalf',
+                    '&customer_id=' . $customer_id
+                ),
+                'target' => 'new',
+            ]
         );
 
         $customer_info = Customer::find($customer_id);
-        if($customer_info){
+        if ($customer_info) {
             $customer_info['orders_count'] = Order::where('customer_id', '=', $customer_id)
-                                                  ->where('order_status_id', '>',0)
-                                                  ->get()
-                                                  ->count();
+                ->where('order_status_id', '>', 0)
+                ->get()
+                ->count();
         }
         $this->data['button_orders_count'] = $this->html->buildElement(
             [
                 'type'  => 'button',
                 'name'  => 'view orders',
-                'text'  => $this->language->get('text_total_order').' '.$customer_info['orders_count'],
+                'text'  => $this->language->get('text_total_order') . ' ' . $customer_info['orders_count'],
                 'style' => 'button2',
-                'href'  => $this->html->getSecureURL('sale/order', '&customer_id='.$customer_id),
-                'title' => $this->language->get('text_view').' '.$this->language->get('tab_history'),
+                'href'  => $this->html->getSecureURL('sale/order', '&customer_id=' . $customer_id),
+                'title' => $this->language->get('text_view') . ' ' . $this->language->get('tab_history'),
             ]
         );
 
@@ -2072,25 +2142,25 @@ class ControllerPagesSaleOrder extends AController
         ) {
             $date = H::dateISO2Display(
                 $customer_info['last_login'],
-                $this->language->get('date_format_short').' '.$this->language->get('time_format')
+                $this->language->get('date_format_short') . ' ' . $this->language->get('time_format')
             );
         } else {
             $date = $this->language->get('text_never');
         }
 
-        $this->data['last_login'] = $this->language->get('text_last_login').' '.$date;
+        $this->data['last_login'] = $this->language->get('text_last_login') . ' ' . $date;
         $this->data['message'] = $this->html->buildElement(
             [
                 'type'   => 'button',
                 'text'   => $this->language->get('button_message'),
-                'href'   => $this->html->getSecureURL('sale/contact', '&to[]='.$customer_id),
+                'href' => $this->html->getSecureURL('sale/contact', '&to[]=' . $customer_id),
                 'target' => 'new',
             ]
         );
 
         //get languages
         if (isset($this->request->get['language_id'])) {
-            $order_info['language_id'] = (int) $this->request->get['language_id'];
+            $order_info['language_id'] = (int)$this->request->get['language_id'];
         }
 
         $all_languages = $this->language->getAvailableLanguages();
@@ -2165,7 +2235,7 @@ class ControllerPagesSaleOrder extends AController
 
                     $value = str_replace('\r\n', "\n", $value);
                     if (mb_strlen($value) > 64) {
-                        $value = mb_substr($value, 0, 64).'...';
+                        $value = mb_substr($value, 0, 64) . '...';
                     }
                 }
 
@@ -2195,11 +2265,11 @@ class ControllerPagesSaleOrder extends AController
                 'total'          => $currency->format_total($price_with_tax, $result['quantity']),
                 'href'           => $this->html->getSecureURL(
                     'catalog/product/update',
-                    '&product_id='.$result['product_id']
+                    '&product_id=' . $result['product_id']
                 ),
                 'remove_url'     => $this->html->getSecureURL(
                     'sale/order/removeProduct',
-                    '&product_key='.$result['key']
+                    '&product_key=' . $result['key']
                 ),
             ];
         }
@@ -2214,7 +2284,7 @@ class ControllerPagesSaleOrder extends AController
                 'style'       => 'aform_noaction chosen',
                 'ajax_url'    => $this->html->getSecureURL(
                     'r/product/product/products',
-                    '&currency_code='.$currency->getCode()
+                    '&currency_code=' . $currency->getCode()
                 ),
                 'placeholder' => $this->language->get('text_select_from_lookup'),
                 'option_attr' => ['price'],
@@ -2241,7 +2311,7 @@ class ControllerPagesSaleOrder extends AController
         }
         $addresses = [];
         foreach ($all_addresses as $a) {
-            $addresses[$a['address_id']] = $a['address_1'].' '.$a['address_2'];
+            $addresses[$a['address_id']] = $a['address_1'] . ' ' . $a['address_2'];
         }
 
         $this->data['shipping_address'] = $this->html->buildElement(
@@ -2301,7 +2371,7 @@ class ControllerPagesSaleOrder extends AController
         if (!$this->data['checkout']->getCustomer()->getAddressId()) {
             $this->data['error_warning'] = sprintf(
                 $this->language->get('error_no_address'),
-                $this->html->getSecureURL('sale/customer/update_address', '&customer_id='.$customer_id)
+                $this->html->getSecureURL('sale/customer/update_address', '&customer_id=' . $customer_id)
             );
         } elseif ($this->data['checkout']->getCart()->hasShipping() && !$this->data['checkout']->getShippingList()) {
             $this->data['error_warning'] = sprintf(

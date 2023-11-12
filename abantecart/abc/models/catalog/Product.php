@@ -1,20 +1,19 @@
 <?php
 /**
  * AbanteCart, Ideal Open Source Ecommerce Solution
- * http://www.abantecart.com
+ * https://www.abantecart.com
  *
- * Copyright 2011-2023 Belavier Commerce LLC
+ * Copyright (c) 2011-2023  Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
  * It is also available at this URL:
- * <http://www.opensource.org/licenses/OSL-3.0>
+ * <https://www.opensource.org/licenses/OSL-3.0>
  *
  * UPGRADE NOTE:
  * Do not edit or add to this file if you wish to upgrade AbanteCart to newer
  * versions in the future. If you wish to customize AbanteCart for your
- * needs please refer to http://www.abantecart.com for more information.
- *
+ * needs please refer to https://www.abantecart.com for more information.
  */
 
 namespace abc\models\catalog;
@@ -26,16 +25,14 @@ use abc\core\lib\AException;
 use abc\core\lib\AttributeManager;
 use abc\models\BaseModel;
 use abc\core\engine\AResource;
+use abc\models\casts\NullableInt;
 use abc\models\casts\Serialized;
-use abc\models\locale\LengthClass;
-use abc\models\locale\WeightClass;
 use abc\models\order\Coupon;
 use abc\models\order\OrderProduct;
 use abc\models\QueryBuilder;
 use abc\models\system\Audit;
 use abc\models\system\Setting;
 use abc\models\system\Store;
-use abc\models\system\TaxClass;
 use Carbon\Carbon;
 use Dyrynda\Database\Support\GeneratesUuid;
 use Exception;
@@ -107,7 +104,8 @@ use stdClass;
  *
  * @method static Product|Collection find(int|array $product_id) Product
  * @method static Product select(mixed $select) Builder
- * @method static Collection search(array $filterParams) - see getProducts() method
+ * @see static::getProducts()
+ * @method static Collection search(array $filterParams)
  * @method static WithFinalPrice(int $customer_group_id, Carbon|string $toDate = null) - adds "final_price" column into selected fields
  * @method static WithFirstSpecialPrice(int $customer_group_id, Carbon|string $toDate = null) - adds "special_price" column into selected fields
  * @method static WithFirstDiscountPrice(int $customer_group_id, Carbon|string $toDate = null) - adds "discount_price" column into selected fields
@@ -151,7 +149,7 @@ class Product extends BaseModel
     protected $hidden = ['pivot'];
 
     /** @see Product::boot() categories touching! */
-    protected $touches = ['stores'];
+    protected $touches = ['stores', 'categories'];
     /**
      * @var array
      */
@@ -159,26 +157,26 @@ class Product extends BaseModel
         'product_id'        => 'int',
         'quantity'          => 'int',
         'stock_status_id'   => 'int',
-        'manufacturer_id'   => 'int',
+        'manufacturer_id' => NullableInt::class,
         'shipping'          => 'int',
         'ship_individually' => 'int',
         'free_shipping'     => 'int',
         'shipping_price'    => 'float',
         'price'             => 'float',
-        'tax_class_id'      => 'int',
+        'tax_class_id'    => NullableInt::class,
         'weight'            => 'float',
-        'weight_class_id'   => 'int',
+        'weight_class_id' => NullableInt::class,
         'length'            => 'float',
         'width'             => 'float',
         'height'            => 'float',
-        'length_class_id'   => 'int',
+        'length_class_id' => NullableInt::class,
         'status'            => 'int',
         'featured'          => 'boolean',
         'viewed'            => 'int',
         'sort_order'        => 'int',
         'subtract'          => 'int',
         'minimum'           => 'int',
-        'maximum'           => 'int',
+        'maximum' => NullableInt::class,
         'cost'              => 'float',
         'call_to_order'     => 'int',
         'product_type_id'   => 'int',
@@ -232,9 +230,13 @@ class Product extends BaseModel
         'product_id' => [
             'checks' => [
                 'integer',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => ['default_text' => 'Product ID is not Integer!'],
+                'integer' => ['default_text' => 'Product ID is not Integer!'],
+                'min' => ['default_text' => 'Product ID value must be greater than zero'],
+                'max' => ['default_text' => 'Product ID must be less than 2147483647']
             ],
         ],
 
@@ -246,28 +248,28 @@ class Product extends BaseModel
             ],
             'messages' => [
                 '*' => [
-                    'default_text' => 'Invalid UUID Format! Please follow pattern ' . Uuid::VALID_PATTERN,
+                    'default_text' => 'Invalid UUID Format! Please follow pattern '.Uuid::VALID_PATTERN,
                 ],
             ],
         ],
 
         'model' => [
-            'checks'   => [
+            'checks' => [
                 'string',
                 'between:1,64',
             ],
             'messages' => [
                 '*' => [
-                    'language_key'   => 'error_model',
+                    'language_key' => 'error_model',
                     'language_block' => 'catalog/product',
-                    'default_text'   => 'Product Model must be less than 64 characters! Recommended 5-25 characters',
-                    'section'        => 'admin',
+                    'default_text' => 'Product Model must be less than 64 characters! Recommended 5-25 characters',
+                    'section' => 'admin',
                 ],
             ],
         ],
 
         'sku' => [
-            'checks'   => [
+            'checks' => [
                 'string',
                 'between:1,64',
             ],
@@ -279,7 +281,7 @@ class Product extends BaseModel
         ],
 
         'location' => [
-            'checks'   => [
+            'checks' => [
                 'string',
                 'between:1,128',
             ],
@@ -290,18 +292,20 @@ class Product extends BaseModel
             ],
         ],
 
-        'quantity'       => [
-            'checks'   => [
+        'quantity' => [
+            'checks' => [
                 'integer',
+                'min:-2147483647',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => 'Product Quantity must be an integer!',
-                ],
+                'integer' => ['default_text' => 'Product Quantity must be an integer!',],
+                'min' => ['default_text' => 'Product Quantity value must be greater than -2147483647'],
+                'max' => ['default_text' => 'Product Quantity must be less than 2147483647']
             ],
         ],
         'stock_checkout' => [
-            'checks'   => [
+            'checks' => [
                 'string',
                 'nullable',
                 'in:0,1',
@@ -318,31 +322,37 @@ class Product extends BaseModel
                 'integer',
                 'sometimes',
                 'required',
+                'min:0',
+                'max:2147483647'
                 // 'exists:stock_statuses',
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => ':attribute is not integer or not presents in stock_statuses table!',
-                ],
+                'integer' => ['default_text' => ':attribute is not integer or not presents in stock_statuses table!',],
+                'min' => ['default_text' => ':attribute value must be greater than zero'],
+                'max' => ['default_text' => ':attribute must be less than 2147483647'],
+                'required' => ['default_text' => ':attribute required']
             ],
         ],
 
         'manufacturer_id' => [
             'checks' => [
                 'integer',
-                'required',
-                'sometimes',
+                'nullable',
                 'exists:manufacturers',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => ':attribute is not integer or not presents in Manufacturers table!',
-                ],
+                'integer' => ['default_text' => ':attribute is not integer',],
+                'exists' => ['default_text' => ':attribute not presents in Manufacturers table!'],
+                'min' => ['default_text' => ':attribute value must be greater than zero'],
+                'max' => ['default_text' => ':attribute must be less than 2147483647'],
+                'required' => ['default_text' => ':attribute required']
             ],
         ],
 
         'shipping' => [
-            'checks'   => [
+            'checks' => [
                 'boolean',
             ],
             'messages' => [
@@ -353,7 +363,7 @@ class Product extends BaseModel
         ],
 
         'ship_individually' => [
-            'checks'   => [
+            'checks' => [
                 'boolean',
             ],
             'messages' => [
@@ -362,8 +372,8 @@ class Product extends BaseModel
                 ],
             ],
         ],
-        'free_shipping'     => [
-            'checks'   => [
+        'free_shipping' => [
+            'checks' => [
                 'boolean',
             ],
             'messages' => [
@@ -372,8 +382,8 @@ class Product extends BaseModel
                 ],
             ],
         ],
-        'shipping_price'    => [
-            'checks'   => [
+        'shipping_price' => [
+            'checks' => [
                 'numeric',
             ],
             'messages' => [
@@ -382,8 +392,8 @@ class Product extends BaseModel
                 ],
             ],
         ],
-        'price'             => [
-            'checks'   => [
+        'price' => [
+            'checks' => [
                 'numeric',
             ],
             'messages' => [
@@ -396,24 +406,24 @@ class Product extends BaseModel
         'tax_class_id' => [
             'checks' => [
                 'integer',
-                'required',
-                'sometimes',
+                'nullable',
                 'exists:tax_classes',
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => ':attribute is not integer or not presents in tax_classes table!',
-                ],
+                'integer' => ['default_text' => ':attribute is not integer!',],
+                'exists' => ['default_text' => 'The :attribute not presents in tax_classes table!'],
             ],
         ],
 
         'weight' => [
             'checks' => [
                 'numeric',
+                'max:1000',
+                'min:0'
             ],
             'messages' => [
                 '*' => [
-                    'default_text' => ':attribute must be numeric!',
+                    'default_text' => 'The :attribute must be numeric between 0 and 1000!',
                 ],
             ],
         ],
@@ -425,19 +435,20 @@ class Product extends BaseModel
                 'exists:weight_classes',
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => ':attribute is not integer or not presents in weight_classes table!',
-                ],
+                'integer' => ['default_text' => ':attribute is not integer!',],
+                'exists' => ['default_text' => 'The :attribute not presents in weight_classes table'],
             ],
         ],
 
         'length' => [
             'checks' => [
                 'numeric',
+                'max:1000',
+                'min:0'
             ],
             'messages' => [
                 '*' => [
-                    'default_text' => ':attribute must be numeric!',
+                    'default_text' => 'The :attribute must be numeric between 0 and 1000!',
                 ],
             ],
         ],
@@ -445,10 +456,12 @@ class Product extends BaseModel
         'width' => [
             'checks' => [
                 'numeric',
+                'max:1000',
+                'min:0'
             ],
             'messages' => [
                 '*' => [
-                    'default_text' => ':attribute must be numeric!',
+                    'default_text' => 'The :attribute must be numeric between 0 and 1000!',
                 ],
             ],
         ],
@@ -456,10 +469,12 @@ class Product extends BaseModel
         'height' => [
             'checks' => [
                 'numeric',
+                'max:1000',
+                'min:0'
             ],
             'messages' => [
                 '*' => [
-                    'default_text' => ':attribute must be numeric!',
+                    'default_text' => ':attribute must be numeric between 0 and 1000!',
                 ],
             ],
         ],
@@ -471,14 +486,13 @@ class Product extends BaseModel
                 'exists:length_classes',
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => ':attribute is not integer or not presents in length_classes table!',
-                ],
+                'integer' => ['default_text' => ':attribute is not integer'],
+                'exists' => ['default_text' => ':attribute not presents in length_classes table!'],
             ],
         ],
 
         'status' => [
-            'checks'   => [
+            'checks' => [
                 'boolean',
             ],
             'messages' => [
@@ -489,7 +503,7 @@ class Product extends BaseModel
         ],
 
         'featured' => [
-            'checks'   => [
+            'checks' => [
                 'boolean',
             ],
             'messages' => [
@@ -499,24 +513,28 @@ class Product extends BaseModel
             ],
         ],
 
-        'viewed'     => [
-            'checks'   => [
+        'viewed' => [
+            'checks' => [
                 'integer',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => ':attribute is not integer!',
-                ],
+                'integer' => ['default_text' => ':attribute is not integer!'],
+                'min' => ['default_text' => ':attribute value must be greater than zero'],
+                'max' => ['default_text' => ':attribute must be less than 2147483647']
             ],
         ],
         'sort_order' => [
-            'checks'   => [
+            'checks' => [
                 'integer',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => ':attribute is not integer!',
-                ],
+                'integer' => ['default_text' => ':attribute is not integer!'],
+                'min' => ['default_text' => ':attribute value must be greater than zero'],
+                'max' => ['default_text' => ':attribute must be less than 2147483647']
             ],
         ],
 
@@ -534,23 +552,27 @@ class Product extends BaseModel
         'minimum' => [
             'checks' => [
                 'integer',
+                'min:1',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => 'Minimal Quantity is not integer!',
-                ],
+                'integer' => ['default_text' => 'Minimal Quantity is not integer!'],
+                'min' => ['default_text' => ':attribute value must be greater than zero'],
+                'max' => ['default_text' => ':attribute must be less than 2147483647']
             ],
         ],
 
         'maximum' => [
             'checks' => [
                 'integer',
+                'nullable',
                 'gte:minimum',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => 'Maximum Quantity is not integer or less than minimal.',
-                ],
+                'integer' => ['default_text' => 'Maximum Quantity is not integer or less than minimal.'],
+                'max' => ['default_text' => ':attribute must be less than 2147483647'],
+                'gte' => ['default_text' => ':attribute must be greater than minimum']
             ],
         ],
 
@@ -580,11 +602,11 @@ class Product extends BaseModel
             'checks' => [
                 'integer',
                 'nullable',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => ':attribute is not integer!',
-                ],
+                'integer' => ['default_text' => ':attribute is not integer!'],
+                'max' => ['default_text' => ':attribute must be less than 2147483647']
             ],
         ],
     ];
@@ -1395,123 +1417,42 @@ class Product extends BaseModel
             ->toArray();
     }
 
-    /**
-     * @return array
-     * @throws ReflectionException
-     * @throws AException
-     * @throws InvalidArgumentException
-     */
-    public function getProductCategories()
-    {
-        $categories = Category::getCategories(0);
-        $product_categories = [];
-        foreach ($categories as $category) {
-            $product_categories[] = (object)[
-                'id'   => $category['category_id'],
-                'name' => htmlspecialchars_decode($category['name']),
-            ];
-        }
-        return $product_categories;
-    }
-
     public function getProductStores()
     {
-        $stores = Store::active()->select(['store_id as id', 'name'])->get();
-        $result[] = (object)['id' => 0, 'name' => 'Default'];
-        foreach ($stores as $store) {
-            $result[] = (object)['id' => $store->id, 'name' => $store->name];
+        $productId = $this->getKey();
+        $query = Store::active()->select('stores.*')
+            ->addSelect('s1.value as store_url')
+            ->addSelect('s2.value as store_ssl_url');
+        if ($productId) {
+            $query->join(
+                'products_to_stores',
+                function ($join) use ($productId) {
+                    $join->on(
+                        'products_to_stores.store_id',
+                        '=',
+                        'stores.store_id'
+                    )->where(
+                        'products_to_stores.product_id',
+                        '=',
+                        $productId
+                    );
+                }
+            );
         }
-        return $result;
-    }
 
-    public function getManufacturers()
-    {
-        $manufacturers = Manufacturer::select(['manufacturer_id as id', 'name'])->get();
-        $result = [];
-        foreach ($manufacturers as $manufacturer) {
-            $result[] = (object)['id' => $manufacturer->id, 'name' => $manufacturer->name];
-        }
-        return $result;
-    }
-
-    public function getTaxClasses()
-    {
-        $tax_classes = TaxClass::with('description')->get();
-        $result = [];
-        $result[] = (object)['id' => 0, 'name' => Registry::language()->get('text_none')];
-        foreach ($tax_classes as $tax_class) {
-            $result[] = (object)['id' => $tax_class->tax_class_id, 'name' => $tax_class->description->title];
-        }
-        return $result;
-    }
-
-    /**
-     * @return array
-     * @throws AException
-     * @throws InvalidArgumentException
-     * @throws ReflectionException
-     */
-    public function getStockCheckouts()
-    {
-        $language = Registry::language();
-        return [
-            (object)[
-                'id'   => '',
-                'name' => $language->get('text_default'),
-            ],
-            (object)[
-                'id'   => 0,
-                'name' => $language->get('text_no'),
-            ],
-            (object)[
-                'id'   => 1,
-                'name' => $language->get('text_yes'),
-            ],
-        ];
-    }
-
-    /**
-     * @param int $language_id
-     *
-     * @return array
-     */
-    public function getStockStatuses($language_id = 0)
-    {
-        $language_id = $language_id ?: static::$current_language_id;
-        $stock_statuses = StockStatus::where('language_id', '=', $language_id)
-            ->select(['stock_status_id as id', 'name'])
-            ->get();
-        $result = [];
-        foreach ($stock_statuses as $stock_status) {
-            $result[] = (object)[
-                'id'   => $stock_status->id,
-                'name' => $stock_status->name,
-            ];
-        }
-        return $result;
-    }
-
-    public function getLengthClasses()
-    {
-        $length_classes = LengthClass::with('description')->get();
-        $result = [];
-        foreach ($length_classes as $length_class) {
-            $result[] = (object)[
-                'id'   => $length_class->length_class_id,
-                'name' => $length_class->description->title
-            ];
-        }
-        return $result;
-    }
-
-    public function getWeightClasses()
-    {
-        $weight_classes = WeightClass::with('description')->get();
-        $result = [];
-        foreach ($weight_classes as $weight_class) {
-            $result[] = (object)['id' => $weight_class->weight_class_id, 'name' => $weight_class->description->title];
-        }
-        return $result;
+        return $query->leftJoin(
+            'settings as s1',
+            function ($on) {
+                $on->on('products_to_stores.store_id', '=', 's1.store_id')
+                    ->where('s1.key', '=', 'config_url');
+            }
+        )->leftJoin(
+            'settings as s2',
+            function ($on) {
+                $on->on('products_to_stores.store_id', '=', 's2.store_id')
+                    ->where('s2.key', '=', 'config_ssl_url');
+            }
+        )->useCache('product')->get();
     }
 
     /**
@@ -1758,6 +1699,7 @@ class Product extends BaseModel
                 $option_value['product_id'] = $productId;
                 $option_value['product_option_id'] = $productOptionId;
                 $option_value['attribute_value_id'] = 0;
+                $option_value['default'] = (bool)$option_value['default'];
 
                 $optionValueData = $this->removeSubArrays($option_value);
                 $optionValueObj = new ProductOptionValue();
@@ -1840,11 +1782,11 @@ class Product extends BaseModel
 
     /**
      * @param $product_id
-     *
+     * @param array|null $withRelations
      * @return array
      * @throws Exception
      */
-    public static function getProductInfo($product_id)
+    public static function getProductInfo($product_id, ?array $withRelations = [])
     {
         $product_id = (int)$product_id;
         if (!$product_id) {
@@ -1852,7 +1794,7 @@ class Product extends BaseModel
         }
         /** @var Product $product */
         $product = Product::with(
-            [
+            array_merge([
                 'description',
                 'categories',
                 'categories.description',
@@ -1860,7 +1802,7 @@ class Product extends BaseModel
                 'tagsByLanguage',
                 'related',
                 'related.description'
-            ]
+            ], $withRelations)
         )->useCache('product')
             ->find($product_id);
         if (!$product) {
@@ -1928,11 +1870,10 @@ class Product extends BaseModel
         $product->save();
         $productId = $product->product_id;
         if ($productId) {
-            if ($product_data['product_description']) {
-                $description = new ProductDescription();
-                $description->fillAndCast($product_data['product_description']);
-                $product->descriptions()->save($description);
-            }
+            $description = new ProductDescription();
+            $description->fillAndCast($product_data['product_description'] ?: $product_data);
+            $product->descriptions()->save($description);
+
             if ($product_data['keyword'] || $product_data['product_description']['name']) {
                 UrlAlias::setProductKeyword(
                     $product_data['keyword'] ?: $product_data['product_description']['name'],
@@ -2104,7 +2045,7 @@ class Product extends BaseModel
      * @param array $product_data
      *
      * @return bool
-     * @throws Exception
+     * @throws Exception|InvalidArgumentException
      */
     public static function updateProduct(int $product_id, array $product_data)
     {
@@ -2127,14 +2068,26 @@ class Product extends BaseModel
         $pd = new ProductDescription();
         $fillable = $pd->getFillable();
 
+        //NOTE: product description can be a separate array in case of data import process
         $update = [];
-        foreach ($fillable as $field_name) {
-            if (isset($product_data['product_description'][$field_name])) {
-                $update[$field_name] = $product_data['product_description'][$field_name];
+        foreach ($fillable as $attrName) {
+            /** $valueExists  - sign if value was set.
+             * Needed because value can be any */
+            $valueExists = $value = false;
+            if (isset($product_data['product_description'][$attrName])) {
+                $value = $product_data['product_description'][$attrName];
+                $valueExists = true;
+            } elseif (isset($product_data[$attrName])) {
+                $value = $product_data[$attrName];
+                $valueExists = true;
+            }
+            if ($valueExists) {
+                $update[$attrName] = $value;
             }
         }
 
-        if (count($update)) {
+
+        if ($update) {
             $language->replaceDescriptions('product_descriptions',
                 ['product_id' => $product_id],
                 [$languageId => $update]
@@ -2240,6 +2193,7 @@ class Product extends BaseModel
         }
 
         if (isset($product_data['product_store'])) {
+            $product_data['product_store'] = array_map('intval', $product_data['product_store']);
             $model->stores()->sync($product_data['product_store']);
         }
 
@@ -2508,7 +2462,7 @@ class Product extends BaseModel
      * @param array $productIds
      *
      * @return array
-     * @throws ReflectionException
+     * @throws ReflectionException|InvalidArgumentException
      */
     public static function getProductsAllInfo(array $productIds)
     {
@@ -2555,8 +2509,9 @@ class Product extends BaseModel
     public function delete()
     {
         UrlAlias::where('query', '=', 'product_id=' . $this->getKey())->delete();
-        parent::delete();
+        $result = parent::delete();
         Registry::cache()->flush('product');
+        return $result;
     }
 
     /**
@@ -2675,18 +2630,24 @@ class Product extends BaseModel
         return $product_option_data;
     }
 
-    public static function getProductOption($option_id)
+    public static function getProductOption($optionId)
     {
+        if (!$optionId) {
+            return [];
+        }
         $option = ProductOption::with('descriptions')
-            ->find($option_id)
+            ->find($optionId)
             ?->toArray();
+        if (!$option) {
+            return [];
+        }
 
         $optionData = [];
         foreach ($option['descriptions'] as $desc) {
             $optionData['language'][$desc['language_id']] = $desc;
         }
         $option_data = array_merge($option, $optionData);
-        $option_data['product_option_value'] = ProductOptionValue::getProductOptionValues($option_id);
+        $option_data['product_option_value'] = ProductOptionValue::getProductOptionValues($optionId);
 
         return $option_data;
     }
@@ -2707,6 +2668,7 @@ class Product extends BaseModel
      *              - description
      *              - model
      *              - only_enabled - with status 1 and date_available less than current time
+     *              - only_viewed  - with viewed count greater than zero
      *              - customer_group_id
      *              - keyword
      *              - keyword_search_parameters - array(
@@ -2736,7 +2698,7 @@ class Product extends BaseModel
         $params['sort'] = (string)$params['sort'] ?: 'sort_order';
         $params['order'] = (string)$params['order'] ?: 'ASC';
         $params['start'] = max((int)$params['start'], 0);
-        $params['limit'] = abs((int)$params['limit']) ?: 20;;
+        $params['limit'] = abs((int)$params['limit']) ?: 20;
 
         $filter = (array)$params['filter'];
         $filter['include'] = $filter['include'] ?? [];
@@ -2746,6 +2708,7 @@ class Product extends BaseModel
         $filter['related_to'] = $filter['related_to'] ?? [];
 
         $filter['only_enabled'] = (bool)$filter['only_enabled'];
+        $filter['only_viewed'] = (bool)$filter['only_viewed'];
         $filter['customer_group_id'] = $filter['customer_group_id']
             ?? Registry::config()?->get('config_customer_group_id');
         $filter['keyword'] = trim($filter['keyword']);
@@ -2869,6 +2832,9 @@ class Product extends BaseModel
         }
         if ($filter['only_featured']) {
             $query->where('products.featured', '=', 1);
+        }
+        if ($filter['only_viewed']) {
+            $query->where('products.viewed', '>', 0);
         }
 
         if ($filter['related_to']) {

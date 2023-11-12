@@ -26,9 +26,11 @@ use abc\core\engine\AResource;
 use abc\models\catalog\Category;
 use abc\models\catalog\Product;
 use abc\models\system\Store;
+use abc\modules\traits\EditProductTrait;
 
 class ControllerPagesCatalogProductRelations extends AController
 {
+    use EditProductTrait;
     public $error = [];
 
     public function main()
@@ -38,7 +40,6 @@ class ControllerPagesCatalogProductRelations extends AController
         $productId = (int)$this->request->get['product_id'];
 
         $this->loadLanguage('catalog/product');
-        $this->document->setTitle($this->language->get('heading_title'));
 
         if ($this->request->is_POST()) {
             $this->request->post['product_category'] = array_filter($this->request->post['product_category'] ?: []);
@@ -61,37 +62,13 @@ class ControllerPagesCatalogProductRelations extends AController
             unset($this->session->data['success']);
         }
 
-        $this->document->initBreadcrumb(
-            [
-                'href'      => $this->html->getSecureURL('index/home'),
-                'text'      => $this->language->get('text_home'),
-                'separator' => false,
-            ]
+        $this->setBreadCrumbs(
+            $productInfo,
+            $this->html->getSecureURL('catalog/product_relations', '&product_id=' . $productId),
+            $this->language->get('tab_relations')
         );
-        $this->document->addBreadcrumb(
-            [
-                'href'      => $this->html->getSecureURL('catalog/product'),
-                'text'      => $this->language->get('heading_title'),
-                'separator' => ' :: ',
-            ]
-        );
-        $this->document->addBreadcrumb(
-            [
-                'href'      => $this->html->getSecureURL('catalog/product/update', '&product_id=' . $productId),
-                'text'      => $this->language->get('text_edit')
-                    . '&nbsp;' . $this->language->get('text_product')
-                    . ' - ' . $productInfo['name'],
-                'separator' => ' :: ',
-            ]
-        );
-        $this->document->addBreadcrumb(
-            [
-                'href'      => $this->html->getSecureURL('catalog/product_relations', '&product_id=' . $productId),
-                'text'      => $this->language->get('tab_relations'),
-                'separator' => ' :: ',
-                'current'   => true,
-            ]
-        );
+
+        $this->document->setTitle($productInfo['name'] . ' ' . $this->language->get('tab_relations'));
 
         $this->data['categories'] = array_column(Category::getCategories(), 'name', 'category_id');
 
@@ -100,14 +77,8 @@ class ControllerPagesCatalogProductRelations extends AController
             ]
             + Store::all()?->pluck('name', 'store_id')?->toArray();
 
-        $this->data['active'] = 'relations';
-        //load tabs controller
-        $tabs_obj = $this->dispatch('pages/catalog/product_tabs', [$this->data]);
-        $this->data['product_tabs'] = $tabs_obj->dispatchGetOutput();
-        unset($tabs_obj);
+        $this->addTabs('relations');
 
-        $this->data['category_products'] = $this->html->getSecureURL('product/product/category');
-        $this->data['related_products'] = $this->html->getSecureURL('product/product/related');
         $this->data['action'] = $this->html->getSecureURL('catalog/product_relations', '&product_id=' . $productId);
         $this->data['form_title'] = $this->language->get('text_edit') . '&nbsp;' . $this->language->get('text_product');
         $this->data['update'] = $this->html->getSecureURL(
@@ -228,7 +199,7 @@ class ControllerPagesCatalogProductRelations extends AController
                 '&product_id=' . $productId
             );
         }
-        $this->addChild('pages/catalog/product_summary', 'summary_form', 'pages/catalog/product_summary.tpl');
+        $this->addSummary();
         $this->view->assign('help_url', $this->gen_help_url('product_relations'));
         $this->view->batchAssign($this->data);
         $this->processTemplate('pages/catalog/product_relations.tpl');

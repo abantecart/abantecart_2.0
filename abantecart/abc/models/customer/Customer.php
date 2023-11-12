@@ -155,32 +155,40 @@ class Customer extends BaseModel
     protected $rules = [
         /** @see validate() */
         'customer_id' => [
-            'checks'   => [
+            'checks' => [
                 'integer',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => ['default_text' => 'Customer ID is not Integer!'],
+                'integer' => ['default_text' => 'Customer ID is not Integer!'],
+                'min' => ['default_text' => 'Customer ID value must be greater than zero'],
+                'max' => ['default_text' => 'Customer ID must be less than 2147483647']
             ],
         ],
         /** @see validate() */
-        'store_id'    => [
-            'checks'   => [
+        'store_id' => [
+            'checks' => [
                 'integer',
                 //required only when new customer creating
                 'required_without:customer_id',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                'integer'                      => [
+                'integer' => [
                     'default_text' => 'Store ID must be an integer!',
                 ],
                 'required_without:customer_id' => [
                     'default_text' => 'Store ID required.',
                 ],
+                'max' => ['default_text' => 'Store ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Store ID value must be greater than zero'],
             ],
         ],
 
         'loginname' => [
-            'checks'   => [
+            'checks' => [
                 'string',
                 'sometimes',
                 'required',
@@ -188,16 +196,16 @@ class Customer extends BaseModel
             ],
             'messages' => [
                 '*' => [
-                    'language_key'   => 'error_loginname',
+                    'language_key' => 'error_loginname',
                     'language_block' => 'account/create',
-                    'default_text'   => 'Login name must be alphanumeric only and between 5 and 96 characters!',
-                    'section'        => 'storefront',
+                    'default_text' => 'Login name must be alphanumeric only and between 5 and 96 characters!',
+                    'section' => 'storefront',
                 ],
             ],
         ],
 
         'firstname' => [
-            'checks'   => [
+            'checks' => [
                 'string',
                 'sometimes',
                 'required',
@@ -205,16 +213,16 @@ class Customer extends BaseModel
             ],
             'messages' => [
                 '*' => [
-                    'language_key'   => 'error_firstname',
+                    'language_key' => 'error_firstname',
                     'language_block' => 'account/create',
-                    'default_text'   => 'First Name must be between 1 and 32 characters!',
-                    'section'        => 'storefront',
+                    'default_text' => 'First Name must be between 1 and 32 characters!',
+                    'section' => 'storefront',
                 ],
             ],
         ],
 
         'lastname' => [
-            'checks'   => [
+            'checks' => [
                 'string',
                 'sometimes',
                 'required',
@@ -222,16 +230,16 @@ class Customer extends BaseModel
             ],
             'messages' => [
                 '*' => [
-                    'language_key'   => 'error_lastname',
+                    'language_key' => 'error_lastname',
                     'language_block' => 'account/create',
-                    'default_text'   => 'Last Name must be between 1 and 32 characters!',
-                    'section'        => 'storefront',
+                    'default_text' => 'Last Name must be between 1 and 32 characters!',
+                    'section' => 'storefront',
                 ],
             ],
         ],
 
         'email' => [
-            'checks'   => [
+            'checks' => [
                 'string',
                 'sometimes',
                 'required',
@@ -242,37 +250,37 @@ class Customer extends BaseModel
             ],
             'messages' => [
                 'unique' => [
-                    'language_key'   => 'error_email_unique',
+                    'language_key' => 'error_email_unique',
                     'language_block' => 'account/create',
-                    'default_text'   => 'Email address must be unique! This email already registered',
-                    'section'        => 'storefront',
+                    'default_text' => 'Email address must be unique! This email already registered',
+                    'section' => 'storefront',
                 ],
-                '*'      => [
-                    'language_key'   => 'error_email',
+                '*' => [
+                    'language_key' => 'error_email',
                     'language_block' => 'account/create',
-                    'default_text'   => 'Email must be valid!',
-                    'section'        => 'storefront',
+                    'default_text' => 'Email must be valid!',
+                    'section' => 'storefront',
                 ],
             ],
         ],
 
         'telephone' => [
-            'checks'   => [
+            'checks' => [
                 'string',
                 'max:32',
             ],
             'messages' => [
                 '*' => [
-                    'language_key'   => 'error_telephone',
+                    'language_key' => 'error_telephone',
                     'language_block' => 'account/create',
-                    'default_text'   => 'Telephone number must be less than 32 characters!',
-                    'section'        => 'storefront',
+                    'default_text' => 'Telephone number must be less than 32 characters!',
+                    'section' => 'storefront',
                 ],
             ],
         ],
 
         'fax' => [
-            'checks'   => [
+            'checks' => [
                 'string',
                 'max:32',
             ],
@@ -284,7 +292,7 @@ class Customer extends BaseModel
         ],
 
         'sms' => [
-            'checks'   => [
+            'checks' => [
                 'string',
                 'max:32',
             ],
@@ -296,7 +304,7 @@ class Customer extends BaseModel
         ],
 
         'salt' => [
-            'checks'   => [
+            'checks' => [
                 'string',
                 'max:10',
             ],
@@ -312,7 +320,7 @@ class Customer extends BaseModel
          */
 
         'password' => [
-            'checks'   => [
+            'checks' => [
                 'string',
                 'sometimes',
                 'required',
@@ -322,34 +330,36 @@ class Customer extends BaseModel
             ],
             'messages' => [
                 'confirmed' => [
-                    'language_key'   => 'error_confirm',
+                    'language_key' => 'error_confirm',
                     'language_block' => 'account/create',
-                    'default_text'   => 'Password confirmation does not match password!',
-                    'section'        => 'storefront',
+                    'default_text' => 'Password confirmation does not match password!',
+                    'section' => 'storefront',
                 ],
-                '*'         => [
-                    'language_key'   => 'error_password',
+                '*' => [
+                    'language_key' => 'error_password',
                     'language_block' => 'account/create',
-                    'default_text'   => 'Password must be between 4 and 40 characters!',
-                    'section'        => 'storefront',
+                    'default_text' => 'Password must be between 4 and 40 characters!',
+                    'section' => 'storefront',
                 ],
             ],
         ],
 
         'address_id' => [
-            'checks'   => [
+            'checks' => [
                 'integer',
                 'nullable',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => 'Address ID must be an integer!',
-                ],
+                'integer' => ['default_text' => 'Address ID must be an integer!'],
+                'max' => ['default_text' => 'Address ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Address ID value must be greater than zero'],
             ],
         ],
 
         'status' => [
-            'checks'   => [
+            'checks' => [
                 'boolean',
             ],
             'messages' => [
@@ -360,7 +370,7 @@ class Customer extends BaseModel
         ],
 
         'advanced_status' => [
-            'checks'   => [
+            'checks' => [
                 'string',
                 'max:128',
             ],
@@ -372,7 +382,7 @@ class Customer extends BaseModel
         ],
 
         'approved' => [
-            'checks'   => [
+            'checks' => [
                 'boolean',
             ],
             'messages' => [
@@ -383,19 +393,21 @@ class Customer extends BaseModel
         ],
 
         'customer_group_id' => [
-            'checks'   => [
+            'checks' => [
                 'integer',
                 'nullable',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => 'Customer Group ID must be an integer or NULL !',
-                ],
+                'integer' => ['default_text' => 'Customer Group ID must be an integer or NULL !',],
+                'max' => ['default_text' => 'Customer Group ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Customer Group ID value must be greater than zero'],
             ],
         ],
 
         'ip' => [
-            'checks'   => [
+            'checks' => [
                 'ip',
                 'max:50',
             ],

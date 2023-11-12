@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2017 Belavier Commerce LLC
+  Copyright © 2011-2023 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -22,18 +22,19 @@ namespace abc\controllers\admin;
 
 use abc\core\engine\AController;
 use abc\core\lib\AError;
+use abc\core\lib\AException;
 use abc\core\lib\AJson;
 use H;
+use Psr\SimpleCache\InvalidArgumentException;
+use ReflectionException;
 use stdClass;
 
 class ControllerResponsesListingGridCoupon extends AController
 {
-    public $data = [];
     public $error;
 
     public function main()
     {
-
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
@@ -54,8 +55,11 @@ class ControllerResponsesListingGridCoupon extends AController
         $response->total = $total_pages;
         $response->records = $total;
 
-        $results =
-            $this->model_sale_coupon->getCoupons(['content_language_id' => $this->language->getContentLanguageID()]);
+        $results = $this->model_sale_coupon->getCoupons(
+            [
+                'content_language_id' => $this->language->getContentLanguageID()
+            ]
+        );
         $i = 0;
         $now = time();
         foreach ($results as $result) {
@@ -97,12 +101,14 @@ class ControllerResponsesListingGridCoupon extends AController
         $this->loadLanguage('sale/coupon');
         if ( ! $this->user->canModify('listing_grid/coupon')) {
             $error = new AError('');
-
-            return $error->toJSONResponse('NO_PERMISSIONS_403',
+            $error->toJSONResponse(
+                'NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/coupon'),
                     'reset_value' => true,
-                ]);
+                ]
+            );
+            return;
         }
 
         switch ($this->request->post['oper']) {
@@ -123,10 +129,7 @@ class ControllerResponsesListingGridCoupon extends AController
                     }
                 }
                 break;
-
             default:
-                //print_r($this->request->post);
-
         }
 
         //update controller data
@@ -136,10 +139,10 @@ class ControllerResponsesListingGridCoupon extends AController
     /**
      * update only one field
      *
-     * @return void
-     * @throws \Psr\SimpleCache\InvalidArgumentException
-     * @throws \ReflectionException
-     * @throws \abc\core\lib\AException
+     * @void
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
+     * @throws AException
      */
     public function update_field()
     {
@@ -153,11 +156,14 @@ class ControllerResponsesListingGridCoupon extends AController
         if ( ! $this->user->canModify('listing_grid/coupon')) {
             $error = new AError('');
 
-            return $error->toJSONResponse('NO_PERMISSIONS_403',
+            $error->toJSONResponse(
+                'NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf($this->language->get('error_permission_modify'), 'listing_grid/coupon'),
                     'reset_value' => true,
-                ]);
+                ]
+            );
+            return;
         }
 
         if (isset($this->request->get['id'])) {
@@ -166,7 +172,7 @@ class ControllerResponsesListingGridCoupon extends AController
                     $value = -1;
                 }
 
-                $err = $this->_validateForm($field, $value);
+                $err = $this->validateForm($field, $value);
                 if (in_array($field, ['date_start', 'date_end'])) {
                     $value = H::dateDisplay2ISO($value);
                 }
@@ -179,8 +185,8 @@ class ControllerResponsesListingGridCoupon extends AController
                     $this->model_sale_coupon->editCoupon($this->request->get['id'], [$field => $value]);
                 } else {
                     $error = new AError('');
-
-                    return $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
+                    $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
+                    return;
                 }
                 //save products to coupon
                 if ($this->request->post['coupon_product']) {
@@ -194,13 +200,13 @@ class ControllerResponsesListingGridCoupon extends AController
         //request sent from jGrid. ID is key of array
         foreach ($this->request->post as $field => $value) {
             foreach ($value as $k => $v) {
-                $err = $this->_validateForm($field, $v);
+                $err = $this->validateForm($field, $v);
                 if ( ! $err) {
                     $this->model_sale_coupon->editCoupon($k, [$field => $v]);
                 } else {
                     $error = new AError('');
-
-                    return $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
+                    $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
+                    return;
                 }
             }
         }
@@ -209,13 +215,13 @@ class ControllerResponsesListingGridCoupon extends AController
         $this->extensions->hk_UpdateData($this, __FUNCTION__);
     }
 
-    private function _validateForm($field, $value)
+    protected function validateForm($field, $value)
     {
 
         $err = false;
         switch ($field) {
             case 'coupon_description' :
-                foreach ($value as $language_id => $v) {
+                foreach ($value as $v) {
                     if (isset($v['name'])) {
                         if (mb_strlen($v['name']) < 2 || mb_strlen($v['name']) > 64) {
                             $err = $this->language->get('error_name');
@@ -247,39 +253,4 @@ class ControllerResponsesListingGridCoupon extends AController
         return $this->error;
     }
 
-    public function products()
-    {
-
-        //init controller data
-        $this->extensions->hk_InitData($this, __FUNCTION__);
-
-        $this->loadModel('catalog/product');
-
-        if (isset($this->request->post['id'])) { // variant for popup listing
-            $products = $this->request->post['id'];
-        } else {
-            $products = [];
-        }
-        $product_data = [];
-
-        foreach ($products as $product_id) {
-            $product_info = $this->model_catalog_product->getProduct($product_id);
-
-            if ($product_info) {
-                $product_data[] = [
-                    'id'         => $product_info['product_id'],
-                    'product_id' => $product_info['product_id'],
-                    'name'       => $product_info['name'],
-                    'model'      => $product_info['model'],
-                ];
-            }
-        }
-
-        //update controller data
-        $this->extensions->hk_UpdateData($this, __FUNCTION__);
-
-        $this->load->library('json');
-        $this->response->addJSONHeader();
-        $this->response->setOutput(AJson::encode($product_data));
-    }
 }

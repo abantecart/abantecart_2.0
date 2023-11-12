@@ -129,9 +129,9 @@ WHERE `customer_id` = 0;
 ALTER TABLE `ac_orders`
     CHANGE COLUMN `coupon_id` `coupon_id` int(11) DEFAULT NULL;
 ALTER TABLE `ac_orders`
-    modify shipping_company varchar(64) null;
+    modify shipping_company varchar(255) null;
 ALTER TABLE `ac_orders`
-    modify payment_company varchar(64) null;
+    modify payment_company varchar(255) null;
 
 
 UPDATE `ac_orders`
@@ -707,6 +707,9 @@ MODIFY COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP;
 
 ALTER TABLE `ac_products`
 MODIFY COLUMN `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP;
+
+ALTER TABLE `ac_products`
+    MODIFY COLUMN maximum INT NULL;
 
 ALTER TABLE `ac_resource_library`
 MODIFY COLUMN `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP;
@@ -2316,6 +2319,23 @@ VALUES
 INSERT INTO `ac_dataset_values` (`dataset_column_id`, `value_integer`, `row_id`)
 VALUES
     (14, 8, 137);
+/*
+ * AbanteCart, Ideal Open Source Ecommerce Solution
+ * https://www.abantecart.com
+ *
+ * Copyright (c) 2011-2023  Belavier Commerce LLC
+ *
+ * This source file is subject to Open Software License (OSL 3.0)
+ * License details is bundled with this package in the file LICENSE.txt.
+ * It is also available at this URL:
+ * <https://www.opensource.org/licenses/OSL-3.0>
+ *
+ * UPGRADE NOTE:
+ * Do not edit or add to this file if you wish to upgrade AbanteCart to newer
+ * versions in the future. If you wish to customize AbanteCart for your
+ * needs please refer to https://www.abantecart.com for more information.
+ */
+
 -- ITEM_TYPE
 INSERT INTO `ac_dataset_values` (`dataset_column_id`, `value_varchar`, `row_id`)
 VALUES

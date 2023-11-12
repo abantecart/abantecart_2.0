@@ -1,19 +1,19 @@
 <?php
 /**
  * AbanteCart, Ideal Open Source Ecommerce Solution
- * http://www.abantecart.com
+ * https://www.abantecart.com
  *
- * Copyright 2011-2022 Belavier Commerce LLC
+ * Copyright (c) 2011-2023  Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
  * It is also available at this URL:
- * <http://www.opensource.org/licenses/OSL-3.0>
+ * <https://www.opensource.org/licenses/OSL-3.0>
  *
  * UPGRADE NOTE:
  * Do not edit or add to this file if you wish to upgrade AbanteCart to newer
  * versions in the future. If you wish to customize AbanteCart for your
- * needs please refer to http://www.abantecart.com for more information.
+ * needs please refer to https://www.abantecart.com for more information.
  */
 
 namespace abc\models\catalog;
@@ -49,6 +49,46 @@ class CategoriesToStore extends BaseModel
     protected $casts = [
         'category_id' => 'int',
         'store_id'    => 'int',
+    ];
+
+    /** @var array */
+    protected $fillable = [
+        'category_id',
+        'store_id'
+    ];
+
+    protected $rules = [
+        /** @see validate() */
+        'category_id' => [
+            'checks' => [
+                'integer',
+                'sometimes',
+                'required',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Category ID is not integer!'],
+                'max' => ['default_text' => 'Category ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Category ID value must be greater than zero'],
+                'required' => ['default_text' => 'Category ID required']
+            ],
+        ],
+        'store_id' => [
+            'checks' => [
+                'integer',
+                'sometimes',
+                'required',
+                'max:2147483647',
+                'min:0',
+            ],
+            'messages' => [
+                'integer' => ['default_text' => 'Store ID is not integer!'],
+                'max' => ['default_text' => 'Store ID must be less than 2147483647'],
+                'min' => ['default_text' => 'Store ID value must be greater than zero'],
+                'required' => ['default_text' => 'Store ID required']
+            ],
+        ],
     ];
 
     public function category()

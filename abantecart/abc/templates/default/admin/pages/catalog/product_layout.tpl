@@ -20,13 +20,16 @@ foreach ($templates as $template) {
 	<div class="panel-heading col-xs-12">
 		<div class="primary_content_actions pull-left">
 			<div class="btn-group mr10 toolbar">
-			  <button class="btn btn-default dropdown-toggle tooltips" type="button" data-toggle="dropdown" title="<?php echo $text_select_template; ?>">
-                  <i class="fa fa-image"></i>
-			    <?php echo $tmpl_id; ?> <span class="caret"></span>
-			  </button>
-			  <ul class="dropdown-menu">
-			    <?php echo $template_list; ?>
-			  </ul>
+                <button class="btn btn-default dropdown-toggle tooltips" type="button" data-toggle="dropdown"
+                        title="<?php echo $text_select_template; ?>">
+                    <i class="fa fa-image"></i>
+                    <?php echo $tmpl_id; ?> <span class="caret"></span>
+                </button>
+                <?php if ($template_list) { ?>
+                    <ul class="dropdown-menu">
+                        <?php echo $template_list; ?>
+                    </ul>
+                <?php } ?>
 			</div>
 
 			<div class="btn-group toolbar">

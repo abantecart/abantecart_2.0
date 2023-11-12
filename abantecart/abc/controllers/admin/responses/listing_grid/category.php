@@ -61,7 +61,6 @@ class ControllerResponsesListingGridCategory extends AController
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
         $this->loadLanguage('catalog/category');
-        $this->loadModel('catalog/product');
         $this->loadModel('tool/image');
 
         //Prepare filter config
@@ -196,11 +195,9 @@ class ControllerResponsesListingGridCategory extends AController
 
     public function update()
     {
-
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
-        $this->loadModel('catalog/product');
         $this->loadLanguage('catalog/category');
         if (!$this->user->canModify('listing_grid/category')) {
             $error = new AError('');

@@ -4,7 +4,6 @@
  */
 if ($logged){ ?>
     <div class="leftpanel">
-
         <div class="logopanel">
             <i class="sticky_header fa fa-toggle-off fa-fw"></i>
             <a href="<?php echo $home; ?>">
@@ -213,7 +212,13 @@ if ($logged){ ?>
         </div>
         <!-- header-right -->
     </div><!-- headerbar -->
-
+<?php if($maintenance_warning){ ?>
+    <div class="container-fluid alert alert-warning">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <strong><?php echo $maintenance_warning;?></strong>
+    </div>
+<?php
+} ?>
     <!-- modals location outside of headerbar -->
 <?php if ($config_voicecontrol){ ?>
     <?php include($tpl_common_dir . 'voice_controls.tpl'); ?>

@@ -5,7 +5,7 @@
   AbanteCart, Ideal OpenSource Ecommerce Solution
   http://www.AbanteCart.com
 
-  Copyright © 2011-2018 Belavier Commerce LLC
+  Copyright © 2011-2023 Belavier Commerce LLC
 
   This source file is subject to Open Software License (OSL 3.0)
   License details is bundled with this package in the file LICENSE.txt.
@@ -23,27 +23,21 @@ namespace abc\controllers\admin;
 use abc\core\engine\AController;
 use abc\core\engine\AResource;
 use abc\core\lib\AError;
+use abc\core\lib\AException;
 use abc\core\lib\AFilter;
 use abc\core\lib\AJson;
 use abc\models\admin\ModelCatalogManufacturer;
 use abc\models\catalog\Manufacturer;
+use abc\models\catalog\Product;
 use H;
+use Psr\SimpleCache\InvalidArgumentException;
+use ReflectionException;
 use stdClass;
-
-/**
- * Class ControllerResponsesListingGridManufacturer
- *
- * @package abc\controllers\admin
- * @property ModelCatalogManufacturer $model_catalog_manufacturer
- */
 
 class ControllerResponsesListingGridManufacturer extends AController
 {
-    public $data = [];
-
     public function main()
     {
-
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
@@ -64,14 +58,10 @@ class ControllerResponsesListingGridManufacturer extends AController
         $results = $this->model_catalog_manufacturer->getManufacturers($filter_data);
 
         //build thumbnails list
-        $ids = [];
-        foreach ($results as $result) {
-            $ids[] = $result['manufacturer_id'];
-        }
         $resource = new AResource('image');
         $thumbnails = $resource->getMainThumbList(
             'manufacturers',
-            $ids,
+            array_column($results, 'manufacturer_id'),
             $this->config->get('config_image_grid_width'),
             $this->config->get('config_image_grid_height')
         );
@@ -82,14 +72,18 @@ class ControllerResponsesListingGridManufacturer extends AController
             $response->rows[$i]['id'] = $result['manufacturer_id'];
             $response->rows[$i]['cell'] = [
                 $thumbnail['thumb_html'],
-                $this->html->buildInput([
-                    'name'  => 'name['.$result['manufacturer_id'].']',
-                    'value' => $result['name'],
-                ]),
-                $this->html->buildInput([
-                    'name'  => 'sort_order['.$result['manufacturer_id'].']',
-                    'value' => $result['sort_order'],
-                ]),
+                $this->html->buildInput(
+                    [
+                        'name'  => 'name[' . $result['manufacturer_id'] . ']',
+                        'value' => $result['name'],
+                    ]
+                ),
+                $this->html->buildInput(
+                    [
+                        'name'  => 'sort_order[' . $result['manufacturer_id'] . ']',
+                        'value' => $result['sort_order'],
+                    ]
+                ),
             ];
             $i++;
         }
@@ -104,40 +98,37 @@ class ControllerResponsesListingGridManufacturer extends AController
 
     public function update()
     {
-
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
-
-        if ( ! $this->user->canModify('listing_grid/manufacturer')) {
+        if (!$this->user->canModify('listing_grid/manufacturer')) {
             $error = new AError('');
-
-            return $error->toJSONResponse('NO_PERMISSIONS_403',
+            $error->toJSONResponse(
+                'NO_PERMISSIONS_403',
                 [
                     'error_text'  => sprintf(
                         $this->language->get('error_permission_modify'),
                         'listing_grid/manufacturer'
                     ),
                     'reset_value' => true,
-                ]);
+                ]
+            );
+            return;
         }
 
-        $this->loadModel('catalog/product');
-        $this->loadModel('catalog/manufacturer');
         $this->loadLanguage('catalog/manufacturer');
 
         switch ($this->request->post['oper']) {
             case 'del':
                 $ids = explode(',', $this->request->post['id']);
-                if ( ! empty($ids)) {
+                if (!empty($ids)) {
                     foreach ($ids as $id) {
-
-                        $product_total = $this->model_catalog_product->getTotalProductsByManufacturerId($id);
-                        if ($product_total) {
-                            $this->response->setOutput(sprintf($this->language->get('error_product'), $product_total));
-                            return null;
+                        $err = $this->validateDelete((int)$id);
+                        if (!empty($err)) {
+                            $error = new AError('');
+                            $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
+                            return;
                         }
-
-                        (new Manufacturer())->deleteManufacturer($id);
+                        Manufacturer::deleteManufacturer($id);
                     }
                 }
                 break;
@@ -145,7 +136,7 @@ class ControllerResponsesListingGridManufacturer extends AController
                 $allowedFields = array_merge(['sort_order', 'name'], (array)$this->data['allowed_fields']);
                 $ids = explode(',', $this->request->post['id']);
                 $array = [];
-                if ( ! empty($ids)) //resort required.
+                if (!empty($ids)) //resort required.
                 {
                     if ($this->request->post['resort'] == 'yes') {
                         //get only ids we need
@@ -163,7 +154,7 @@ class ControllerResponsesListingGridManufacturer extends AController
                 }
                 foreach ($ids as $id) {
                     foreach ($allowedFields as $field) {
-                        (new Manufacturer())->editManufacturer(
+                        Manufacturer::editManufacturer(
                             $id,
                             [$field => $this->request->post[$field][$id]]
                         );
@@ -181,9 +172,9 @@ class ControllerResponsesListingGridManufacturer extends AController
      * update only one field
      *
      * @return void
-     * @throws \Psr\SimpleCache\InvalidArgumentException
-     * @throws \ReflectionException
-     * @throws \abc\core\lib\AException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
+     * @throws AException
      */
     public function update_field()
     {
@@ -191,7 +182,7 @@ class ControllerResponsesListingGridManufacturer extends AController
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
 
-        if ( ! $this->user->canModify('listing_grid/manufacturer')) {
+        if (!$this->user->canModify('listing_grid/manufacturer')) {
             $error = new AError('');
 
             return $error->toJSONResponse('NO_PERMISSIONS_403',
@@ -207,7 +198,7 @@ class ControllerResponsesListingGridManufacturer extends AController
             //request sent from edit form. ID in url
             foreach ($this->request->post as $field => $value) {
                 if ($field == 'keyword') {
-                    if ($err = $this->html->isSEOkeywordExists('manufacturer_id='.$this->request->get['id'], $value)) {
+                    if ($err = $this->html->isSEOkeywordExists('manufacturer_id=' . $this->request->get['id'], $value)) {
                         $error = new AError('');
 
                         return $error->toJSONResponse('VALIDATION_ERROR_406', ['error_text' => $err]);
@@ -233,7 +224,6 @@ class ControllerResponsesListingGridManufacturer extends AController
 
     public function manufacturers()
     {
-
         $response = [];
         //init controller data
         $this->extensions->hk_InitData($this, __FUNCTION__);
@@ -242,15 +232,13 @@ class ControllerResponsesListingGridManufacturer extends AController
             $filter = [
                 'limit'         => 20,
                 'language_id'   => $this->language->getContentLanguageID(),
-                'subsql_filter' => "m.name LIKE '%".$this->db->escape($this->request->post['term'], true)."%'",
+                'subsql_filter' => "m.name LIKE '%" . $this->db->escape($this->request->post['term'], true) . "%'",
             ];
             $results = $this->model_catalog_manufacturer->getManufacturers($filter);
 
             //build thumbnails list
-            $ids = [];
-            foreach ($results as $result) {
-                $ids[] = $result['manufacturer_id'];
-            }
+            $ids = array_column($results, 'manufacturer_id');
+
             $resource = new AResource('image');
             $thumbnails = $resource->getMainThumbList(
                 'manufacturers',
@@ -262,9 +250,7 @@ class ControllerResponsesListingGridManufacturer extends AController
                 $thumbnail = $thumbnails[$item['manufacturer_id']];
 
                 $response[] = [
-                    'image'      => $icon = $thumbnail['thumb_html']
-                        ? $thumbnail['thumb_html']
-                        : '<i class="fa fa-code fa-4x"></i>&nbsp;',
+                    'image' => $thumbnail['thumb_html'] ?: '<i class="fa fa-code fa-4x"></i>&nbsp;',
                     'id'         => $item['manufacturer_id'],
                     'name'       => $item['name'],
                     'meta'       => '',
@@ -282,4 +268,19 @@ class ControllerResponsesListingGridManufacturer extends AController
         $this->response->setOutput(AJson::encode($this->data['response']));
     }
 
+    protected function validateDelete(int $manufacturerId)
+    {
+        $this->data['error'] = '';
+        Manufacturer::setCurrentLanguageID($this->language->getDefaultLanguageID());
+        $products = Product::where('manufacturer_id', '=', $manufacturerId)->get();
+        $productCount = $products->count();
+        if ($productCount) {
+            $this->data['error'] = sprintf($this->language->get('error_product'), $productCount);
+            if ($productCount < 10) {
+                $this->data['error'] .= ' ID(s): ' . implode(', ', $products->pluck('product_id')->toArray());
+            }
+        }
+        $this->extensions->hk_ValidateData($this, __FUNCTION__, $manufacturerId);
+        return $this->data['error'];
+    }
 }

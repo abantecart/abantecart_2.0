@@ -1,39 +1,38 @@
 <?php
 /**
  * AbanteCart, Ideal Open Source Ecommerce Solution
- * http://www.abantecart.com
+ * https://www.abantecart.com
  *
- * Copyright 2011-2022 Belavier Commerce LLC
+ * Copyright (c) 2011-2023  Belavier Commerce LLC
  *
  * This source file is subject to Open Software License (OSL 3.0)
  * License details is bundled with this package in the file LICENSE.txt.
  * It is also available at this URL:
- * <http://www.opensource.org/licenses/OSL-3.0>
+ * <https://www.opensource.org/licenses/OSL-3.0>
  *
  * UPGRADE NOTE:
  * Do not edit or add to this file if you wish to upgrade AbanteCart to newer
  * versions in the future. If you wish to customize AbanteCart for your
- * needs please refer to http://www.abantecart.com for more information.
+ * needs please refer to https://www.abantecart.com for more information.
  */
 namespace abc\models\catalog;
 
 use abc\models\BaseModel;
-use Dyrynda\Database\Support\CascadeSoftDeletes;
+use abc\models\casts\NullableInt;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class GlobalAttribute
  *
  * @property int $attribute_id
- * @property int $attribute_parent_id
- * @property int $attribute_group_id
+ * @property int|null $attribute_parent_id
+ * @property int|null $attribute_group_id
  * @property int $attribute_type_id
  * @property string $element_type
  * @property int $sort_order
- * @property int $required
+ * @property bool $required
  * @property string $settings
- * @property int $status
+ * @property bool $status
  * @property string $regexp_pattern
  *
  * @property Collection $global_attributes_descriptions
@@ -50,12 +49,12 @@ class GlobalAttribute extends BaseModel
     public $timestamps = false;
 
     protected $casts = [
-        'attribute_parent_id' => 'int',
-        'attribute_group_id'  => 'int',
+        'attribute_parent_id' => NullableInt::class,
+        'attribute_group_id'  => NullableInt::class,
         'attribute_type_id'   => 'int',
         'sort_order'          => 'int',
-        'required'            => 'int',
-        'status'              => 'int',
+        'required'            => 'boolean',
+        'status'              => 'boolean',
     ];
 
     protected $fillable = [
@@ -70,6 +69,83 @@ class GlobalAttribute extends BaseModel
         'regexp_pattern',
     ];
 
+    protected $rules = [
+        'attribute_parent_id' => [
+            'checks' => [
+                'integer',
+                'nullable',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => ':value is not Integer!'],
+                'min' => ['default_text' => ':value value must be greater than zero'],
+                'max' => ['default_text' => ':value must be less than 2147483647']
+            ],
+        ],
+        'attribute_group_id' => [
+            'checks' => [
+                'integer',
+                'nullable',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => ':value is not Integer!'],
+                'min' => ['default_text' => ':value value must be greater than zero'],
+                'max' => ['default_text' => ':value must be less than 2147483647']
+            ],
+        ],
+        'attribute_type_id' => [
+            'checks' => [
+                'integer',
+                'exists:global_attributes_types',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => ':value is not Integer!'],
+                'min' => ['default_text' => ':value value must be greater than zero'],
+                'max' => ['default_text' => ':value must be less than 2147483647']
+            ],
+        ],
+        'sort_order' => [
+            'checks' => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => ':value is not Integer!'],
+                'min' => ['default_text' => ':value value must be greater than zero'],
+                'max' => ['default_text' => ':value must be less than 2147483647']
+            ],
+        ],
+        'required' => [
+            'checks' => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => ':value is not Integer!'],
+                'min' => ['default_text' => ':value value must be greater than zero'],
+                'max' => ['default_text' => ':value must be less than 2147483647']
+            ],
+        ],
+        'status' => [
+            'checks' => [
+                'integer',
+                'min:0',
+                'max:2147483647'
+            ],
+            'messages' => [
+                'integer' => ['default_text' => ':value is not Integer!'],
+                'min' => ['default_text' => ':value value must be greater than zero'],
+                'max' => ['default_text' => ':value must be less than 2147483647']
+            ],
+        ]
+    ];
     public function description()
     {
         return $this->hasOne(GlobalAttributesDescription::class, 'attribute_id')

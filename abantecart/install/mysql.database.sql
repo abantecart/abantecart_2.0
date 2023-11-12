@@ -9313,7 +9313,7 @@ CREATE TABLE `ac_orders` (
   `email`                   varchar(96)   NOT NULL DEFAULT '',
   `shipping_firstname`      varchar(32)   NOT NULL,
   `shipping_lastname`       varchar(32)   NOT NULL DEFAULT '',
-  `shipping_company`        varchar(64)   NOT NULL,
+  `shipping_company` varchar(255) NOT NULL,
   `shipping_address_1`      varchar(128)  NOT NULL,
   `shipping_address_2`      varchar(128)  NOT NULL,
   `shipping_city`           varchar(128)  NOT NULL,
@@ -9327,7 +9327,7 @@ CREATE TABLE `ac_orders` (
   `shipping_method_key`     varchar(128)  NOT NULL DEFAULT '',
   `payment_firstname`       varchar(32)   NOT NULL DEFAULT '',
   `payment_lastname`        varchar(32)   NOT NULL DEFAULT '',
-  `payment_company`         varchar(64)   NOT NULL,
+  `payment_company`  varchar(255) NOT NULL,
   `payment_address_1`       varchar(128)  NOT NULL,
   `payment_address_2`       varchar(128)  NOT NULL,
   `payment_city`            varchar(128)  NOT NULL,
@@ -9612,7 +9612,7 @@ CREATE TABLE `ac_products` (
   `sort_order` int(11) NOT NULL DEFAULT '0',
   `subtract` int(1) NOT NULL DEFAULT '1',
   `minimum` int(11) NOT NULL DEFAULT '1',
-  `maximum` int(11) NOT NULL DEFAULT '0',
+  `maximum` int(11) DEFAULT NULL,
   `cost` DECIMAL(15,4) NOT NULL DEFAULT '0.0000',
   `call_to_order` smallint NOT NULL default '0',
   `product_type_id` int(11) DEFAULT NULL,
@@ -13937,6 +13937,23 @@ CREATE TABLE `ac_email_templates`
   AUTO_INCREMENT = 14
   DEFAULT CHARSET = utf8
   COLLATE = utf8_general_ci;
+
+/*
+ * AbanteCart, Ideal Open Source Ecommerce Solution
+ * https://www.abantecart.com
+ *
+ * Copyright (c) 2011-2023  Belavier Commerce LLC
+ *
+ * This source file is subject to Open Software License (OSL 3.0)
+ * License details is bundled with this package in the file LICENSE.txt.
+ * It is also available at this URL:
+ * <https://www.opensource.org/licenses/OSL-3.0>
+ *
+ * UPGRADE NOTE:
+ * Do not edit or add to this file if you wish to upgrade AbanteCart to newer
+ * versions in the future. If you wish to customize AbanteCart for your
+ * needs please refer to https://www.abantecart.com for more information.
+ */
 
 --
 -- Dumping data for table `ac_email_templates`

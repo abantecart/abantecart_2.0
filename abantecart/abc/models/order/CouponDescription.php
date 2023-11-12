@@ -60,31 +60,37 @@ class CouponDescription extends BaseModel
     protected $rules = [
 
         'coupon_id' => [
-            'checks'   => [
+            'checks' => [
                 'int',
                 'exists:coupons',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => ':attribute is not integer or absent in coupons table!',
-                ],
+                'int' => ['default_text' => ':attribute is not integer or absent in coupons table!'],
+                'max' => ['default_text' => ':attribute must be less than 2147483647'],
+                'min' => ['default_text' => ':attribute value must be greater than zero'],
+                'exists' => ['default_text' => ':attribute not exists in coupons table']
             ],
         ],
 
         'language_id' => [
-            'checks'   => [
+            'checks' => [
                 'int',
                 'exists:languages',
+                'min:0',
+                'max:2147483647'
             ],
             'messages' => [
-                '*' => [
-                    'default_text' => ':attribute is not integer or absent in languages table!',
-                ],
+                'int' => ['default_text' => ':attribute is not integer or absent in languages table!'],
+                'max' => ['default_text' => ':attribute must be less than 2147483647'],
+                'min' => ['default_text' => ':attribute value must be greater than zero'],
+                'exists' => ['default_text' => ':attribute not exists in language table']
             ],
         ],
 
-        'name'        => [
-            'checks'   => [
+        'name' => [
+            'checks' => [
                 'string',
                 'min:2',
                 'max:128',
@@ -92,15 +98,15 @@ class CouponDescription extends BaseModel
             ],
             'messages' => [
                 '*' => [
-                    'language_key'   => 'error_name',
+                    'language_key' => 'error_name',
                     'language_block' => 'sale/coupon',
-                    'default_text'   => 'Coupon name must be between :min and :max characters!',
-                    'section'        => 'admin',
+                    'default_text' => 'Coupon name must be between :min and :max characters!',
+                    'section' => 'admin',
                 ],
             ],
         ],
         'description' => [
-            'checks'   => [
+            'checks' => [
                 'string',
                 'min:2',
                 'max:1500',
@@ -108,10 +114,10 @@ class CouponDescription extends BaseModel
             ],
             'messages' => [
                 '*' => [
-                    'language_key'   => 'error_description',
+                    'language_key' => 'error_description',
                     'language_block' => 'sale/coupon',
-                    'default_text'   => 'Coupon description must be between 2 characters!',
-                    'section'        => 'admin',
+                    'default_text' => 'Coupon description must be between 2 characters!',
+                    'section' => 'admin',
                 ],
             ],
         ],
