@@ -241,7 +241,7 @@ class ModelUserUserGroup extends Model
         ];
 
         $controllers_list = [];
-        $files_common = glob( ABC::env( 'DIR_APP' ).'controllers/admin/common/*/*.php' );
+        $files_common = glob( ABC::env( 'DIR_APP' ).'controllers/admin/common/*.php' );
         $files_api = glob( ABC::env( 'DIR_APP' ).'controllers/admin/api/*/*.php' );
         $files_pages = glob( ABC::env( 'DIR_APP' ).'controllers/admin/pages/*/*.php' );
         $files_response = glob( ABC::env( 'DIR_APP' ).'controllers/admin/responses/*/*.php' );
@@ -250,7 +250,7 @@ class ModelUserUserGroup extends Model
             $files = array_merge( $files_pages, $files_api );
         }
         if($files_common){
-            $files = array_merge( $files_pages, $files_common );
+            $files = array_merge( $files, $files_common );
         }
 
         // looking for controllers inside core
@@ -262,7 +262,7 @@ class ModelUserUserGroup extends Model
             }
         }
         // looking for controllers inside extensions
-        $files_common = glob( ABC::env( 'DIR_APP_EXTENSIONS' ).'/*/controllers/admin/common/*/*.php' );
+        $files_common = glob( ABC::env( 'DIR_APP_EXTENSIONS' ).'/*/controllers/admin/common/*.php' );
         $files_api = glob( ABC::env( 'DIR_APP_EXTENSIONS' ).'/*/controllers/admin/api/*/*.php' );
         $files_pages = glob( ABC::env( 'DIR_APP_EXTENSIONS' ).'/*/controllers/admin/pages/*/*.php' );
         $files_response = glob( ABC::env( 'DIR_APP_EXTENSIONS' ).'/*/controllers/admin/responses/*/*.php' );
@@ -271,7 +271,7 @@ class ModelUserUserGroup extends Model
             $files = array_merge( $files_pages, $files_api );
         }
         if($files_common){
-            $files = array_merge( $files_pages, $files_common );
+            $files = array_merge( $files, $files_common );
         }
         foreach ( $files as $file ) {
             $data = explode( '/', dirname( $file ) );
