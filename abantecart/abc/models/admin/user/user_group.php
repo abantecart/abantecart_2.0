@@ -245,9 +245,10 @@ class ModelUserUserGroup extends Model
         $files_api = glob( ABC::env( 'DIR_APP' ).'controllers/admin/api/*/*.php' );
         $files_pages = glob( ABC::env( 'DIR_APP' ).'controllers/admin/pages/*/*.php' );
         $files_response = glob( ABC::env( 'DIR_APP' ).'controllers/admin/responses/*/*.php' );
+
         $files = array_merge( $files_pages, $files_response );
         if($files_api){
-            $files = array_merge( $files_pages, $files_api );
+            $files = array_merge( $files, $files_api );
         }
         if($files_common){
             $files = array_merge( $files, $files_common );
@@ -268,7 +269,7 @@ class ModelUserUserGroup extends Model
         $files_response = glob( ABC::env( 'DIR_APP_EXTENSIONS' ).'/*/controllers/admin/responses/*/*.php' );
         $files = array_merge( $files_pages, $files_response );
         if($files_api){
-            $files = array_merge( $files_pages, $files_api );
+            $files = array_merge( $files, $files_api );
         }
         if($files_common){
             $files = array_merge( $files, $files_common );
