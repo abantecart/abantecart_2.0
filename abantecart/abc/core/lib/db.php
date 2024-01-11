@@ -126,7 +126,7 @@ class ADB
         } catch (PDOException $e) {
             error_log($e->getMessage());
             throw new AException(
-                $e->getMessage() . "\n" . $e->getTraceAsString(),
+                $e->getMessage() . "\n" . $e->getTraceAsString()." GET:\n".http_build_query($_GET)."\n ARGV: ".var_export($argv, true),
                 $e->getCode(),
                 $e->getFile(),
                 $e->getLine()
