@@ -104,7 +104,7 @@ class ControllerBlocksCategory extends AController
             if ($parent_id != $category['parent_id'] || !$category['active_products_count']) {
                 continue;
             }
-            $category['parents'] = explode("_", $category['path']);
+            $category['parents'] = explode("_", (string)$category['path']);
             //dig into level
             $category['level'] = sizeof($category['parents']) - 1;
             if ($category['category_id'] == $this->category_id) {

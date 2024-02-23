@@ -123,8 +123,11 @@ class CSRFToken
             $token = $this->request->get_or_post('csrftoken');
         }
         //note: $instance can be zero!
-        if (!empty($token) && H::has_value($instance)
-            && $this->session->data['csrftoken'][$instance] === $token) {
+        if (!empty($token)
+            && H::has_value($instance)
+            && isset($this->session->data['csrftoken'][$instance])
+            && $this->session->data['csrftoken'][$instance] === $token
+        ) {
             $this->instance = $instance;
             $this->token = $this->session->data['csrftoken'][$instance];
             unset($this->session->data['csrftoken'][$instance]);

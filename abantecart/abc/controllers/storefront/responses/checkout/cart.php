@@ -191,7 +191,7 @@ class ControllerResponsesCheckoutCart extends AController
 
         $clear_shipping = false;
         if ($this->request->post['shipping_method']) {
-            $shipping = explode('.', $this->request->post['shipping_method']);
+            $shipping = explode('.', (string)$this->request->post['shipping_method']);
             if ( ! $this->session->data['shipping_method']) {
                 $clear_shipping = true;
             }

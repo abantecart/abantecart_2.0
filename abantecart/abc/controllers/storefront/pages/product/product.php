@@ -100,7 +100,7 @@ class ControllerPagesProductProduct extends AController
 
         if (isset($request['path'])) {
             $path = '';
-            foreach (explode('_', $request['path']) as $path_id) {
+            foreach (explode('_', (string)$request['path']) as $path_id) {
                 $category_info = Category::getCategory($path_id);
                 if (!$path) {
                     $path = $path_id;
@@ -157,7 +157,7 @@ class ControllerPagesProductProduct extends AController
         //key of product from cart
         $key = [];
         if (H::has_value($request['key'])) {
-            $key = explode(':', $request['key']);
+            $key = explode(':', (string)$request['key']);
             $product_id = (int)$key[0];
         } elseif (H::has_value($request['product_id'])) {
             $product_id = (int)$request['product_id'];
