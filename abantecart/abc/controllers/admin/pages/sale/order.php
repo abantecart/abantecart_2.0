@@ -552,7 +552,7 @@ class ControllerPagesSaleOrder extends AController
         $this->data['categories'] = Category::getCategories();
 
         $this->data['order_products'] = [];
-        $order_products = OrderProduct::where('order_id', '=', $order_id)->get()?->toArray();
+        $order_products = OrderProduct::where('order_id', '=', $order_id)->get();
 
         foreach ($order_products as $order_product) {
             $option_data = [];
@@ -592,13 +592,14 @@ class ControllerPagesSaleOrder extends AController
                     }
                 }
 
-                $option_data[] = [
-                    'name'                    => $option['name'],
-                    'value'                   => nl2br($value),
-                    'title'                   => $title,
-                    'product_option_id'       => $option['product_option_id'],
-                    'product_option_value_id' => $option['product_option_value_id'],
-                ];
+                $option_data[] = array_merge(
+                    $option->toArray(),
+                    [
+                        'value'                   => nl2br($value),
+                        'title'                   => $title
+                    ]
+                );
+
             }
 
             //check if this product is still available, so we can use recalculation against the cart
@@ -630,47 +631,46 @@ class ControllerPagesSaleOrder extends AController
                     'language_id'     => (int)$order_info['language_id'],
                 ]
             )->first();
-            $this->data['order_products'][] = [
-                'disable_edit'     => in_array($order_product['order_status_id'], $this->data['cancel_statuses']),
-                'order_product_id' => $order_product['order_product_id'],
-                'product_id'       => $order_product['product_id'],
-                'product_status' => $product?->status,
-                'order_status_id'  => $order_product['order_status_id'],
-                'order_status'     => ($orderStatus
-                    ? $orderStatus->name
-                    : Registry::order_status()->getStatusById($order_product['order_status_id'])
-                ),
-                'name'             => $order_product['name'],
-                'model'            => $order_product['model'],
-                'option'           => $option_data,
-                'quantity'         => $order_product['quantity'],
-                'price'            => $this->currency->format(
-                    $order_product['price'],
-                    $order_info['currency'],
-                    $order_info['value']
-                ),
-                'price_value'      => $this->currency->format(
-                    $order_product['price'],
-                    $order_info['currency'],
-                    $order_info['value'],
-                    false
-                ),
-                'total'            => $this->currency->format_total(
-                    $order_product['price'],
-                    $order_product['quantity'],
-                    $order_info['currency'], $order_info['value']
-                ),
-                'total_value'      => $this->currency->format(
-                        $order_product['price'],
-                        $order_info['currency'],
-                        $order_info['value'],
-                        false
-                    ) * $order_product['quantity'],
-                'href'             => $this->html->getSecureURL(
-                    'catalog/product/update',
-                    '&product_id=' . $order_product['product_id']
-                ),
-            ];
+
+            $this->data['order_products'][] =
+                array_merge(
+                    $order_product->toArray(),
+                    [
+                        'disable_edit'     => in_array($order_product['order_status_id'], $this->data['cancel_statuses']),
+                        'product_status' => $product?->status,
+                        'order_status'     => ($orderStatus
+                            ? $orderStatus->name
+                            : Registry::order_status()->getStatusById($order_product['order_status_id'])
+                        ),
+                        'option'           => $option_data,
+                        'price'            => $this->currency->format(
+                            $order_product['price'],
+                            $order_info['currency'],
+                            $order_info['value']
+                        ),
+                        'price_value'      => $this->currency->format(
+                            $order_product['price'],
+                            $order_info['currency'],
+                            $order_info['value'],
+                            false
+                        ),
+                        'total'            => $this->currency->format_total(
+                            $order_product['price'],
+                            $order_product['quantity'],
+                            $order_info['currency'], $order_info['value']
+                        ),
+                        'total_value'      => $this->currency->format(
+                                $order_product['price'],
+                                $order_info['currency'],
+                                $order_info['value'],
+                                false
+                            ) * $order_product['quantity'],
+                        'href'             => $this->html->getSecureURL(
+                            'catalog/product/update',
+                            '&product_id=' . $order_product['product_id']
+                        ),
+                    ]
+                );
         }
 
         $this->data['currency'] = $this->currency->getCurrency($order_info['currency']);
