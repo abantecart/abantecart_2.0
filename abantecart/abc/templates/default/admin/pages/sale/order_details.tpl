@@ -231,8 +231,7 @@
                         <a target="_blank"
                            href="<?php echo $order_product['href']; ?>">
                             <?php
-                            echo $order_product['name'] . ($order_product['model'] ? '(' . $order_product['model']
-                                    . ')' : '');
+                            echo $order_product['name'] . ($order_product['sku'] ? ' (' . $order_product['sku']. ')' : '');
                             echo ' - ' . $order_product['order_status']; ?>
                         </a>
                         <input type="hidden"
@@ -253,7 +252,7 @@
                                             - <?php echo $option['name']; ?></small>
                                     </dt>
                                     <dd>
-                                        <small title="<?php echo $option['title'] ?>"><?php echo $option['value']; ?></small>
+                                        <small title="<?php echo $option['title'] ?>"><?php echo $option['value'].($option['sku'] ? ' ('.$option['sku'].')':''); ?></small>
                                         <input type="hidden"
                                                name="product[<?php echo $oid; ?>][option][<?php echo $option['product_option_id']; ?>]"
                                                value="<?php echo $option['product_option_value_id']; ?>"/>

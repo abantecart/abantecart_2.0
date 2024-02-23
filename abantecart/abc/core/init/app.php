@@ -135,10 +135,10 @@ require_once $dir_lib.'warning.php';
 
 //define rt - route for application controller
 if (isset($_GET['rt']) && $_GET['rt']) {
-    ABC::env('ROUTE', $_GET['rt']);
+    ABC::env('ROUTE', (string)$_GET['rt']);
 } else {
     if (isset($_POST['rt']) && $_POST['rt']) {
-        ABC::env('ROUTE', $_POST['rt']);
+        ABC::env('ROUTE', (string)$_POST['rt']);
     } else {
         ABC::env('ROUTE', 'index/home');
     }
