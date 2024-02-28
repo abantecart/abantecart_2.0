@@ -172,6 +172,11 @@ final class ARequest
         } else if (!is_numeric($data)) {
             $data = htmlspecialchars($data, ENT_NOQUOTES, ABC::env('APP_CHARSET'));
         }
+
+        if(isset($data['rt'])){
+            $data['rt'] = (string)$data['rt'];
+        }
+
         return $data;
     }
 
@@ -199,7 +204,7 @@ final class ARequest
 
         $nua = strtolower($_SERVER['HTTP_USER_AGENT']);
 
-        $agent['http'] = $nua ?? "";
+        $agent['http'] = $nua ?: "";
         $agent['version'] = 'unknown';
         $agent['browser'] = 'unknown';
         $agent['platform'] = 'unknown';

@@ -70,7 +70,7 @@ class ControllerApiCommonAccess extends AControllerAPI
             return true;
         }
 
-        $ips = array_map('trim', explode(",", $this->config->get('config_admin_access_ip_list')));
+        $ips = array_map('trim', explode(",", (string)$this->config->get('config_admin_access_ip_list')));
         if (in_array($this->request->getRemoteIP(), $ips)) {
             return true;
         }
@@ -82,6 +82,7 @@ class ControllerApiCommonAccess extends AControllerAPI
         $request = $this->rest->getRequestParams();
         //allow access to listed controllers with no login
         if (isset($request['rt']) && !isset($request['token'])) {
+            $request['rt'] = (string)$request['rt'];
             $route = '';
             $request['rt'] = ltrim($request['rt'], 'a/');
             $request['rt'] = ltrim($request['rt'], 'r/');
@@ -115,6 +116,7 @@ class ControllerApiCommonAccess extends AControllerAPI
         }
 
         if (isset($request['rt'])) {
+            $request['rt'] = (string)$request['rt'];
             $route = '';
             $request['rt'] = ltrim($request['rt'], 'a/');
             $request['rt'] = ltrim($request['rt'], 'r/');

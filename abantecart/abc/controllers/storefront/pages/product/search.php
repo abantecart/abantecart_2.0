@@ -52,10 +52,10 @@ class ControllerPagesProductSearch extends AController
     public function main()
     {
         $request = array_merge($this->request->get, $this->request->post);
-        $this->path = explode(',', $request['category_id']);
+        $this->path = explode(',', (string)$request['category_id']);
 
         if (isset($request['category_id'])) {
-            $category_id = explode(',', $request['category_id']);
+            $category_id = explode(',', (string)$request['category_id']);
             end($category_id);
             $category_id = current($category_id);
         } else {

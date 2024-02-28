@@ -349,7 +349,7 @@ class ControllerBlocksListingBlock extends AController
             if (isset($this->request->get['category_id'])) {
                 $object_id = $this->request->get['product_id'];
             } else {
-                $temp = explode("_", $this->request->get['path']);
+                $temp = explode("_", (string)$this->request->get['path']);
                 end($temp);
                 $object_id = current($temp);
             }

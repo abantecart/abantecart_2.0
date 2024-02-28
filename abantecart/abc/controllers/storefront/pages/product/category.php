@@ -59,12 +59,12 @@ class ControllerPagesProductCategory extends AController
 
         if (isset($request['path'])) {
             $path = '';
-            $parts = explode('_', $request['path']);
+            $parts = explode('_', (string)$request['path']);
             $category_id = end($parts);
             if (count($parts) == 1) {
                 $category = Category::find((int) $request['path']);
                 if ($category) {
-                    $parts = explode('_', ($category->path ? : $request['path']));
+                    $parts = explode('_', (string)($category->path ? : $request['path']));
                 }
             }
 
