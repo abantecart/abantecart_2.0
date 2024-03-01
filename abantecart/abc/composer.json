@@ -221,7 +221,7 @@
     "ext-libxml": "*",
     "ext-xmlwriter": "*",
     "mnsami/composer-custom-directory-installer": "2.0.*",
-    "wikimedia/composer-merge-plugin": "2.0.1",
+    "wikimedia/composer-merge-plugin": "v2.1.0",
     "psr/http-message": "1.0.1",
     "google/recaptcha": "1.2.4",
     "components/jquery": "3.3.1",
