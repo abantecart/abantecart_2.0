@@ -169,7 +169,7 @@ class ATaskManager
             ->whereIn('starter', [2, $this->starter]);
         if ($task_id) {
             $query->where('task_id', '=', $task_id);
-            return $query->get()?->first()->toArray();
+            return $query->get()?->first()?->toArray();
         }
         return $query->get()?->toArray();
     }
@@ -669,7 +669,7 @@ class ATaskManager
                 '=',
                 'tasks.task_id'
             )->where('tasks.task_id', '=', $task_id)
-            ->first()->toArray();
+            ->first()?->toArray();
 
         if ($output) {
             $output['settings'] = $output['settings'] ? unserialize($output['settings']) : [];
@@ -697,7 +697,7 @@ class ATaskManager
                 '=',
                 'tasks.task_id'
             )->where('tasks.name', '=', $task_name)
-            ->first()->toArray();
+            ->first()?->toArray();
 
         if ($output) {
             $output['steps'] = $this->getTaskSteps($output['task_id']);
